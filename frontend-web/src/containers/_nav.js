@@ -11,6 +11,16 @@ export default [
   },
   {
     _tag: "CSidebarNavTitle",
+    _children: ["Assets"],
+  },
+  {
+    _tag: "CSidebarNavItem",
+    name: "Bank Accounts",
+    to: "/assets/banks",
+    icon: "cil-bank",
+  },
+  {
+    _tag: "CSidebarNavTitle",
     _children: ["Theme"],
   },
   {
