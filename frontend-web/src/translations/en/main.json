@@ -1,0 +1,8 @@
+{
+  "assets": {
+    "banks": {
+      "bankAccounts": "Bank Accounts",
+      "description": "This is where you can manage all your bank accounts."
+    }
+  }
+}

@@ -1,12 +1,14 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const Banks = () => {
+  const { t, i18n } = useTranslation("main");
   return (
     <>
       <div className="card">
-        <div className="card-header">Bank Accounts</div>
+        <div className="card-header">{t("assets.banks.bankAccounts")}</div>
         <div className="card-body">
-          <p>This section will contain all your bank account details.</p>
+          <p>{t("assets.banks.description")}</p>
         </div>
       </div>
     </>
