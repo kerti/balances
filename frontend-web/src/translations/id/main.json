@@ -1,5 +1,6 @@
 {
   "assets": {
+    "assets": "Harta",
     "banks": {
       "bankAccounts": "Rekening Bank",
       "description": "Di sini Anda dapat mengelola semua rekening bank Anda."
