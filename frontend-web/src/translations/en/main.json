@@ -3,6 +3,14 @@
     "banks": {
       "bankAccounts": "Bank Accounts",
       "description": "This is where you can manage all your bank accounts."
+    },
+    "properties": {
+      "properties": "Properties",
+      "description": "This is where you can manage all your properties."
+    },
+    "vehicles": {
+      "vehicles": "Vehicles",
+      "description": "This is where you can manage all your vehicles."
     }
   }
 }

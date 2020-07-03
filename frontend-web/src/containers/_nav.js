@@ -20,6 +20,18 @@ export default [
     icon: "cil-bank",
   },
   {
+    _tag: "CSidebarNavItem",
+    name: "Properties",
+    to: "/assets/properties",
+    icon: "cil-house",
+  },
+  {
+    _tag: "CSidebarNavItem",
+    name: "Vehicles",
+    to: "/assets/vehicles",
+    icon: "cil-car-alt",
+  },
+  {
     _tag: "CSidebarNavTitle",
     _children: ["Theme"],
   },
