@@ -14,8 +14,8 @@ import store from "./store";
 import { I18nextProvider } from "react-i18next";
 import i18next from "i18next";
 
-import main_en from "./translations/en/main.json";
-import main_id from "./translations/id/main.json";
+import assets_en from "./translations/en/assets.json";
+import assets_id from "./translations/id/assets.json";
 
 import navigation_en from "./translations/en/navigation.json";
 import navigation_id from "./translations/id/navigation.json";
@@ -25,11 +25,11 @@ i18next.init({
   lng: "id",
   resources: {
     en: {
-      main: main_en,
+      assets: assets_en,
       navigation: navigation_en,
     },
     id: {
-      main: main_id,
+      assets: assets_id,
       navigation: navigation_id,
     },
   },

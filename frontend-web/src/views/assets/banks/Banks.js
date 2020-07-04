@@ -2,13 +2,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 const Banks = () => {
-  const { t } = useTranslation("main");
+  const { t } = useTranslation("assets");
   return (
     <>
       <div className="card">
-        <div className="card-header">{t("assets.banks.bankAccounts")}</div>
+        <div className="card-header">{t("banks.bankAccounts")}</div>
         <div className="card-body">
-          <p>{t("assets.banks.description")}</p>
+          <p>{t("banks.description")}</p>
         </div>
       </div>
     </>
