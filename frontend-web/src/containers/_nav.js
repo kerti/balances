@@ -16,19 +16,19 @@ const getNavigation = (t) => {
     },
     {
       _tag: "CSidebarNavItem",
-      name: t("assets.banks.bankAccounts"),
+      name: t("assets.bankAccounts"),
       to: "/assets/banks",
       icon: "cil-bank",
     },
     {
       _tag: "CSidebarNavItem",
-      name: t("assets.properties.properties"),
+      name: t("assets.properties"),
       to: "/assets/properties",
       icon: "cil-house",
     },
     {
       _tag: "CSidebarNavItem",
-      name: t("assets.vehicles.vehicles"),
+      name: t("assets.vehicles"),
       to: "/assets/vehicles",
       icon: "cil-car-alt",
     },

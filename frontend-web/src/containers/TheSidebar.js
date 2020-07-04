@@ -22,7 +22,7 @@ import getNavigation from "./_nav";
 const TheSidebar = () => {
   const dispatch = useDispatch();
   const show = useSelector((state) => state.sidebarShow);
-  const { t, i18n } = useTranslation("main");
+  const { t } = useTranslation("navigation");
 
   const translatedNavigation = getNavigation(t);
 

@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 const Vehicles = () => {
-  const { t, i18n } = useTranslation("main");
+  const { t } = useTranslation("main");
   return (
     <>
       <div className="card">
