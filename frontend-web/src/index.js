@@ -28,7 +28,7 @@ import navigation_id from "./translations/id/navigation.json";
 
 i18next.init({
   interpolation: { escapeValue: false },
-  lng: "en",
+  lng: "id",
   resources: {
     en: {
       assets: assets_en,

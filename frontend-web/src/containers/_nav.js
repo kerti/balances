@@ -19,7 +19,7 @@ const getNavigation = (t) => {
       _tag: "CSidebarNavItem",
       name: t("assets.bankAccounts"),
       to: "/assets/banks",
-      icon: "cil-bank",
+      icon: "cil-cash",
     },
     {
       _tag: "CSidebarNavItem",
@@ -42,13 +42,13 @@ const getNavigation = (t) => {
       _tag: "CSidebarNavItem",
       name: t("liabilities.institutional"),
       to: "/liabilities/institutional",
-      icon: "cil-building",
+      icon: "cil-institution",
     },
     {
       _tag: "CSidebarNavItem",
       name: t("liabilities.personal"),
       to: "/liabilities/personal",
-      icon: "cil-people",
+      icon: "cil-contact",
     },
     // Investments Section
     {
@@ -59,19 +59,19 @@ const getNavigation = (t) => {
       _tag: "CSidebarNavItem",
       name: t("investments.deposits"),
       to: "/investments/deposits",
-      icon: "cil-people",
+      icon: "cil-file",
     },
     {
       _tag: "CSidebarNavItem",
       name: t("investments.obligations"),
       to: "/investments/obligations",
-      icon: "cil-people",
+      icon: "cil-briefcase",
     },
     {
       _tag: "CSidebarNavItem",
       name: t("investments.gold"),
       to: "/investments/gold",
-      icon: "cil-people",
+      icon: "cil3d",
     },
     {
       _tag: "CSidebarNavItem",
@@ -83,13 +83,13 @@ const getNavigation = (t) => {
       _tag: "CSidebarNavItem",
       name: t("investments.stocks"),
       to: "/investments/stocks",
-      icon: "cil-people",
+      icon: "cil-graph",
     },
     {
       _tag: "CSidebarNavItem",
       name: t("investments.p2pLending"),
       to: "/investments/p2pLending",
-      icon: "cil-people",
+      icon: "cil-casino",
     },
     // To-be-deleted Section
     {
