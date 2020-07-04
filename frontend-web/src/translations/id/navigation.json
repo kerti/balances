@@ -5,5 +5,10 @@
     "bankAccounts": "Rekening Bank",
     "properties": "Properti",
     "vehicles": "Kendaraan"
+  },
+  "liabilities": {
+    "liabilities": "Hutang",
+    "institutional": "Lembaga",
+    "personal": "Pribadi"
   }
 }

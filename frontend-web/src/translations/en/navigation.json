@@ -5,5 +5,10 @@
     "bankAccounts": "Bank Accounts",
     "properties": "Properties",
     "vehicles": "Vehicles"
+  },
+  "liabilities": {
+    "liabilities": "Liabilities",
+    "institutional": "Institutional",
+    "personal": "Personal"
   }
 }

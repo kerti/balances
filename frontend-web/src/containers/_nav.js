@@ -34,6 +34,22 @@ const getNavigation = (t) => {
     },
     {
       _tag: "CSidebarNavTitle",
+      _children: [t("liabilities.liabilities")],
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("liabilities.institutional"),
+      to: "/liabilities/institutional",
+      icon: "cil-building",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("liabilities.personal"),
+      to: "/liabilities/personal",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavTitle",
       _children: ["Theme"],
     },
     {

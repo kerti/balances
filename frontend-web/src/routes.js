@@ -66,6 +66,13 @@ const Properties = React.lazy(() =>
 );
 const Vehicles = React.lazy(() => import("./views/assets/vehicles/Vehicles"));
 
+const Institutional = React.lazy(() =>
+  import("./views/liabilities/institutional/Institutional")
+);
+const Personal = React.lazy(() =>
+  import("./views/liabilities/personal/Personal")
+);
+
 const getRoutes = (t) => {
   return [
     { path: "/", exact: true, name: t("home") },
@@ -90,6 +97,22 @@ const getRoutes = (t) => {
       path: "/assets/vehicles",
       name: t("assets.vehicles"),
       component: Vehicles,
+    },
+    {
+      path: "/liabilities",
+      name: t("liabilities.liabilities"),
+      component: Institutional,
+      exact: true,
+    },
+    {
+      path: "/liabilities/institutional",
+      name: t("liabilities.institutional"),
+      component: Institutional,
+    },
+    {
+      path: "/liabilities/personal",
+      name: t("liabilities.personal"),
+      component: Personal,
     },
     { path: "/theme", name: "Theme", component: Colors, exact: true },
     { path: "/theme/colors", name: "Colors", component: Colors },
