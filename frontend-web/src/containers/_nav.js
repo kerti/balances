@@ -10,6 +10,7 @@ const getNavigation = (t) => {
         text: "NEW",
       },
     },
+    // Assets Section
     {
       _tag: "CSidebarNavTitle",
       _children: [t("assets.assets")],
@@ -32,6 +33,7 @@ const getNavigation = (t) => {
       to: "/assets/vehicles",
       icon: "cil-car-alt",
     },
+    // Liabilities Section
     {
       _tag: "CSidebarNavTitle",
       _children: [t("liabilities.liabilities")],
@@ -48,6 +50,48 @@ const getNavigation = (t) => {
       to: "/liabilities/personal",
       icon: "cil-people",
     },
+    // Investments Section
+    {
+      _tag: "CSidebarNavTitle",
+      _children: [t("investments.investments")],
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.deposits"),
+      to: "/investments/deposits",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.obligations"),
+      to: "/investments/obligations",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.gold"),
+      to: "/investments/gold",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.mutualFunds"),
+      to: "/investments/mutualFunds",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.stocks"),
+      to: "/investments/stocks",
+      icon: "cil-people",
+    },
+    {
+      _tag: "CSidebarNavItem",
+      name: t("investments.p2pLending"),
+      to: "/investments/p2pLending",
+      icon: "cil-people",
+    },
+    // To-be-deleted Section
     {
       _tag: "CSidebarNavTitle",
       _children: ["Theme"],

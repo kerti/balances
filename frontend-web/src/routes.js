@@ -60,12 +60,14 @@ const Widgets = React.lazy(() => import("./views/widgets/Widgets"));
 const Users = React.lazy(() => import("./views/users/Users"));
 const User = React.lazy(() => import("./views/users/User"));
 
+// Assets Section
 const Banks = React.lazy(() => import("./views/assets/banks/Banks"));
 const Properties = React.lazy(() =>
   import("./views/assets/properties/Properties")
 );
 const Vehicles = React.lazy(() => import("./views/assets/vehicles/Vehicles"));
 
+// Liabilities Section
 const Institutional = React.lazy(() =>
   import("./views/liabilities/institutional/Institutional")
 );
@@ -73,10 +75,27 @@ const Personal = React.lazy(() =>
   import("./views/liabilities/personal/Personal")
 );
 
+// Investments Section
+const Deposits = React.lazy(() =>
+  import("./views/investments/deposits/Deposits")
+);
+const Obligations = React.lazy(() =>
+  import("./views/investments/obligations/Obligations")
+);
+const Gold = React.lazy(() => import("./views/investments/gold/Gold"));
+const MutualFunds = React.lazy(() =>
+  import("./views/investments/mutualFunds/MutualFunds")
+);
+const Stocks = React.lazy(() => import("./views/investments/stocks/Stocks"));
+const P2pLending = React.lazy(() =>
+  import("./views/investments/p2pLending/P2pLending")
+);
+
 const getRoutes = (t) => {
   return [
     { path: "/", exact: true, name: t("home") },
     { path: "/dashboard", name: "Dashboard", component: Dashboard },
+    // Assets Section
     {
       path: "/assets",
       name: t("assets.assets"),
@@ -98,6 +117,7 @@ const getRoutes = (t) => {
       name: t("assets.vehicles"),
       component: Vehicles,
     },
+    // Liabilities Section
     {
       path: "/liabilities",
       name: t("liabilities.liabilities"),
@@ -114,6 +134,44 @@ const getRoutes = (t) => {
       name: t("liabilities.personal"),
       component: Personal,
     },
+    // Investments Section
+    {
+      path: "/investments",
+      name: t("investments.investments"),
+      component: Deposits,
+      exact: true,
+    },
+    {
+      path: "/investments/deposits",
+      name: t("investments.deposits"),
+      component: Deposits,
+    },
+    {
+      path: "/investments/obligations",
+      name: t("investments.obligations"),
+      component: Obligations,
+    },
+    {
+      path: "/investments/gold",
+      name: t("investments.gold"),
+      component: Gold,
+    },
+    {
+      path: "/investments/mutualFunds",
+      name: t("investments.mutualFunds"),
+      component: MutualFunds,
+    },
+    {
+      path: "/investments/stocks",
+      name: t("investments.stocks"),
+      component: Stocks,
+    },
+    {
+      path: "/investments/p2pLending",
+      name: t("investments.p2pLending"),
+      component: P2pLending,
+    },
+    // To-be-deleted Section
     { path: "/theme", name: "Theme", component: Colors, exact: true },
     { path: "/theme/colors", name: "Colors", component: Colors },
     { path: "/theme/typography", name: "Typography", component: Typography },

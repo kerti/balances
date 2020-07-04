@@ -10,5 +10,14 @@
     "liabilities": "Hutang",
     "institutional": "Lembaga",
     "personal": "Pribadi"
+  },
+  "investments": {
+    "investments": "Investasi",
+    "deposits": "Deposito",
+    "obligations": "Obligasi",
+    "gold": "Emas",
+    "mutualFunds": "Reksa Dana",
+    "stocks": "Saham",
+    "p2pLending": "Pinjaman Online"
   }
 }

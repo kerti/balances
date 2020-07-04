@@ -20,21 +20,26 @@ import assets_id from "./translations/id/assets.json";
 import liabilities_en from "./translations/en/liabilities.json";
 import liabilities_id from "./translations/id/liabilities.json";
 
+import investments_en from "./translations/en/investments.json";
+import investments_id from "./translations/id/investments.json";
+
 import navigation_en from "./translations/en/navigation.json";
 import navigation_id from "./translations/id/navigation.json";
 
 i18next.init({
   interpolation: { escapeValue: false },
-  lng: "id",
+  lng: "en",
   resources: {
     en: {
       assets: assets_en,
       liabilities: liabilities_en,
+      investments: investments_en,
       navigation: navigation_en,
     },
     id: {
       assets: assets_id,
       liabilities: liabilities_id,
+      investments: investments_id,
       navigation: navigation_id,
     },
   },
