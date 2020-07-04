@@ -4,14 +4,15 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/password/platform/pgsql"
 )
 
 // Service represents password application interface
 type Service interface {
-	Change(echo.Context, int, string, string) error
+	Change(echo.Context, uuid.UUID, string, string) error
 }
 
 // New creates new password application service
@@ -39,7 +40,7 @@ type Password struct {
 
 // UserDB represents user repository interface
 type UserDB interface {
-	View(orm.DB, int) (gorsk.User, error)
+	View(orm.DB, uuid.UUID) (gorsk.User, error)
 	Update(orm.DB, gorsk.User) error
 }
 
@@ -52,5 +53,5 @@ type Securer interface {
 
 // RBAC represents role-based-access-control interface
 type RBAC interface {
-	EnforceUser(echo.Context, int) error
+	EnforceUser(echo.Context, uuid.UUID) error
 }

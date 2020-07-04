@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/password"
 )
 
@@ -26,7 +27,7 @@ type LogService struct {
 const name = "password"
 
 // Change logging
-func (ls *LogService) Change(c echo.Context, id int, oldPass, newPass string) (err error) {
+func (ls *LogService) Change(c echo.Context, id uuid.UUID, oldPass, newPass string) (err error) {
 	defer func(begin time.Time) {
 		ls.logger.Log(
 			c,

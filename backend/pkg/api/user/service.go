@@ -4,8 +4,9 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/user/platform/pgsql"
 )
 
@@ -13,8 +14,8 @@ import (
 type Service interface {
 	Create(echo.Context, gorsk.User) (gorsk.User, error)
 	List(echo.Context, gorsk.Pagination) ([]gorsk.User, error)
-	View(echo.Context, int) (gorsk.User, error)
-	Delete(echo.Context, int) error
+	View(echo.Context, uuid.UUID) (gorsk.User, error)
+	Delete(echo.Context, uuid.UUID) error
 	Update(echo.Context, Update) (gorsk.User, error)
 }
 
@@ -44,7 +45,7 @@ type Securer interface {
 // UDB represents user repository interface
 type UDB interface {
 	Create(orm.DB, gorsk.User) (gorsk.User, error)
-	View(orm.DB, int) (gorsk.User, error)
+	View(orm.DB, uuid.UUID) (gorsk.User, error)
 	List(orm.DB, *gorsk.ListQuery, gorsk.Pagination) ([]gorsk.User, error)
 	Update(orm.DB, gorsk.User) error
 	Delete(orm.DB, gorsk.User) error
@@ -53,7 +54,7 @@ type UDB interface {
 // RBAC represents role-based-access-control interface
 type RBAC interface {
 	User(echo.Context) gorsk.AuthUser
-	EnforceUser(echo.Context, int) error
-	AccountCreate(echo.Context, gorsk.AccessRole, int, int) error
+	EnforceUser(echo.Context, uuid.UUID) error
+	AccountCreate(echo.Context, uuid.UUID, uuid.UUID, uuid.UUID) error
 	IsLowerRole(echo.Context, gorsk.AccessRole) error
 }

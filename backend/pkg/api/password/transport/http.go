@@ -2,10 +2,10 @@ package transport
 
 import (
 	"net/http"
-	"strconv"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/password"
+	"github.com/satori/uuid"
 
 	"github.com/labstack/echo"
 )
@@ -28,7 +28,7 @@ func NewHTTP(svc password.Service, er *echo.Group) {
 	// - name: id
 	//   in: path
 	//   description: id of user
-	//   type: int
+	//   type: uuid.UUID
 	//   required: true
 	// - name: request
 	//   in: body
@@ -58,14 +58,14 @@ var (
 // Password change request
 // swagger:model pwChange
 type changeReq struct {
-	ID                 int    `json:"-"`
-	OldPassword        string `json:"old_password" validate:"required,min=8"`
-	NewPassword        string `json:"new_password" validate:"required,min=8"`
-	NewPasswordConfirm string `json:"new_password_confirm" validate:"required"`
+	ID                 uuid.UUID `json:"-"`
+	OldPassword        string    `json:"old_password" validate:"required,min=8"`
+	NewPassword        string    `json:"new_password" validate:"required,min=8"`
+	NewPasswordConfirm string    `json:"new_password_confirm" validate:"required"`
 }
 
 func (h *HTTP) change(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return gorsk.ErrBadRequest
 	}

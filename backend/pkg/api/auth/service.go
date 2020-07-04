@@ -4,8 +4,9 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/auth/platform/pgsql"
 )
 
@@ -43,7 +44,7 @@ type Auth struct {
 
 // UserDB represents user repository interface
 type UserDB interface {
-	View(orm.DB, int) (gorsk.User, error)
+	View(orm.DB, uuid.UUID) (gorsk.User, error)
 	FindByUsername(orm.DB, string) (gorsk.User, error)
 	FindByToken(orm.DB, string) (gorsk.User, error)
 	Update(orm.DB, gorsk.User) error

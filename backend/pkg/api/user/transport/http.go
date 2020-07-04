@@ -2,10 +2,10 @@ package transport
 
 import (
 	"net/http"
-	"strconv"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/user"
+	"github.com/satori/uuid"
 
 	"github.com/labstack/echo"
 )
@@ -150,9 +150,9 @@ type createReq struct {
 	PasswordConfirm string `json:"password_confirm" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
 
-	CompanyID  int              `json:"company_id" validate:"required"`
-	LocationID int              `json:"location_id" validate:"required"`
-	RoleID     gorsk.AccessRole `json:"role_id" validate:"required"`
+	CompanyID  uuid.UUID `json:"company_id" validate:"required"`
+	LocationID uuid.UUID `json:"location_id" validate:"required"`
+	RoleID     uuid.UUID `json:"role_id" validate:"required"`
 }
 
 func (h HTTP) create(c echo.Context) error {
@@ -167,9 +167,10 @@ func (h HTTP) create(c echo.Context) error {
 		return ErrPasswordsNotMaching
 	}
 
-	if r.RoleID < gorsk.SuperAdminRole || r.RoleID > gorsk.UserRole {
-		return gorsk.ErrBadRequest
-	}
+	// TODO: fix this
+	// if r.RoleID < gorsk.SuperAdminRole || r.RoleID > gorsk.UserRole {
+	// 	return gorsk.ErrBadRequest
+	// }
 
 	usr, err := h.svc.Create(c, gorsk.User{
 		Username:   r.Username,
@@ -210,7 +211,7 @@ func (h HTTP) list(c echo.Context) error {
 }
 
 func (h HTTP) view(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return gorsk.ErrBadRequest
 	}
@@ -226,16 +227,16 @@ func (h HTTP) view(c echo.Context) error {
 // User update request
 // swagger:model userUpdate
 type updateReq struct {
-	ID        int    `json:"-"`
-	FirstName string `json:"first_name,omitempty" validate:"omitempty,min=2"`
-	LastName  string `json:"last_name,omitempty" validate:"omitempty,min=2"`
-	Mobile    string `json:"mobile,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-	Address   string `json:"address,omitempty"`
+	ID        uuid.UUID `json:"-"`
+	FirstName string    `json:"first_name,omitempty" validate:"omitempty,min=2"`
+	LastName  string    `json:"last_name,omitempty" validate:"omitempty,min=2"`
+	Mobile    string    `json:"mobile,omitempty"`
+	Phone     string    `json:"phone,omitempty"`
+	Address   string    `json:"address,omitempty"`
 }
 
 func (h HTTP) update(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return gorsk.ErrBadRequest
 	}
@@ -262,7 +263,7 @@ func (h HTTP) update(c echo.Context) error {
 }
 
 func (h HTTP) delete(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return gorsk.ErrBadRequest
 	}

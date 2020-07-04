@@ -18,7 +18,7 @@ type Base struct {
 // ListQuery holds company/location data used for list db queries
 type ListQuery struct {
 	Query string
-	ID    int
+	ID    uuid.UUID
 }
 
 // BeforeInsert hooks into insert operations, setting createdAt and updatedAt to current time

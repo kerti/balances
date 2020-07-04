@@ -3,8 +3,9 @@ package user
 
 import (
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/utl/query"
 )
 
@@ -28,7 +29,7 @@ func (u User) List(c echo.Context, p gorsk.Pagination) ([]gorsk.User, error) {
 }
 
 // View returns single user
-func (u User) View(c echo.Context, id int) (gorsk.User, error) {
+func (u User) View(c echo.Context, id uuid.UUID) (gorsk.User, error) {
 	if err := u.rbac.EnforceUser(c, id); err != nil {
 		return gorsk.User{}, err
 	}
@@ -36,7 +37,7 @@ func (u User) View(c echo.Context, id int) (gorsk.User, error) {
 }
 
 // Delete deletes a user
-func (u User) Delete(c echo.Context, id int) error {
+func (u User) Delete(c echo.Context, id uuid.UUID) error {
 	user, err := u.udb.View(u.db, id)
 	if err != nil {
 		return err
@@ -49,7 +50,7 @@ func (u User) Delete(c echo.Context, id int) error {
 
 // Update contains user's information used for updating
 type Update struct {
-	ID        int
+	ID        uuid.UUID
 	FirstName string
 	LastName  string
 	Mobile    string
@@ -64,7 +65,7 @@ func (u User) Update(c echo.Context, r Update) (gorsk.User, error) {
 	}
 
 	if err := u.udb.Update(u.db, gorsk.User{
-		Base:      gorsk.Base{ID: r.ID},
+		ID:        r.ID,
 		FirstName: r.FirstName,
 		LastName:  r.LastName,
 		Mobile:    r.Mobile,

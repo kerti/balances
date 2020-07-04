@@ -2,8 +2,9 @@ package mockdb
 
 import (
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 )
 
 // User database mock
@@ -23,7 +24,7 @@ func (u *User) Create(db orm.DB, usr gorsk.User) (gorsk.User, error) {
 }
 
 // View mock
-func (u *User) View(db orm.DB, id int) (gorsk.User, error) {
+func (u *User) View(db orm.DB, id uuid.UUID) (gorsk.User, error) {
 	return u.ViewFn(db, id)
 }
 

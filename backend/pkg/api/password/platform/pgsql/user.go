@@ -2,16 +2,17 @@ package pgsql
 
 import (
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 )
 
 // User represents the client for user table
 type User struct{}
 
 // View returns single user by ID
-func (u User) View(db orm.DB, id int) (gorsk.User, error) {
-	user := gorsk.User{Base: gorsk.Base{ID: id}}
+func (u User) View(db orm.DB, id uuid.UUID) (gorsk.User, error) {
+	user := gorsk.User{ID: id}
 	err := db.Select(&user)
 	return user, err
 }

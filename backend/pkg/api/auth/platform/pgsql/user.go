@@ -2,15 +2,16 @@ package pgsql
 
 import (
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 )
 
 // User represents the client for user table
 type User struct{}
 
 // View returns single user by ID
-func (u User) View(db orm.DB, id int) (gorsk.User, error) {
+func (u User) View(db orm.DB, id uuid.UUID) (gorsk.User, error) {
 	var user gorsk.User
 	sql := `SELECT "user".*, "role"."id" AS "role__id", "role"."access_level" AS "role__access_level", "role"."name" AS "role__name" 
 	FROM "users" AS "user" LEFT JOIN "roles" AS "role" ON "role"."id" = "user"."role_id" 

@@ -3,7 +3,7 @@ package query
 import (
 	"github.com/labstack/echo"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 )
 
 // List prepares data for list queries

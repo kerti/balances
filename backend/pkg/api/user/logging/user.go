@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
+	"github.com/satori/uuid"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/api/user"
 )
 
@@ -59,7 +60,7 @@ func (ls *LogService) List(c echo.Context, req gorsk.Pagination) (resp []gorsk.U
 }
 
 // View logging
-func (ls *LogService) View(c echo.Context, req int) (resp gorsk.User, err error) {
+func (ls *LogService) View(c echo.Context, req uuid.UUID) (resp gorsk.User, err error) {
 	defer func(begin time.Time) {
 		ls.logger.Log(
 			c,
@@ -75,7 +76,7 @@ func (ls *LogService) View(c echo.Context, req int) (resp gorsk.User, err error)
 }
 
 // Delete logging
-func (ls *LogService) Delete(c echo.Context, req int) (err error) {
+func (ls *LogService) Delete(c echo.Context, req uuid.UUID) (err error) {
 	defer func(begin time.Time) {
 		ls.logger.Log(
 			c,

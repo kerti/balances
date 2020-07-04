@@ -3,9 +3,10 @@ package rbac_test
 import (
 	"testing"
 
-	"github.com/kerti/balances/backend"
+	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/utl/mock"
 	"github.com/kerti/balances/backend/pkg/utl/rbac"
+	"github.com/satori/uuid"
 
 	"github.com/labstack/echo"
 
@@ -176,9 +177,9 @@ func TestEnforceLocation(t *testing.T) {
 func TestAccountCreate(t *testing.T) {
 	type args struct {
 		ctx        echo.Context
-		roleID     gorsk.AccessRole
-		companyID  int
-		locationID int
+		roleID     uuid.UUID
+		companyID  uuid.UUID
+		locationID uuid.UUID
 	}
 	cases := []struct {
 		name    string
