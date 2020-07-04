@@ -14,18 +14,23 @@ import store from "./store";
 import { I18nextProvider } from "react-i18next";
 import i18next from "i18next";
 
-import main_id from "./translations/id/main.json";
 import main_en from "./translations/en/main.json";
+import main_id from "./translations/id/main.json";
+
+import navigation_en from "./translations/en/navigation.json";
+import navigation_id from "./translations/id/navigation.json";
 
 i18next.init({
   interpolation: { escapeValue: false },
-  lng: "en",
+  lng: "id",
   resources: {
-    id: {
-      main: main_id,
-    },
     en: {
       main: main_en,
+      navigation: navigation_en,
+    },
+    id: {
+      main: main_id,
+      navigation: navigation_id,
     },
   },
 });

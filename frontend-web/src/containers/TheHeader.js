@@ -12,9 +12,10 @@ import {
   CLink,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
+import { useTranslation } from "react-i18next";
 
 // routes config
-import routes from "../routes";
+import getRoutes from "../routes";
 
 import {
   TheHeaderDropdown,
@@ -26,6 +27,8 @@ import {
 const TheHeader = () => {
   const dispatch = useDispatch();
   const sidebarShow = useSelector((state) => state.sidebarShow);
+  const { t } = useTranslation("navigation");
+  const routes = getRoutes(t);
 
   const toggleSidebar = () => {
     const val = [true, "responsive"].includes(sidebarShow)

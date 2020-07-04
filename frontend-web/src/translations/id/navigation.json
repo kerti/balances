@@ -1,0 +1,9 @@
+{
+  "home": "Beranda",
+  "assets": {
+    "assets": "Harta",
+    "bankAccounts": "Rekening Bank",
+    "properties": "Properti",
+    "vehicles": "Kendaraan"
+  }
+}

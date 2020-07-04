@@ -1,0 +1,9 @@
+{
+  "home": "Home",
+  "assets": {
+    "assets": "Assets",
+    "bankAccounts": "Bank Accounts",
+    "properties": "Properties",
+    "vehicles": "Vehicles"
+  }
+}
