@@ -1,0 +1,3 @@
+# direnv files
+.envrc
+./cmd/migration/.envrc

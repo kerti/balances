@@ -4,55 +4,72 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	gorsk "github.com/kerti/balances/backend"
 	"github.com/kerti/balances/backend/pkg/utl/secure"
-
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/satori/uuid"
 )
 
 func main() {
-	dbInsert := `INSERT INTO public.companies VALUES (1, now(), now(), NULL, 'admin_company', true);
-	INSERT INTO public.locations VALUES (1, now(), now(), NULL, 'admin_location', true, 'admin_address', 1);
-	INSERT INTO public.roles VALUES (100, 100, 'SUPER_ADMIN');
-	INSERT INTO public.roles VALUES (110, 110, 'ADMIN');
-	INSERT INTO public.roles VALUES (120, 120, 'COMPANY_ADMIN');
-	INSERT INTO public.roles VALUES (130, 130, 'LOCATION_ADMIN');
-	INSERT INTO public.roles VALUES (200, 200, 'USER');`
-	var psn = os.Getenv("DATABASE_URL")
-	queries := strings.Split(dbInsert, ";")
+	var host = os.Getenv("DB_HOST")
+	var port = os.Getenv("DB_PORT")
+	var user = os.Getenv("DB_USER")
+	var pass = os.Getenv("DB_PASS")
+	var name = os.Getenv("DB_NAME")
+	var dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True", user, pass, host, port, name)
 
-	u, err := pg.ParseURL(psn)
+	db, err := gorm.Open("mysql", dsn)
 	checkErr(err)
-	db := pg.Connect(u)
-	_, err = db.Exec("SELECT 1")
-	checkErr(err)
-	createSchema(db, &gorsk.Company{}, &gorsk.Location{}, &gorsk.Role{}, &gorsk.User{})
+	defer db.Close()
 
-	for _, v := range queries[0 : len(queries)-1] {
-		_, err := db.Exec(v)
-		checkErr(err)
-	}
+	db.AutoMigrate(
+		&gorsk.Company{},
+		&gorsk.Location{},
+		&gorsk.Role{},
+		&gorsk.User{})
 
+	var companyID = uuid.NewV4()
+	var locationID = uuid.NewV4()
+	var userID = uuid.NewV4()
+	var superUserRoleID = uuid.NewV4()
 	sec := secure.New(1, nil)
 
-	userInsert := `INSERT INTO public.users (id, created_at, updated_at, first_name, last_name, username, password, email, active, role_id, company_id, location_id) VALUES (1, now(),now(),'Admin', 'Admin', 'admin', '%s', 'johndoe@mail.com', true, 100, 1, 1);`
-	_, err = db.Exec(fmt.Sprintf(userInsert, sec.Hash("admin")))
-	checkErr(err)
+	db.Create(&gorsk.Company{ID: companyID, Name: "admin_company", Active: true})
+
+	db.Create(&gorsk.Location{
+		ID:        locationID,
+		Name:      "admin_location",
+		Active:    true,
+		Address:   "admin_address",
+		CompanyID: companyID})
+
+	db.Create(&gorsk.Role{ID: superUserRoleID, AccessLevel: 100, Name: "SUPER_ADMIN"})
+	db.Create(&gorsk.Role{ID: uuid.NewV4(), AccessLevel: 110, Name: "ADMIN"})
+	db.Create(&gorsk.Role{ID: uuid.NewV4(), AccessLevel: 120, Name: "COMPANY_ADMIN"})
+	db.Create(&gorsk.Role{ID: uuid.NewV4(), AccessLevel: 130, Name: "LOCATION_ADMIN"})
+	db.Create(&gorsk.Role{ID: uuid.NewV4(), AccessLevel: 140, Name: "USER"})
+
+	db.Create(&gorsk.User{
+		ID:         userID,
+		FirstName:  "John",
+		LastName:   "Doe",
+		Username:   "johndoe",
+		Password:   sec.Hash("admin"),
+		Email:      "johndoe@mail.com",
+		Mobile:     "+6280989999",
+		Phone:      "+62274147",
+		Address:    "1234 Alpha Stret",
+		Active:     true,
+		RoleID:     superUserRoleID,
+		CompanyID:  companyID,
+		LocationID: locationID,
+	})
 }
 
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func createSchema(db *pg.DB, models ...interface{}) {
-	for _, model := range models {
-		checkErr(db.CreateTable(model, &orm.CreateTableOptions{
-			FKConstraints: true,
-		}))
 	}
 }

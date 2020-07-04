@@ -1,5 +1,7 @@
 package gorsk
 
+import "github.com/satori/uuid"
+
 // AccessRole represents access role type
 type AccessRole int
 
@@ -22,7 +24,7 @@ const (
 
 // Role model
 type Role struct {
-	ID          AccessRole `json:"id"`
+	ID          uuid.UUID  `json:"id" gorm:"type:char(36)"`
 	AccessLevel AccessRole `json:"access_level"`
 	Name        string     `json:"name"`
 }
