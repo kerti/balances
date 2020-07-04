@@ -65,7 +65,7 @@ func NewHTTP(svc user.Service, r *echo.Group) {
 	// - name: id
 	//   in: path
 	//   description: id of user
-	//   type: int
+	//   type: string
 	//   required: true
 	// responses:
 	//   "200":
@@ -90,7 +90,7 @@ func NewHTTP(svc user.Service, r *echo.Group) {
 	// - name: id
 	//   in: path
 	//   description: id of user
-	//   type: int
+	//   type: string
 	//   required: true
 	// - name: request
 	//   in: body
@@ -119,7 +119,7 @@ func NewHTTP(svc user.Service, r *echo.Group) {
 	// - name: id
 	//   in: path
 	//   description: id of user
-	//   type: int
+	//   type: string
 	//   required: true
 	// responses:
 	//   "200":
