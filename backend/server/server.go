@@ -61,7 +61,7 @@ func (s *Server) Serve() {
 
 func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Info(r.RequestURI)
+		logger.Trace(r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
