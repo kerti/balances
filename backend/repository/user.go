@@ -126,6 +126,10 @@ func (r *User) ResolveByIdentity(identity string) (user model.User, err error) {
 // Create creates a user
 func (r *User) Create(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
 
 	var stmt *sqlx.NamedStmt
 
@@ -153,6 +157,10 @@ func (r *User) Create(user model.User) error {
 // Update updates a user
 func (r *User) Update(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
 
 	if !exists {
 		err = errors.New("user does not exist")

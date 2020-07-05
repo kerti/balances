@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	// requred MySQL import
+	// required MySQL import
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/config"
