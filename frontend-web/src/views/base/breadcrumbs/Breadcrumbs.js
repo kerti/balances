@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   CBreadcrumb,
   CBreadcrumbItem,
@@ -8,11 +8,15 @@ import {
   CCardHeader,
   CLink,
   CCol,
-  CRow
-} from '@coreui/react'
-import routes from '../../../routes'
+  CRow,
+} from "@coreui/react";
+import { useTranslation } from "react-i18next";
+
+import getRoutes from "../../../routes";
 
 const Breadcrumbs = () => {
+  const { t } = useTranslation("navigation");
+  const routes = getRoutes(t);
   return (
     <CRow>
       <CCol xs="12">
@@ -20,10 +24,10 @@ const Breadcrumbs = () => {
           <CCardHeader>
             Bootstrap Breadcrumb
             <div className="card-header-actions">
-              <a 
-                href="https://coreui.github.io/components/breadcrumbs/" 
-                rel="noreferrer noopener" 
-                target="_blank" 
+              <a
+                href="https://coreui.github.io/components/breadcrumbs/"
+                rel="noreferrer noopener"
+                target="_blank"
                 className="card-header-action"
               >
                 <small className="text-muted">docs</small>
@@ -32,7 +36,7 @@ const Breadcrumbs = () => {
           </CCardHeader>
           <CCardBody>
             <h6>CBreadcrumbRouter wrapper component</h6>
-            <CBreadcrumbRouter routes={routes}/>
+            <CBreadcrumbRouter routes={routes} />
             <h6>Manual</h6>
             <CBreadcrumb>
               <CBreadcrumbItem>
@@ -67,7 +71,7 @@ const Breadcrumbs = () => {
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default Breadcrumbs
+export default Breadcrumbs;
