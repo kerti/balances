@@ -1,0 +1,6 @@
+{
+  "date": {
+    "long": "{{value, date.long}}"
+  },
+  "currency": "{{value, currency}}"
+}

@@ -1,8 +1,39 @@
 {
   "assets": "Assets",
   "banks": {
-    "bankAccounts": "Bank Accounts",
-    "description": "This is where you can manage all your bank accounts."
+    "accountName": "Account Name",
+    "accountNamePlaceholder": "Enter your account name...",
+    "accountNumber": "Account Number",
+    "accountNumberPlaceholder": "Enter your account number...",
+    "accountHolder": "Account Holder",
+    "accountHolderPlaceholder": "Enter your account holder...",
+    "setBalance": "Set Balance",
+    "balance": "Balance",
+    "balanceHistory": "Balance History",
+    "balanceSetBy": "Balance Set By",
+    "balanceHistoryGraph": "Balance History Graph",
+    "name": "Bank Name",
+    "namePlaceholder": "Enter your bank name...",
+    "details": "Bank Account Details",
+    "lastBalance": "Last Balance",
+    "listOfBankAccounts": "List of Bank Accounts",
+    "status": "Status"
+  },
+  "common": {
+    "actions": {
+      "activate": "Activate",
+      "add": "Add",
+      "deactivate": "Deactivate",
+      "date": "Date",
+      "delete": "Delete",
+      "edit": "Edit",
+      "reset": "Reset",
+      "submit": "Submit"
+    },
+    "states": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
   },
   "properties": {
     "properties": "Properties",

@@ -62,6 +62,7 @@ const User = React.lazy(() => import("./views/users/User"));
 
 // Assets Section
 const Banks = React.lazy(() => import("./views/assets/banks/Banks"));
+const BankDetail = React.lazy(() => import("./views/assets/banks/BankDetail"));
 const Properties = React.lazy(() =>
   import("./views/assets/properties/Properties")
 );
@@ -106,6 +107,13 @@ const getRoutes = (t) => {
       path: "/assets/banks",
       name: t("assets.bankAccounts"),
       component: Banks,
+      exact: true,
+    },
+    {
+      // TODO: figure out a way to enable correct routing for /assets/banks/:id
+      path: "/assets/banks/:id",
+      name: t("assets.bankAccountDetails"),
+      component: BankDetail,
     },
     {
       path: "/assets/properties",
