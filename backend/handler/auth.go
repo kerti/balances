@@ -26,6 +26,11 @@ func (h *Auth) Shutdown() {
 	logger.Trace("Auth Handler shutting down...")
 }
 
+// HandlePreflight handles a preflight check for logins
+func (h *Auth) HandlePreflight(w http.ResponseWriter, r *http.Request) {
+	respondWithMessage(w, http.StatusOK, "OK")
+}
+
 // HandleAuthLogin performs a login action and returns the JWT token
 func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	token, err := h.Service.Authenticate(r.Header.Get("Authorization"))
