@@ -9,7 +9,7 @@ import * as serviceWorker from "./serviceWorker";
 import { icons } from "./assets/icons";
 
 import { Provider } from "react-redux";
-import store from "./store";
+import initStore from "./data/store";
 
 import { I18nextProvider } from "react-i18next";
 import i18next from "i18next";
@@ -46,6 +46,8 @@ i18next.init({
 });
 
 React.icons = icons;
+
+const store = initStore();
 
 ReactDOM.render(
   <Provider store={store}>
