@@ -1,4 +1,4 @@
-const baseURL = process.env.BACKEND_URL;
+const baseURL = process.env.REACT_APP_BACKEND_URL;
 
 const sources = {
   baseURL: baseURL,
