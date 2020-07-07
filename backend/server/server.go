@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/config"
@@ -61,7 +62,14 @@ func (s *Server) Serve() {
 
 func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Trace(r.RequestURI)
+		headerList := make([]string, 0)
+		for k, v := range r.Header {
+			headerList = append(headerList, fmt.Sprintf("  - %s: %s", k, v))
+		}
+		headers := fmt.Sprintf("- HEADERS:\n%s", strings.Join(headerList, "\n"))
+
+		logger.Trace("### RECEIEVED %v %v\n%s", r.Method, r.RequestURI, headers)
+
 		next.ServeHTTP(w, r)
 	})
 }

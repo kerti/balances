@@ -16,6 +16,7 @@ func (s *Server) InitRoutes() {
 	s.router.HandleFunc("/health", s.HealthHandler.HandleHealthCheck).Methods("GET")
 
 	// Authentication/Authorization
+	s.router.HandleFunc("/auth/login", s.AuthHandler.HandlePreflight).Methods("OPTIONS")
 	s.router.HandleFunc("/auth/login", s.AuthHandler.HandleAuthLogin).Methods("POST")
 	s.router.HandleFunc("/auth/token", s.AuthHandler.HandleGetToken).Methods("GET")
 
