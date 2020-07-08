@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === "development") {
 
 const initialState = {
   ui: {
+    lang: process.env.REACT_APP_DEFAULT_LANG,
     sidebarShow: "responsive",
   },
 };

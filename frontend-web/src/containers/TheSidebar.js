@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next";
 import getNavigation from "./_nav";
 
 // action
-import { setSidebarShow } from "../data/actions/sidebar";
+import { setSidebarShow } from "../data/actions/ui";
 
 const TheSidebar = () => {
   const dispatch = useDispatch();

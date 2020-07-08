@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   CButton,
@@ -7,6 +7,10 @@ import {
   CCardGroup,
   CCol,
   CContainer,
+  CDropdown,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
   CForm,
   CInput,
   CInputGroup,
@@ -15,18 +19,34 @@ import {
   CRow,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-
-import { useDispatch } from "react-redux";
+import i18n from "i18next";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import flagIconMap from "../../../translations/flags.json";
 
 // actions
 import { requestLogin } from "../../../data/actions/auth";
+import { setLang } from "../../../data/actions/ui";
 
 const Login = () => {
+  const { t } = useTranslation("app");
   const dispatch = useDispatch();
+  const authLoading = useSelector((state) => state.auth.loading);
+  const [flag, setFlag] = useState(
+    flagIconMap[process.env.REACT_APP_DEFAULT_LANG]
+  );
+
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(requestLogin("admin", "admin"));
   };
+
+  const selectLang = (lang) => {
+    i18n.changeLanguage(lang);
+    setFlag(flagIconMap[lang]);
+    dispatch(setLang(lang));
+  };
+
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
       <CContainer>
@@ -36,8 +56,29 @@ const Login = () => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm onSubmit={handleSubmit}>
-                    <h1>Login</h1>
-                    <p className="text-muted">Sign In to your account</p>
+                    <CRow>
+                      <CCol xs="6">
+                        <h1>{t("login.login")}</h1>
+                        <p className="text-muted">
+                          {t("login.signInToYourAccount")}
+                        </p>
+                      </CCol>
+                      <CCol xs="6" className="text-right">
+                        <CDropdown className="m-1">
+                          <CDropdownToggle>
+                            <CIcon name={flag} size="lg" />
+                          </CDropdownToggle>
+                          <CDropdownMenu>
+                            <CDropdownItem onClick={() => selectLang("en")}>
+                              English
+                            </CDropdownItem>
+                            <CDropdownItem onClick={() => selectLang("id")}>
+                              Bahasa Indonesia
+                            </CDropdownItem>
+                          </CDropdownMenu>
+                        </CDropdown>
+                      </CCol>
+                    </CRow>
                     <CInputGroup className="mb-3">
                       <CInputGroupPrepend>
                         <CInputGroupText>
@@ -46,7 +87,7 @@ const Login = () => {
                       </CInputGroupPrepend>
                       <CInput
                         type="text"
-                        placeholder="Username"
+                        placeholder={t("login.username")}
                         autoComplete="username"
                       />
                     </CInputGroup>
@@ -58,14 +99,19 @@ const Login = () => {
                       </CInputGroupPrepend>
                       <CInput
                         type="password"
-                        placeholder="Password"
+                        placeholder={t("login.password")}
                         autoComplete="current-password"
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs="6">
-                        <CButton type="submit" color="primary" className="px-4">
-                          Login
+                        <CButton
+                          type="submit"
+                          color="primary"
+                          className="px-4"
+                          disabled={authLoading}
+                        >
+                          {t("login.login")}
                         </CButton>
                       </CCol>
                       <CCol hidden xs="6" className="text-right">

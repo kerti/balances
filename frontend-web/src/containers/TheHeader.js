@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import getRoutes from "../routes";
 
 // action
-import { setSidebarShow } from "../data/actions/sidebar";
+import { setSidebarShow } from "../data/actions/ui";
 
 import {
   TheHeaderDropdown,

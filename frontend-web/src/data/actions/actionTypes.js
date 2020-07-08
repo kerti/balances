@@ -8,6 +8,9 @@ const actionTypes = {
     logout: "AUTH_LOGOUT",
   },
   ui: {
+    lang: {
+      SET: "UI_LANG_SET",
+    },
     sidebarShow: {
       SET: "UI_SIDEBAR_SHOW_SET",
     },

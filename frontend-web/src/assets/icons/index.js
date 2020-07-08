@@ -28,7 +28,16 @@ import {
   cibGooglePay,
   cibCcAmex,
 } from "@coreui/icons";
-import { cifUs, cifBr, cifIn, cifFr, cifEs, cifPl } from "@coreui/icons";
+import {
+  cifUs,
+  cifBr,
+  cifGb,
+  cifId,
+  cifIn,
+  cifFr,
+  cifEs,
+  cifPl,
+} from "@coreui/icons";
 import {
   cil3d,
   cilAlignCenter,
@@ -242,6 +251,8 @@ export const icons = Object.assign(
   {
     cifUs,
     cifBr,
+    cifGb,
+    cifId,
     cifIn,
     cifFr,
     cifEs,
