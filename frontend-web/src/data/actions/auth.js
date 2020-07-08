@@ -1,15 +1,19 @@
 import actionTypes from "./actionTypes";
 import auth from "../sources/auth/auth";
 
-export function requestLogin(username, password) {
+export function requestLogin(setCookies, username, password) {
   return (dispatch) => {
     dispatch(loginLoading());
     auth
       .login(username, password)
       .then((payload) => {
+        setCookies("token", payload.data.data.token, {
+          expires: new Date(payload.data.data.expiration),
+        });
         dispatch(loginSuccess(payload.data));
       })
       .catch((error) => {
+        console.log(error);
         dispatch(loginFailure(error.response.data));
       });
   };

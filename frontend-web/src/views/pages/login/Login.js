@@ -41,7 +41,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(requestLogin(username, password));
+    dispatch(requestLogin(setCookie, username, password));
   };
 
   const selectLang = (lang) => {
