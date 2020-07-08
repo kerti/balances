@@ -3,14 +3,14 @@ import auth from "../sources/auth/auth";
 
 export function requestLogin(username, password) {
   return (dispatch) => {
-    dispatch(loginLoading);
+    dispatch(loginLoading());
     auth
       .login(username, password)
-      .then(({ data }) => {
-        dispatch(loginSuccess(data));
+      .then((payload) => {
+        dispatch(loginSuccess(payload.data));
       })
       .catch((error) => {
-        dispatch(loginFailure(error));
+        dispatch(loginFailure(error.response.data));
       });
   };
 }
@@ -21,10 +21,10 @@ export function loginLoading() {
   };
 }
 
-export function loginSuccess(data) {
+export function loginSuccess(payload) {
   return {
     type: actionTypes.auth.login.SUCCESS,
-    data: data,
+    payload: payload,
   };
 }
 

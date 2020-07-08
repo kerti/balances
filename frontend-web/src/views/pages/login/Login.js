@@ -25,7 +25,6 @@ const Login = () => {
   const dispatch = useDispatch();
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(e);
     dispatch(requestLogin("admin", "admin"));
   };
   return (
