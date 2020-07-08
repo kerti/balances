@@ -7,6 +7,7 @@ import (
 	"github.com/kerti/balances/backend/model"
 
 	"github.com/gorilla/mux"
+	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
@@ -32,40 +33,40 @@ func (h *User) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	users, err := h.Service.GetByIDs([]uuid.UUID{id})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if len(users) != 1 {
-		respondWithError(w, http.StatusInternalServerError, "user not found")
+		response.RespondWithError(w, http.StatusInternalServerError, "user not found")
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, users[0].ToOutput())
+	response.RespondWithJSON(w, http.StatusOK, users[0].ToOutput())
 }
 
 // HandleCreateUser handles the request
 func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input model.UserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		response.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
 
 	// TODO: FIX THIS!
 	userID := uuid.NewV4()
 	user, err := h.Service.Create(input, userID)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, user.ToOutput())
+	response.RespondWithJSON(w, http.StatusCreated, user.ToOutput())
 	return
 }
 
@@ -74,13 +75,13 @@ func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	var input model.UserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		response.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
 	input.ID = id
 
@@ -88,10 +89,10 @@ func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	userID := uuid.NewV4()
 	user, err := h.Service.Update(input, userID)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, user.ToOutput())
+	response.RespondWithJSON(w, http.StatusCreated, user.ToOutput())
 	return
 }
