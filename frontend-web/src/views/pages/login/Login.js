@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   CButton,
@@ -23,6 +23,7 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import flagIconMap from "../../../translations/flags.json";
+import { useCookies } from "react-cookie";
 
 // actions
 import { requestLogin } from "../../../data/actions/auth";
@@ -32,20 +33,26 @@ const Login = () => {
   const { t } = useTranslation("app");
   const dispatch = useDispatch();
   const authLoading = useSelector((state) => state.auth.loading);
-  const [flag, setFlag] = useState(
-    flagIconMap[process.env.REACT_APP_DEFAULT_LANG]
-  );
+  const [cookie, setCookie] = useCookies();
+  const currentLang = cookie.lang || process.env.REACT_APP_DEFAULT_LANG;
+  const [flag, setFlag] = useState(flagIconMap[currentLang]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(requestLogin("admin", "admin"));
+    dispatch(requestLogin(username, password));
   };
 
   const selectLang = (lang) => {
-    i18n.changeLanguage(lang);
     setFlag(flagIconMap[lang]);
-    dispatch(setLang(lang));
+    setCookie("lang", lang);
   };
+
+  useEffect(() => {
+    i18n.changeLanguage(currentLang);
+    dispatch(setLang(currentLang));
+  }, [dispatch, currentLang]);
 
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
@@ -89,6 +96,8 @@ const Login = () => {
                         type="text"
                         placeholder={t("login.username")}
                         autoComplete="username"
+                        value={username}
+                        onChange={(u) => setUsername(u.target.value)}
                       />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
@@ -101,6 +110,8 @@ const Login = () => {
                         type="password"
                         placeholder={t("login.password")}
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(p) => setPassword(p.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
