@@ -32,7 +32,7 @@ func (s *Auth) Shutdown() {
 }
 
 // Authenticate performs authentication
-func (s *Auth) Authenticate(basic string) (token *string, err error) {
+func (s *Auth) Authenticate(basic string) (authInfo *model.AuthenticationInfo, err error) {
 	identity, password, err := s.validateBasicAuthHeader(basic)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,12 @@ func (s *Auth) Authenticate(basic string) (token *string, err error) {
 		return nil, errors.New("authentication failed")
 	}
 
-	return s.signJWT(&user)
+	token, expiration, err := s.signJWT(&user)
+	return &model.AuthenticationInfo{
+		Expiration: expiration,
+		Token:      token,
+		User:       &user,
+	}, err
 }
 
 // Authorize authorizes a request based on its Bearer token
@@ -85,7 +90,7 @@ func (s *Auth) Authorize(bearer string) (userID *uuid.UUID, err error) {
 }
 
 // GetToken signs a new token for a specified user
-func (s *Auth) GetToken(user model.User) (token *string, err error) {
+func (s *Auth) GetToken(user model.User) (token *string, expiration *time.Time, err error) {
 	return s.signJWT(&user)
 }
 
@@ -115,7 +120,7 @@ func (s *Auth) validateBearerAuthHeader(bearer string) (string, error) {
 	return auth[1], nil
 }
 
-func (s *Auth) signJWT(user *model.User) (*string, error) {
+func (s *Auth) signJWT(user *model.User) (*string, *time.Time, error) {
 	config := config.Get()
 	now := time.Now()
 	expTime := now.Add(config.JWT.Expiration)
@@ -127,7 +132,7 @@ func (s *Auth) signJWT(user *model.User) (*string, error) {
 		"iss":        "balances",
 	})
 	tokenString, err := token.SignedString([]byte(config.JWT.Secret))
-	return &tokenString, err
+	return &tokenString, &expTime, err
 }
 
 func (s *Auth) getUserID(claims jwt.MapClaims) (*uuid.UUID, error) {

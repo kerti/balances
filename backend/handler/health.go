@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/util/logger"
 )
 
@@ -31,8 +32,8 @@ func (h *Health) Shutdown() {
 // HandleHealthCheck handles the request
 func (h *Health) HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	if h.isHealthy {
-		respondWithMessage(w, http.StatusOK, "OK")
+		response.RespondWithMessage(w, http.StatusOK, "OK")
 	} else {
-		respondWithMessage(w, http.StatusServiceUnavailable, "SERVER UNHEALTHY")
+		response.RespondWithMessage(w, http.StatusServiceUnavailable, "SERVER UNHEALTHY")
 	}
 }
