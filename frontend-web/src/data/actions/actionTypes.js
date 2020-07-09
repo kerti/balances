@@ -5,7 +5,9 @@ const actionTypes = {
       FAILURE: "AUTH_LOGIN_FAILURE",
       SUCCESS: "AUTH_LOGIN_SUCCESS",
     },
-    logout: "AUTH_LOGOUT",
+    logout: {
+      REQUEST: "AUTH_LOGOUT_REQUEST",
+    },
   },
   ui: {
     lang: {

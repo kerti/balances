@@ -4,5 +4,8 @@
     "signInToYourAccount": "Masuk ke akun Anda",
     "username": "Nama",
     "password": "Sandi"
+  },
+  "logout": {
+    "lockAccount": "Kunci Akun"
   }
 }

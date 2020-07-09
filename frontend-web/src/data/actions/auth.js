@@ -2,7 +2,7 @@ import actionTypes from "./actionTypes";
 import auth from "../sources/auth/auth";
 import cookieNames from "../cookies";
 
-export function requestLogin(setCookies, username, password, history) {
+export function requestLogin(setCookie, username, password, history) {
   return (dispatch) => {
     dispatch(loginLoading());
     auth
@@ -10,23 +10,23 @@ export function requestLogin(setCookies, username, password, history) {
       .then((payload) => {
         const loginResponse = payload.data.data;
 
-        setCookies(cookieNames.auth.token, loginResponse.token, {
+        setCookie(cookieNames.auth.token, loginResponse.token, {
           expires: new Date(loginResponse.expiration),
         });
 
-        setCookies(cookieNames.auth.userId, loginResponse.user.id, {
+        setCookie(cookieNames.auth.userId, loginResponse.user.id, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookies(cookieNames.auth.userEmail, loginResponse.user.email, {
+        setCookie(cookieNames.auth.userEmail, loginResponse.user.email, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookies(cookieNames.auth.userProfileName, loginResponse.user.name, {
+        setCookie(cookieNames.auth.userProfileName, loginResponse.user.name, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookies(cookieNames.auth.username, loginResponse.user.username, {
+        setCookie(cookieNames.auth.username, loginResponse.user.username, {
           expires: new Date(payload.data.data.expiration),
         });
 
@@ -56,5 +56,19 @@ export function loginFailure(error) {
   return {
     type: actionTypes.auth.login.FAILURE,
     error: error,
+  };
+}
+
+export function requestLogout(removeCookie, history) {
+  history.push("/logout");
+
+  removeCookie(cookieNames.auth.token);
+  removeCookie(cookieNames.auth.userId);
+  removeCookie(cookieNames.auth.userEmail);
+  removeCookie(cookieNames.auth.userProfileName);
+  removeCookie(cookieNames.auth.username);
+
+  return {
+    type: actionTypes.auth.logout.REQUEST,
   };
 }

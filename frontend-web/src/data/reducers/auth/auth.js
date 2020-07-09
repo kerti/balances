@@ -24,6 +24,8 @@ const auth = (state = {}, action) => {
         loading: false,
         authError: action.error,
       };
+    case actionTypes.auth.logout.REQUEST:
+      return {};
     default:
       return state;
   }
