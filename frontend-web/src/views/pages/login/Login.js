@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import {
   CButton,
   CCard,
@@ -38,10 +38,11 @@ const Login = () => {
   const [flag, setFlag] = useState(flagIconMap[currentLang]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const history = useHistory();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(requestLogin(setCookie, username, password));
+    dispatch(requestLogin(setCookie, username, password, history));
   };
 
   const selectLang = (lang) => {
