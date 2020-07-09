@@ -2,10 +2,11 @@ import React from "react";
 import { Cookies } from "react-cookie";
 import { TheContent, TheSidebar, TheFooter, TheHeader } from "./index";
 import { Redirect } from "react-router-dom";
+import cookieNames from "../data/cookies";
 
 const TheLayout = () => {
   const cookies = new Cookies();
-  const token = cookies.get("token");
+  const token = cookies.get(cookieNames.auth.token);
   return token ? (
     <div className="c-app c-default-layout">
       <TheSidebar />

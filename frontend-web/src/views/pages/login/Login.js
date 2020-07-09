@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import flagIconMap from "../../../translations/flags.json";
 import { useCookies } from "react-cookie";
+import cookieNames from "../../../data/cookies";
 
 // actions
 import { requestLogin } from "../../../data/actions/auth";
@@ -34,7 +35,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const authLoading = useSelector((state) => state.auth.loading);
   const [cookie, setCookie] = useCookies();
-  const currentLang = cookie.lang || process.env.REACT_APP_DEFAULT_LANG;
+  const currentLang =
+    cookie[cookieNames.ui.lang] || process.env.REACT_APP_DEFAULT_LANG;
   const [flag, setFlag] = useState(flagIconMap[currentLang]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +49,7 @@ const Login = () => {
 
   const selectLang = (lang) => {
     setFlag(flagIconMap[lang]);
-    setCookie("lang", lang);
+    setCookie(cookieNames.ui.lang, lang);
   };
 
   useEffect(() => {

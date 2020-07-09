@@ -4,6 +4,7 @@ import { Cookies, withCookies } from "react-cookie";
 import { instanceOf } from "prop-types";
 import i18n from "i18next";
 import "./scss/style.scss";
+import cookieNames from "./data/cookies";
 
 const loading = (
   <div className="pt-3 text-center">
@@ -30,7 +31,7 @@ class App extends Component {
 
     const { cookies } = props;
     const currentLang =
-      cookies.get("lang") || process.env.REACT_APP_DEFAULT_LANG;
+      cookies.get(cookieNames.ui.lang) || process.env.REACT_APP_DEFAULT_LANG;
 
     i18n.changeLanguage(currentLang);
   }
