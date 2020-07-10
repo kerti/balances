@@ -19,18 +19,18 @@ import { useTranslation } from "react-i18next";
 // sidebar nav config
 import getNavigation from "./_nav";
 
+// action
+import { setSidebarShow } from "../data/actions/ui";
+
 const TheSidebar = () => {
   const dispatch = useDispatch();
-  const show = useSelector((state) => state.sidebarShow);
+  const show = useSelector((state) => state.ui.sidebarShow);
   const { t } = useTranslation("navigation");
 
   const translatedNavigation = getNavigation(t);
 
   return (
-    <CSidebar
-      show={show}
-      onShowChange={(val) => dispatch({ type: "set", sidebarShow: val })}
-    >
+    <CSidebar show={show} onShowChange={(val) => dispatch(setSidebarShow(val))}>
       <CSidebarBrand className="d-md-down-none" to="/">
         <CIcon
           className="c-sidebar-brand-full"

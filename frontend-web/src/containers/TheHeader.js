@@ -17,6 +17,9 @@ import { useTranslation } from "react-i18next";
 // routes config
 import getRoutes from "../routes";
 
+// action
+import { setSidebarShow } from "../data/actions/ui";
+
 import {
   TheHeaderDropdown,
   TheHeaderDropdownMssg,
@@ -26,7 +29,7 @@ import {
 
 const TheHeader = () => {
   const dispatch = useDispatch();
-  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const sidebarShow = useSelector((state) => state.ui.sidebarShow);
   const { t } = useTranslation("navigation");
   const routes = getRoutes(t);
 
@@ -34,14 +37,14 @@ const TheHeader = () => {
     const val = [true, "responsive"].includes(sidebarShow)
       ? false
       : "responsive";
-    dispatch({ type: "set", sidebarShow: val });
+    dispatch(setSidebarShow(val));
   };
 
   const toggleSidebarMobile = () => {
     const val = [false, "responsive"].includes(sidebarShow)
       ? true
       : "responsive";
-    dispatch({ type: "set", sidebarShow: val });
+    dispatch(setSidebarShow(val));
   };
 
   return (
