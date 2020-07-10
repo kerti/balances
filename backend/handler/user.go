@@ -58,8 +58,8 @@ func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		response.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
 
-	userID := (r.Context().Value(ctxprops.PropUserID)).(uuid.UUID)
-	user, err := h.Service.Create(input, userID)
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
+	user, err := h.Service.Create(input, *userID)
 	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -84,8 +84,8 @@ func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	input.ID = id
 
-	userID := (r.Context().Value(ctxprops.PropUserID)).(uuid.UUID)
-	user, err := h.Service.Update(input, userID)
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
+	user, err := h.Service.Update(input, *userID)
 	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
