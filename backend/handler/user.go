@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kerti/balances/backend/model"
-
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler/response"
+	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
+	"github.com/kerti/balances/backend/util/ctxprops"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
 )
@@ -58,8 +58,7 @@ func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		response.RespondWithError(w, http.StatusBadRequest, err.Error())
 	}
 
-	// TODO: FIX THIS!
-	userID := uuid.NewV4()
+	userID := (r.Context().Value(ctxprops.PropUserID)).(uuid.UUID)
 	user, err := h.Service.Create(input, userID)
 	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
@@ -85,8 +84,7 @@ func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	input.ID = id
 
-	// TODO: FIX THIS!
-	userID := uuid.NewV4()
+	userID := (r.Context().Value(ctxprops.PropUserID)).(uuid.UUID)
 	user, err := h.Service.Update(input, userID)
 	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
