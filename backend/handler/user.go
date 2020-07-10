@@ -13,7 +13,7 @@ import (
 	"github.com/satori/uuid"
 )
 
-// User handles all requests related to users
+// User handles all requests related to Users
 type User struct {
 	Service *service.User `inject:""`
 }

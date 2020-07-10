@@ -24,19 +24,19 @@ func (s *User) Shutdown() {
 	logger.Trace("User Service shutting down...")
 }
 
-// GetByIDs fetches a users by their IDs
+// GetByIDs fetches Users by their IDs
 func (s *User) GetByIDs(ids []uuid.UUID) ([]model.User, error) {
 	return s.Repository.ResolveByIDs(ids)
 }
 
-// Create creates a new user
+// Create creates a new User
 func (s *User) Create(input model.UserInput, userID uuid.UUID) (model.User, error) {
 	user := model.NewUserFromInput(input, userID)
 	err := s.Repository.Create(user)
 	return user, err
 }
 
-// Update updates an existing user
+// Update updates an existing User
 func (s *User) Update(input model.UserInput, userID uuid.UUID) (model.User, error) {
 	users, err := s.Repository.ResolveByIDs([]uuid.UUID{input.ID})
 	if err != nil {
