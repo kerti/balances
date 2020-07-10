@@ -107,7 +107,9 @@ const Banks = () => {
                 scopedSlots={{
                   lastBalance: (item) => (
                     <td className="text-right">
-                      {f("currency", { value: item.lastBalance })}
+                      {f("number.decimal.2fractions", {
+                        value: item.lastBalance,
+                      })}
                       <br />
                       <small>
                         {f("date.long", {

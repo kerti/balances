@@ -16,79 +16,9 @@ import { CookiesProvider } from "react-cookie";
 import { I18nextProvider } from "react-i18next";
 import i18next from "i18next";
 
-import app_en from "./translations/en/app.json";
-import app_id from "./translations/id/app.json";
+import { initTranslations } from "./translations/translations";
 
-import assets_en from "./translations/en/assets.json";
-import assets_id from "./translations/id/assets.json";
-
-import formats from "./translations/formats.json";
-
-import liabilities_en from "./translations/en/liabilities.json";
-import liabilities_id from "./translations/id/liabilities.json";
-
-import investments_en from "./translations/en/investments.json";
-import investments_id from "./translations/id/investments.json";
-
-import navigation_en from "./translations/en/navigation.json";
-import navigation_id from "./translations/id/navigation.json";
-
-const defaultLang = "id";
-
-let currencyFormatters = {
-  id: new Intl.NumberFormat("id", {
-    style: "currency",
-    currency: "IDR",
-  }),
-  en: new Intl.NumberFormat("en", {
-    style: "currency",
-    currency: "USD",
-  }),
-};
-
-let longDateFormatters = {
-  en: new Intl.DateTimeFormat("en", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }),
-  id: new Intl.DateTimeFormat("id", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }),
-};
-
-const i18nFormatter = (value, format, lng) => {
-  if (format === "currency") return currencyFormatters[lng].format(value);
-  if (format === "date.long") return longDateFormatters[lng].format(value);
-};
-
-i18next.init({
-  interpolation: {
-    escapeValue: false,
-    format: i18nFormatter,
-  },
-  lng: process.env.REACT_APP_DEFAULT_LANG,
-  resources: {
-    en: {
-      app: app_en,
-      assets: assets_en,
-      formats: formats,
-      liabilities: liabilities_en,
-      investments: investments_en,
-      navigation: navigation_en,
-    },
-    id: {
-      app: app_id,
-      assets: assets_id,
-      formats: formats,
-      liabilities: liabilities_id,
-      investments: investments_id,
-      navigation: navigation_id,
-    },
-  },
-});
+initTranslations();
 
 React.icons = icons;
 
