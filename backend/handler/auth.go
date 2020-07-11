@@ -13,8 +13,8 @@ import (
 
 // Auth handles all requests related to authentication and authorization
 type Auth struct {
-	Service     *service.Auth `inject:""`
-	UserService *service.User `inject:""`
+	Service     *service.Auth `inject:"authService"`
+	UserService *service.User `inject:"userService"`
 }
 
 // Startup perform startup functions

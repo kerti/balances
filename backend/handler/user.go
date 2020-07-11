@@ -15,7 +15,7 @@ import (
 
 // User handles all requests related to Users
 type User struct {
-	Service *service.User `inject:""`
+	Service *service.User `inject:"userService"`
 }
 
 // Startup perform startup functions

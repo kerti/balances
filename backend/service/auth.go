@@ -18,7 +18,7 @@ import (
 
 // Auth is the service provider
 type Auth struct {
-	UserRepository *repository.User `inject:""`
+	UserRepository *repository.User `inject:"userRepository"`
 }
 
 // Startup performs startup functions

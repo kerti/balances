@@ -19,12 +19,13 @@ var isShuttingDown bool
 
 // Server is the server instance
 type Server struct {
-	config        *config.Config
-	AuthHandler   *handler.Auth   `inject:""`
-	HealthHandler *handler.Health `inject:"healthHandler"`
-	UserHandler   *handler.User   `inject:""`
-	AuthService   *service.Auth   `inject:""`
-	router        *mux.Router
+	config             *config.Config
+	AuthHandler        *handler.Auth        `inject:"authHandler"`
+	AuthService        *service.Auth        `inject:"authService"`
+	BankAccountHandler *handler.BankAccount `inject:"bankAccountHandler"`
+	HealthHandler      *handler.Health      `inject:"healthHandler"`
+	UserHandler        *handler.User        `inject:"userHandler"`
+	router             *mux.Router
 }
 
 // Startup perform startup functions
