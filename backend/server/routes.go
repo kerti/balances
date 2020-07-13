@@ -25,5 +25,17 @@ func (s *Server) InitRoutes() {
 	s.router.HandleFunc("/users", s.UserHandler.HandleCreateUser).Methods("POST")
 	s.router.HandleFunc("/users/{id}", s.UserHandler.HandleUpdateUser).Methods("PATCH")
 
+	// Banks
+	s.router.HandleFunc("/bankAccounts", s.BankAccountHandler.HandleCreateBankAccount).Methods("POST")
+	s.router.HandleFunc("/bankAccounts/{id}", s.BankAccountHandler.HandleGetBankAccountByID).Methods("GET")
+	s.router.HandleFunc("/bankAccounts/search", s.BankAccountHandler.HandleGetBankAccountByFilter).Methods("POST")
+	s.router.HandleFunc("/bankAccounts/{id}", s.BankAccountHandler.HandleUpdateBankAccount).Methods("PATCH")
+	s.router.HandleFunc("/bankAccounts/{id}", s.BankAccountHandler.HandleDeleteBankAccount).Methods("DELETE")
+	s.router.HandleFunc("/bankAccounts/balances", s.BankAccountHandler.HandleCreateBankAccountBalance).Methods("POST")
+	s.router.HandleFunc("/bankAccounts/balances/{id}", s.BankAccountHandler.HandleGetBankAccountBalanceByID).Methods("GET")
+	s.router.HandleFunc("/bankAccounts/balances/search", s.BankAccountHandler.HandleGetBankAccountBalanceByFilter).Methods("POST")
+	s.router.HandleFunc("/bankAccounts/balances/{id}", s.BankAccountHandler.HandleUpdateBankAccountBalance).Methods("PATCH")
+	s.router.HandleFunc("/bankAccounts/balances/{id}", s.BankAccountHandler.HandleDeleteBankAccountBalance).Methods("DELETE")
+
 	http.Handle("/", s.router)
 }
