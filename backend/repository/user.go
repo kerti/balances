@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
 )
@@ -132,7 +131,7 @@ func (r *User) Create(user model.User) error {
 	}
 
 	if exists {
-		err = errors.New("user already exists")
+		err = failure.OperationNotPermitted("create", "User", "already exists")
 		logger.ErrNoStack("%v", err)
 		return err
 	}
@@ -161,7 +160,7 @@ func (r *User) Update(user model.User) error {
 	}
 
 	if !exists {
-		err = errors.New("user does not exist")
+		err = failure.EntityNotFound("User")
 		logger.ErrNoStack("%v", err)
 		return err
 	}

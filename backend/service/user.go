@@ -1,10 +1,9 @@
 package service
 
 import (
-	"errors"
-
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
 )
@@ -24,9 +23,18 @@ func (s *User) Shutdown() {
 	logger.Trace("User Service shutting down...")
 }
 
-// GetByIDs fetches Users by their IDs
-func (s *User) GetByIDs(ids []uuid.UUID) ([]model.User, error) {
-	return s.Repository.ResolveByIDs(ids)
+// GetByID fetches a User by its ID
+func (s *User) GetByID(id uuid.UUID) (*model.User, error) {
+	users, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) != 1 {
+		return nil, failure.EntityNotFound("User")
+	}
+
+	return &users[0], nil
 }
 
 // Create creates a new User
@@ -44,7 +52,7 @@ func (s *User) Update(input model.UserInput, userID uuid.UUID) (model.User, erro
 	}
 
 	if len(users) != 1 {
-		return model.User{}, errors.New("failed resolving user for update")
+		return model.User{}, failure.EntityNotFound("User")
 	}
 
 	user := users[0]

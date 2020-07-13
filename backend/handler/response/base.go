@@ -3,6 +3,7 @@ package response
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 // BaseResponse is the base object of all responses
@@ -29,6 +30,12 @@ func RespondWithJSON(w http.ResponseWriter, code int, jsonPayload interface{}) {
 
 // RespondWithError sends a response with an error message
 func RespondWithError(w http.ResponseWriter, code int, errorMessage interface{}) {
+	strErrorMessage, ok := errorMessage.(string)
+	if ok {
+		if strings.Contains(strErrorMessage, "not found") {
+			code = http.StatusNotFound
+		}
+	}
 	respond(w, code, BaseResponse{Error: &errorMessage})
 }
 

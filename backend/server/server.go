@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/config"
 	"github.com/kerti/balances/backend/handler"
+	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/ctxprops"
 	"github.com/kerti/balances/backend/util/logger"
@@ -49,8 +50,6 @@ func (s *Server) InitMiddleware() {
 
 // Serve runs the server
 func (s *Server) Serve() {
-	// TODO: setup middlewares
-
 	logger.Info("Server started and is available at the following address(es):")
 	ips, _ := s.getIPs()
 	for _, ip := range ips {
@@ -87,8 +86,7 @@ func (s *Server) jwtMiddleware(next http.Handler) http.Handler {
 		userID, err := s.AuthService.Authorize(r.Header.Get("Authorization"))
 		if err != nil {
 			logger.Trace(fmt.Sprintf("authorization failed: %v", err.Error()))
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("authorization failed"))
+			response.RespondWithError(w, err)
 			return
 		}
 

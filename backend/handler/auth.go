@@ -7,6 +7,7 @@ import (
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/ctxprops"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
 )
@@ -36,7 +37,7 @@ func (h *Auth) HandlePreflight(w http.ResponseWriter, r *http.Request) {
 func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	authInfo, err := h.Service.Authenticate(r.Header.Get("Authorization"))
 	if err != nil {
-		response.RespondWithError(w, http.StatusUnauthorized, err.Error())
+		response.RespondWithError(w, failure.Unauthorized(err.Error()))
 		return
 	}
 
@@ -50,24 +51,17 @@ func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetToken fetches a new token for the currently logged-in user
 func (h *Auth) HandleGetToken(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(ctxprops.PropUserID)
-	if userID == nil {
-		response.RespondWithError(w, http.StatusUnauthorized, "user is not logged in")
-		return
-	}
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
 
-	uuidSlice := []uuid.UUID{
-		*(userID.(*uuid.UUID)),
-	}
-	users, err := h.UserService.GetByIDs(uuidSlice)
-	if err != nil || len(users) != 1 {
-		response.RespondWithError(w, http.StatusUnauthorized, "user not found")
-		return
-	}
-
-	token, expiration, err := h.Service.GetToken(users[0])
+	user, err := h.UserService.GetByID(*userID)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, failure.Unauthorized("user not found"))
+		return
+	}
+
+	token, expiration, err := h.Service.GetToken(*user)
+	if err != nil {
+		response.RespondWithError(w, err)
 		return
 	}
 
