@@ -6,13 +6,12 @@ jobs:
     - language: go
       go: 1.14.x
       before_install:
-        - go get -v ./...
         - go get github.com/mattn/goveralls
         - go get github.com/stretchr/testify/assert
       before_script:
         - cd backend
       script:
-        - go build -ldflags="-s -w"
+        - env GO111MODULE=on go build -ldflags="-s -w"
         - bash coverage.sh
         - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=.cover/cover.out
 
