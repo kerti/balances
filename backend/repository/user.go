@@ -1,17 +1,16 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
 	"github.com/satori/uuid"
 )
 
 const (
-	querySelect = `
+	querySelectUser = `
 		SELECT
 			users.entity_id,
 			users.username,
@@ -25,7 +24,7 @@ const (
 		FROM
 			users `
 
-	queryInsert = `
+	queryInsertUser = `
 		INSERT INTO users (
 			entity_id,
 			username,
@@ -48,7 +47,7 @@ const (
 			:updated_by
 		)`
 
-	queryUpdate = `
+	queryUpdateUser = `
 		UPDATE users
 		SET
 			username = :username,
@@ -62,7 +61,7 @@ const (
 		WHERE entity_id = :entity_id`
 )
 
-// User is the repository for users
+// User is the repository for Users
 type User struct {
 	DB *database.MySQL `inject:"mysql"`
 }
@@ -77,7 +76,7 @@ func (r *User) Shutdown() {
 	logger.Trace("User Repository shutting down...")
 }
 
-// ExistsByID checks the existence of a user by its ID
+// ExistsByID checks the existence of a User by its ID
 func (r *User) ExistsByID(id uuid.UUID) (exists bool, err error) {
 	err = r.DB.Get(
 		&exists,
@@ -89,13 +88,13 @@ func (r *User) ExistsByID(id uuid.UUID) (exists bool, err error) {
 	return
 }
 
-// ResolveByIDs resolves users by their IDs
+// ResolveByIDs resolves Users by their IDs
 func (r *User) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
 	if len(ids) == 0 {
 		return
 	}
 
-	query, args, err := sqlx.In(querySelect+" WHERE users.entity_id IN (?)", ids)
+	query, args, err := sqlx.In(querySelectUser+" WHERE users.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -109,11 +108,11 @@ func (r *User) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
 	return
 }
 
-// ResolveByIdentity resolves a user by its username or email
+// ResolveByIdentity resolves a User by its username or email
 func (r *User) ResolveByIdentity(identity string) (user model.User, err error) {
 	err = r.DB.Get(
 		&user,
-		querySelect+" WHERE users.username = ? OR users.email = ? LIMIT 1",
+		querySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1",
 		identity,
 		identity,
 	)
@@ -123,7 +122,7 @@ func (r *User) ResolveByIdentity(identity string) (user model.User, err error) {
 	return
 }
 
-// Create creates a user
+// Create creates a User
 func (r *User) Create(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
 	if err != nil {
@@ -131,15 +130,13 @@ func (r *User) Create(user model.User) error {
 		return err
 	}
 
-	var stmt *sqlx.NamedStmt
-
 	if exists {
-		err = errors.New("user already exists")
+		err = failure.OperationNotPermitted("create", "User", "already exists")
 		logger.ErrNoStack("%v", err)
 		return err
 	}
 
-	stmt, err = r.DB.Prepare(queryInsert)
+	stmt, err := r.DB.Prepare(queryInsertUser)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err
@@ -154,7 +151,7 @@ func (r *User) Create(user model.User) error {
 	return nil
 }
 
-// Update updates a user
+// Update updates a User
 func (r *User) Update(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
 	if err != nil {
@@ -163,12 +160,12 @@ func (r *User) Update(user model.User) error {
 	}
 
 	if !exists {
-		err = errors.New("user does not exist")
+		err = failure.EntityNotFound("User")
 		logger.ErrNoStack("%v", err)
 		return err
 	}
 
-	stmt, err := r.DB.Prepare(queryUpdate)
+	stmt, err := r.DB.Prepare(queryUpdateUser)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err

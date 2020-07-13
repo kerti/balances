@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User represents a user entity object
+// User represents a User entity object
 type User struct {
 	ID        uuid.UUID   `db:"entity_id" validate:"min=36,max=36"`
 	Username  string      `db:"username"`
@@ -19,12 +19,12 @@ type User struct {
 	Password  string      `db:"password"`
 	Name      string      `db:"name"`
 	Created   time.Time   `db:"created"`
-	CreatedBy uuid.UUID   `db:"created_by"`
+	CreatedBy uuid.UUID   `db:"created_by" validate:"min=36,max=36"`
 	Updated   null.Time   `db:"updated"`
-	UpdatedBy nuuid.NUUID `db:"updated_by"`
+	UpdatedBy nuuid.NUUID `db:"updated_by" validate:"min=36,max=36"`
 }
 
-// NewUserFromInput creates a new user from its input struct
+// NewUserFromInput creates a new User from its input struct
 func NewUserFromInput(input UserInput, userID uuid.UUID) (u User) {
 	now := time.Now()
 
@@ -44,7 +44,7 @@ func NewUserFromInput(input UserInput, userID uuid.UUID) (u User) {
 	return
 }
 
-// Update performs an update on a user
+// Update performs an update on a User
 func (u *User) Update(input UserInput, userID uuid.UUID) error {
 	now := time.Now()
 
@@ -59,7 +59,7 @@ func (u *User) Update(input UserInput, userID uuid.UUID) error {
 	return nil
 }
 
-// SetPassword sets a user's password
+// SetPassword sets a User's password
 func (u *User) SetPassword(password string, userID uuid.UUID) error {
 	now := time.Now()
 
@@ -69,10 +69,12 @@ func (u *User) SetPassword(password string, userID uuid.UUID) error {
 
 	u.hashPassword()
 
+	// TODO: Validate?
+
 	return nil
 }
 
-// ComparePassword compares a user's password in storage against an input
+// ComparePassword compares a User's password in storage against an input
 func (u *User) ComparePassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
@@ -88,7 +90,7 @@ func (u *User) hashPassword() error {
 	return nil
 }
 
-// ToOutput converts a user to its JSON-compatible object representation
+// ToOutput converts a User to its JSON-compatible object representation
 func (u *User) ToOutput() UserOutput {
 	return UserOutput{
 		ID:        u.ID,
@@ -103,7 +105,7 @@ func (u *User) ToOutput() UserOutput {
 	}
 }
 
-// UserInput represents an input struct for user entity
+// UserInput represents an input struct for User entity
 type UserInput struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
@@ -112,7 +114,7 @@ type UserInput struct {
 	Name     string    `json:"name"`
 }
 
-// UserOutput is the JSON-compatible object representation of user
+// UserOutput is the JSON-compatible object representation of User
 type UserOutput struct {
 	ID        uuid.UUID            `json:"id"`
 	Username  string               `json:"username"`
@@ -121,6 +123,6 @@ type UserOutput struct {
 	Name      string               `json:"name"`
 	Created   cachetime.CacheTime  `json:"created"`
 	CreatedBy uuid.UUID            `json:"createdBy"`
-	Updated   cachetime.NCacheTime `json:"updated"`
-	UpdatedBy nuuid.NUUID          `json:"updatedBy"`
+	Updated   cachetime.NCacheTime `json:"updated,omitempty"`
+	UpdatedBy nuuid.NUUID          `json:"updatedBy,omitempty"`
 }

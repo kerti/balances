@@ -10,14 +10,8 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Result represent a query result object
-type Result struct {
-	Data  interface{}
-	Error error
-}
-
 // Block contains a transaction block
-type Block func(db *sqlx.Tx, c chan Result)
+type Block func(db *sqlx.Tx, c chan error)
 
 // MySQL is the MySQL database class
 type MySQL struct {
@@ -52,21 +46,21 @@ func (m *MySQL) Shutdown() {
 }
 
 // WithTransaction performs queries with transaction
-func (m *MySQL) WithTransaction(block Block) (result Result, err error) {
-	c := make(chan Result)
+func (m *MySQL) WithTransaction(db *MySQL, block Block) (err error) {
+	e := make(chan error)
 	tx, err := m.db.Beginx()
-	if err == nil {
-		go block(tx, c)
-	} else {
-		logger.Err(err.Error())
+	if err != nil {
 		return
 	}
-	result = <-c
-	if result.Error != nil {
-		tx.Tx.Rollback()
-	} else {
-		tx.Tx.Commit()
+	go block(tx, e)
+	err = <-e
+	if err != nil {
+		if errTx := tx.Rollback(); errTx != nil {
+			err = fmt.Errorf("Rolling %s FAIL: %v", err.Error(), errTx)
+		}
+		return
 	}
+	err = tx.Commit()
 	return
 }
 
