@@ -3,11 +3,11 @@ package model
 import (
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/nuuid"
-	"github.com/satori/uuid"
 )
 
 // BankAccountStatus indicates the status of a Bank Account
@@ -96,9 +96,10 @@ type BankAccount struct {
 // NewBankAccountFromInput creates a new Bank Account from its input object
 func NewBankAccountFromInput(input BankAccountInput, userID uuid.UUID) (b BankAccount) {
 	now := time.Now()
+	newUUID, _ := uuid.NewV4()
 
 	b = BankAccount{
-		ID:                uuid.NewV4(),
+		ID:                newUUID,
 		AccountName:       input.AccountName,
 		BankName:          input.BankName,
 		AccountHolderName: input.AccountHolderName,
@@ -265,9 +266,10 @@ type BankAccountBalance struct {
 // NewBankAccountBalanceFromInput creates a new Bank Account Balance from its input object
 func NewBankAccountBalanceFromInput(input BankAccountBalanceInput, bankAccountID uuid.UUID, userID uuid.UUID) (bb BankAccountBalance) {
 	now := time.Now()
+	newUUID, _ := uuid.NewV4()
 
 	bb = BankAccountBalance{
-		ID:            uuid.NewV4(),
+		ID:            newUUID,
 		BankAccountID: bankAccountID,
 		Date:          input.Date.Time(),
 		Balance:       input.Balance,

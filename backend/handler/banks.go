@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/model"
@@ -12,7 +13,6 @@ import (
 	"github.com/kerti/balances/backend/util/ctxprops"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
 // BankAccount handles all requests related to Bank Accounts

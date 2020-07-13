@@ -1,11 +1,11 @@
 package service
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
 // User is the service provider

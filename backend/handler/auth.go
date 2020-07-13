@@ -3,13 +3,13 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/ctxprops"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
 // Auth handles all requests related to authentication and authorization

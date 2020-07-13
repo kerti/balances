@@ -7,13 +7,13 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/config"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
 // Auth is the service provider
