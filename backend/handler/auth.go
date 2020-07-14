@@ -12,29 +12,38 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Auth handles all requests related to authentication and authorization
-type Auth struct {
-	Service     *service.Auth `inject:"authService"`
-	UserService *service.User `inject:"userService"`
+// Auth is the authentication handler interface
+type Auth interface {
+	Startup()
+	Shutdown()
+	HandlePreflight(w http.ResponseWriter, r *http.Request)
+	HandleAuthLogin(w http.ResponseWriter, r *http.Request)
+	HandleGetToken(w http.ResponseWriter, r *http.Request)
+}
+
+// AuthImpl handles all requests related to authentication and authorization
+type AuthImpl struct {
+	Service     service.Auth `inject:"authService"`
+	UserService service.User `inject:"userService"`
 }
 
 // Startup perform startup functions
-func (h *Auth) Startup() {
+func (h *AuthImpl) Startup() {
 	logger.Trace("Auth Handler starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (h *Auth) Shutdown() {
+func (h *AuthImpl) Shutdown() {
 	logger.Trace("Auth Handler shutting down...")
 }
 
 // HandlePreflight handles a preflight check for logins
-func (h *Auth) HandlePreflight(w http.ResponseWriter, r *http.Request) {
+func (h *AuthImpl) HandlePreflight(w http.ResponseWriter, r *http.Request) {
 	response.RespondWithMessage(w, http.StatusOK, "OK")
 }
 
 // HandleAuthLogin performs a login action and returns the JWT token
-func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
+func (h *AuthImpl) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	authInfo, err := h.Service.Authenticate(r.Header.Get("Authorization"))
 	if err != nil {
 		response.RespondWithError(w, failure.Unauthorized(err.Error()))
@@ -50,7 +59,7 @@ func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleGetToken fetches a new token for the currently logged-in user
-func (h *Auth) HandleGetToken(w http.ResponseWriter, r *http.Request) {
+func (h *AuthImpl) HandleGetToken(w http.ResponseWriter, r *http.Request) {
 	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
 
 	user, err := h.UserService.GetByID(*userID)

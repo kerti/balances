@@ -16,23 +16,32 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Auth is the service provider
-type Auth struct {
-	UserRepository *repository.User `inject:"userRepository"`
+// Auth is the service provider interface
+type Auth interface {
+	Startup()
+	Shutdown()
+	Authenticate(basic string) (authInfo *model.AuthenticationInfo, err error)
+	Authorize(bearer string) (userID *uuid.UUID, err error)
+	GetToken(user model.User) (token *string, expiration *time.Time, err error)
+}
+
+// AuthImpl is the service provider implementation
+type AuthImpl struct {
+	UserRepository repository.User `inject:"userRepository"`
 }
 
 // Startup performs startup functions
-func (s *Auth) Startup() {
+func (s *AuthImpl) Startup() {
 	logger.Trace("Auth service starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (s *Auth) Shutdown() {
+func (s *AuthImpl) Shutdown() {
 	logger.Trace("Auth service shutting down...")
 }
 
 // Authenticate performs authentication
-func (s *Auth) Authenticate(basic string) (authInfo *model.AuthenticationInfo, err error) {
+func (s *AuthImpl) Authenticate(basic string) (authInfo *model.AuthenticationInfo, err error) {
 	identity, password, err := s.validateBasicAuthHeader(basic)
 	if err != nil {
 		return nil, err
@@ -57,7 +66,7 @@ func (s *Auth) Authenticate(basic string) (authInfo *model.AuthenticationInfo, e
 }
 
 // Authorize authorizes a request based on its Bearer token
-func (s *Auth) Authorize(bearer string) (userID *uuid.UUID, err error) {
+func (s *AuthImpl) Authorize(bearer string) (userID *uuid.UUID, err error) {
 	config := config.Get()
 	jwtToken, err := s.validateBearerAuthHeader(bearer)
 	if err != nil {
@@ -90,12 +99,12 @@ func (s *Auth) Authorize(bearer string) (userID *uuid.UUID, err error) {
 }
 
 // GetToken signs a new token for a specified user
-func (s *Auth) GetToken(user model.User) (token *string, expiration *time.Time, err error) {
+func (s *AuthImpl) GetToken(user model.User) (token *string, expiration *time.Time, err error) {
 	return s.signJWT(&user)
 }
 
 // ValidateBasicAuthHeader validates basic authentication header
-func (s *Auth) validateBasicAuthHeader(basic string) (string, string, error) {
+func (s *AuthImpl) validateBasicAuthHeader(basic string) (string, string, error) {
 	auth := strings.SplitN(basic, " ", 2)
 	if len(auth) != 2 || auth[0] != "Basic" {
 		return "", "", failure.BadRequestFromString("invalid authentication request")
@@ -111,7 +120,7 @@ func (s *Auth) validateBasicAuthHeader(basic string) (string, string, error) {
 	return pair[0], pair[1], nil
 }
 
-func (s *Auth) validateBearerAuthHeader(bearer string) (string, error) {
+func (s *AuthImpl) validateBearerAuthHeader(bearer string) (string, error) {
 	auth := strings.SplitN(bearer, " ", 2)
 	if len(auth) != 2 || auth[0] != "Bearer" {
 		return "", failure.BadRequestFromString("invalid authentication header")
@@ -120,7 +129,7 @@ func (s *Auth) validateBearerAuthHeader(bearer string) (string, error) {
 	return auth[1], nil
 }
 
-func (s *Auth) signJWT(user *model.User) (*string, *time.Time, error) {
+func (s *AuthImpl) signJWT(user *model.User) (*string, *time.Time, error) {
 	config := config.Get()
 	now := time.Now()
 	expTime := now.Add(config.JWT.Expiration)
@@ -135,7 +144,7 @@ func (s *Auth) signJWT(user *model.User) (*string, *time.Time, error) {
 	return &tokenString, &expTime, err
 }
 
-func (s *Auth) getUserID(claims jwt.MapClaims) (*uuid.UUID, error) {
+func (s *AuthImpl) getUserID(claims jwt.MapClaims) (*uuid.UUID, error) {
 	userIDBase64 := claims["id"].(string)
 	userIDBytes, err := base64.StdEncoding.DecodeString(userIDBase64)
 	if err != nil {
@@ -148,7 +157,7 @@ func (s *Auth) getUserID(claims jwt.MapClaims) (*uuid.UUID, error) {
 	return &userID, nil
 }
 
-func (s *Auth) checkExpiration(claims jwt.MapClaims) error {
+func (s *AuthImpl) checkExpiration(claims jwt.MapClaims) error {
 	expiration := int64(claims["expiration"].(float64))
 	expTime := time.Unix(expiration/1000, 0)
 	if expTime.Before(time.Now()) {

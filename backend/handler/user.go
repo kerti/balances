@@ -14,23 +14,32 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// User handles all requests related to Users
-type User struct {
-	Service *service.User `inject:"userService"`
+// User is the handler interface for Users
+type User interface {
+	Startup()
+	Shutdown()
+	HandleGetUserByID(w http.ResponseWriter, r *http.Request)
+	HandleCreateUser(w http.ResponseWriter, r *http.Request)
+	HandleUpdateUser(w http.ResponseWriter, r *http.Request)
+}
+
+// UserImpl is the handler implementation for Users
+type UserImpl struct {
+	Service service.User `inject:"userService"`
 }
 
 // Startup perform startup functions
-func (h *User) Startup() {
+func (h *UserImpl) Startup() {
 	logger.Trace("User Handler starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (h *User) Shutdown() {
+func (h *UserImpl) Shutdown() {
 	logger.Trace("User Handler shutting down...")
 }
 
 // HandleGetUserByID handles the request
-func (h *User) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {
@@ -48,7 +57,7 @@ func (h *User) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleCreateUser handles the request
-func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input model.UserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		response.RespondWithError(w, failure.BadRequest(err))
@@ -66,7 +75,7 @@ func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleUpdateUser handles the request
-func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {

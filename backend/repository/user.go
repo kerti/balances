@@ -60,23 +60,34 @@ const (
 		WHERE entity_id = :entity_id`
 )
 
-// User is the repository for Users
-type User struct {
+// User is the User repository interface
+type User interface {
+	Startup()
+	Shutdown()
+	ExistsByID(id uuid.UUID) (exists bool, err error)
+	ResolveByIDs(ids []uuid.UUID) (users []model.User, err error)
+	ResolveByIdentity(identity string) (user model.User, err error)
+	Create(user model.User) error
+	Update(user model.User) error
+}
+
+// UserMySQLRepo is the repository for Users implemented with MySQL backend
+type UserMySQLRepo struct {
 	DB *database.MySQL `inject:"mysql"`
 }
 
 // Startup perform startup functions
-func (r *User) Startup() {
+func (r *UserMySQLRepo) Startup() {
 	logger.Trace("User Repository starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (r *User) Shutdown() {
+func (r *UserMySQLRepo) Shutdown() {
 	logger.Trace("User Repository shutting down...")
 }
 
 // ExistsByID checks the existence of a User by its ID
-func (r *User) ExistsByID(id uuid.UUID) (exists bool, err error) {
+func (r *UserMySQLRepo) ExistsByID(id uuid.UUID) (exists bool, err error) {
 	err = r.DB.Get(
 		&exists,
 		"SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?",
@@ -88,7 +99,7 @@ func (r *User) ExistsByID(id uuid.UUID) (exists bool, err error) {
 }
 
 // ResolveByIDs resolves Users by their IDs
-func (r *User) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
+func (r *UserMySQLRepo) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
 	if len(ids) == 0 {
 		return
 	}
@@ -108,7 +119,7 @@ func (r *User) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
 }
 
 // ResolveByIdentity resolves a User by its username or email
-func (r *User) ResolveByIdentity(identity string) (user model.User, err error) {
+func (r *UserMySQLRepo) ResolveByIdentity(identity string) (user model.User, err error) {
 	err = r.DB.Get(
 		&user,
 		querySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1",
@@ -122,7 +133,7 @@ func (r *User) ResolveByIdentity(identity string) (user model.User, err error) {
 }
 
 // Create creates a User
-func (r *User) Create(user model.User) error {
+func (r *UserMySQLRepo) Create(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -151,7 +162,7 @@ func (r *User) Create(user model.User) error {
 }
 
 // Update updates a User
-func (r *User) Update(user model.User) error {
+func (r *UserMySQLRepo) Update(user model.User) error {
 	exists, err := r.ExistsByID(user.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)

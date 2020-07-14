@@ -15,7 +15,7 @@ func TestHealthCheckHandler(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		server := new(Health)
+		server := new(HealthImpl)
 		server.Startup()
 		handler := http.HandlerFunc(server.HandleHealthCheck)
 
@@ -38,7 +38,7 @@ func TestHealthCheckHandler(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		server := new(Health)
+		server := new(HealthImpl)
 		server.Startup()
 		server.PrepareShutdown()
 		handler := http.HandlerFunc(server.HandleHealthCheck)
@@ -62,7 +62,7 @@ func TestHealthCheckHandler(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		server := new(Health)
+		server := new(HealthImpl)
 		server.Startup()
 		server.PrepareShutdown()
 		server.Shutdown()
