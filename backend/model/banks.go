@@ -324,7 +324,7 @@ func (bb *BankAccountBalance) ToOutput() BankAccountBalanceOutput {
 	}
 }
 
-// BankAccountBalanceInput representes an input struct for Bank Account Balance entity
+// BankAccountBalanceInput represents an input struct for Bank Account Balance entity
 type BankAccountBalanceInput struct {
 	ID            uuid.UUID           `json:"id"`
 	BankAccountID uuid.UUID           `json:"bankAccountId"`
