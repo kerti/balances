@@ -297,6 +297,7 @@ func TestUserRepository(t *testing.T) {
 
 			assert.NotNil(t, err)
 			assert.IsType(t, &failure.Failure{}, err)
+			assert.Equal(t, failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("not all mock expectations met")
@@ -447,6 +448,7 @@ func TestUserRepository(t *testing.T) {
 
 			assert.NotNil(t, err)
 			assert.IsType(t, &failure.Failure{}, err)
+			assert.Equal(t, failure.CodeEntityNotFound, err.(*failure.Failure).Code)
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("not all mock expectations met")
