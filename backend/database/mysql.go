@@ -75,7 +75,12 @@ func (m *MySQL) Select(dest interface{}, query string, args ...interface{}) (err
 }
 
 // In performs queries with IN clause
-func (m *MySQL) In(query string, params map[string]interface{}) (string, []interface{}, error) {
+func (m *MySQL) In(query string, params ...interface{}) (string, []interface{}, error) {
+	return sqlx.In(query, params...)
+}
+
+// NamedIn performs queries with IN clause using named query
+func (m *MySQL) NamedIn(query string, params map[string]interface{}) (string, []interface{}, error) {
 	query, args, err := sqlx.Named(query, params)
 	if err != nil {
 		return query, args, err

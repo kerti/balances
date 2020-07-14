@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/failure"
@@ -94,7 +93,7 @@ func (r *User) ResolveByIDs(ids []uuid.UUID) (users []model.User, err error) {
 		return
 	}
 
-	query, args, err := sqlx.In(querySelectUser+" WHERE users.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(querySelectUser+" WHERE users.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return

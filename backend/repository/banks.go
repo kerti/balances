@@ -182,7 +182,7 @@ func (r *BankAccount) ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAc
 		return
 	}
 
-	query, args, err := sqlx.In(querySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(querySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -202,7 +202,7 @@ func (r *BankAccount) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances
 		return
 	}
 
-	query, args, err := sqlx.In(querySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(querySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -224,7 +224,7 @@ func (r *BankAccount) ResolveByFilter(filter filter.Filter) (bankAccounts []mode
 	}
 
 	filterArgs := filter.GetArgs(true)
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccount+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
@@ -268,7 +268,7 @@ func (r *BankAccount) ResolveBalancesByFilter(filter filter.Filter) (bankAccount
 	filterArgs := filter.GetArgs(true)
 	logger.Warn(querySelectBankAccountBalance + filterQueryString + filter.Pagination.ToQueryString())
 	logger.Warn("%#v", filterArgs)
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccountBalance+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
@@ -309,7 +309,7 @@ func (r *BankAccount) ResolveLastBalancesByBankAccountID(id uuid.UUID, count int
 	}
 
 	whereClause := " WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?"
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccountBalance+whereClause, id, count)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
