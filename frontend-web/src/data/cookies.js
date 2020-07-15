@@ -1,6 +1,7 @@
 const cookieNames = {
   auth: {
     token: "__b_a_T",
+    tokenExpiration: "__b_a_TE",
     userId: "__b_a_ID",
     username: "__b_a_N",
     userEmail: "__b_a_E",

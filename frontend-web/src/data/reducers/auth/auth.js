@@ -7,6 +7,7 @@ const auth = (state = {}, action) => {
         loading: true,
       };
     case actionTypes.auth.login.SUCCESS:
+    case actionTypes.auth.login.LOADCOOKIES:
       const data = action.payload.data;
       return {
         expiration: data.expiration,

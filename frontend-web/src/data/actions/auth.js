@@ -15,6 +15,14 @@ export function requestLogin(username, password, history) {
           expires: new Date(loginResponse.expiration),
         });
 
+        Cookies.set(
+          cookieNames.auth.tokenExpiration,
+          loginResponse.expiration,
+          {
+            expires: new Date(loginResponse.expiration),
+          }
+        );
+
         Cookies.set(cookieNames.auth.userId, loginResponse.user.id, {
           expires: new Date(payload.data.data.expiration),
         });
@@ -36,6 +44,25 @@ export function requestLogin(username, password, history) {
       .catch((error) => {
         dispatch(loginFailure(error.response.data));
       });
+  };
+}
+
+export function loadAuthCookies() {
+  const payload = {
+    data: {
+      expiration: Cookies.get(cookieNames.auth.tokenExpiration),
+      token: Cookies.get(cookieNames.auth.token),
+      user: {
+        id: Cookies.get(cookieNames.auth.userId),
+        email: Cookies.get(cookieNames.auth.userEmail),
+        name: Cookies.get(cookieNames.auth.userProfileName),
+        username: Cookies.get(cookieNames.auth.username),
+      },
+    },
+  };
+  return {
+    type: actionTypes.auth.login.LOADCOOKIES,
+    payload: payload,
   };
 }
 
@@ -61,9 +88,10 @@ export function loginFailure(error) {
 }
 
 export function requestLogout(history) {
-  history.push("/logout");
+  history.push("/login");
 
   Cookies.expire(cookieNames.auth.token);
+  Cookies.expire(cookieNames.auth.tokenExpiration);
   Cookies.expire(cookieNames.auth.userId);
   Cookies.expire(cookieNames.auth.userEmail);
   Cookies.expire(cookieNames.auth.userProfileName);

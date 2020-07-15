@@ -16,6 +16,7 @@ import i18next from "i18next";
 
 import { initTranslations } from "./translations/translations";
 import { setLangFromCookie } from "./data/actions/ui";
+import { loadAuthCookies } from "./data/actions/auth";
 
 initTranslations();
 
@@ -24,6 +25,7 @@ React.icons = icons;
 const store = initStore();
 
 store.dispatch(setLangFromCookie());
+store.dispatch(loadAuthCookies());
 
 ReactDOM.render(
   <Provider store={store}>

@@ -19,7 +19,6 @@ import {
   CRow,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import flagIconMap from "../../../translations/flags.json";
@@ -43,7 +42,6 @@ const Login = () => {
   };
 
   const selectLang = (lang) => {
-    i18n.changeLanguage(lang);
     dispatch(setLang(lang));
   };
 
