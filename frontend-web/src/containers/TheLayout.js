@@ -1,12 +1,14 @@
 import React from "react";
 import { TheContent, TheSidebar, TheFooter, TheHeader } from "./index";
+import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
-import Cookies from "cookies-js";
-import cookieNames from "../data/cookies";
 
 const TheLayout = () => {
-  const token = Cookies.get(cookieNames.auth.token);
-  return token ? (
+  const token = useSelector((state) => state.auth.token);
+  const tokenExpiration = useSelector((state) => state.auth.expiration);
+  const expirationDate = new Date(tokenExpiration);
+  const expired = new Date() > expirationDate;
+  return token && !expired ? (
     <div className="c-app c-default-layout">
       <TheSidebar />
       <div className="c-wrapper">

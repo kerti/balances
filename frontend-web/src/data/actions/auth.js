@@ -40,6 +40,7 @@ export function requestLogin(username, password, history) {
         });
 
         dispatch(loginSuccess(history, payload.data));
+        history.push("/");
       })
       .catch((error) => {
         dispatch(loginFailure(error.response.data));
@@ -50,7 +51,7 @@ export function requestLogin(username, password, history) {
 export function loadAuthCookies() {
   const payload = {
     data: {
-      expiration: Cookies.get(cookieNames.auth.tokenExpiration),
+      expiration: parseInt(Cookies.get(cookieNames.auth.tokenExpiration)),
       token: Cookies.get(cookieNames.auth.token),
       user: {
         id: Cookies.get(cookieNames.auth.userId),
@@ -73,7 +74,6 @@ export function loginLoading() {
 }
 
 export function loginSuccess(history, payload) {
-  history.push("/");
   return {
     type: actionTypes.auth.login.SUCCESS,
     payload: payload,
