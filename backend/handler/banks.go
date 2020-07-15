@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gofrs/uuid"
-	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
@@ -15,7 +14,7 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Bank Account is the handler interface for Bank Accounts
+// BankAccount is the handler interface for Bank Accounts
 type BankAccount interface {
 	Startup()
 	Shutdown()
@@ -48,10 +47,8 @@ func (h *BankAccountImpl) Shutdown() {
 
 // HandleCreateBankAccount handles the request
 func (h *BankAccountImpl) HandleCreateBankAccount(w http.ResponseWriter, r *http.Request) {
-	var input model.BankAccountInput
-	err := json.NewDecoder(r.Body).Decode(&input)
+	input, err := h.getInputFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -67,11 +64,8 @@ func (h *BankAccountImpl) HandleCreateBankAccount(w http.ResponseWriter, r *http
 
 // HandleGetBankAccountByID handles the request
 func (h *BankAccountImpl) HandleGetBankAccountByID(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -127,18 +121,13 @@ func (h *BankAccountImpl) HandleGetBankAccountByFilter(w http.ResponseWriter, r 
 
 // HandleUpdateBankAccount handles the request
 func (h *BankAccountImpl) HandleUpdateBankAccount(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
-	var input model.BankAccountInput
-	err = json.NewDecoder(r.Body).Decode(&input)
+	input, err := h.getInputFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -159,11 +148,8 @@ func (h *BankAccountImpl) HandleUpdateBankAccount(w http.ResponseWriter, r *http
 
 // HandleDeleteBankAccount handles the request
 func (h *BankAccountImpl) HandleDeleteBankAccount(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -179,10 +165,8 @@ func (h *BankAccountImpl) HandleDeleteBankAccount(w http.ResponseWriter, r *http
 
 // HandleCreateBankAccountBalance handles the request
 func (h *BankAccountImpl) HandleCreateBankAccountBalance(w http.ResponseWriter, r *http.Request) {
-	var input model.BankAccountBalanceInput
-	err := json.NewDecoder(r.Body).Decode(&input)
+	input, err := h.getBalanceInputFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -198,11 +182,8 @@ func (h *BankAccountImpl) HandleCreateBankAccountBalance(w http.ResponseWriter, 
 
 // HandleGetBankAccountBalanceByID handles the request
 func (h *BankAccountImpl) HandleGetBankAccountBalanceByID(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -246,18 +227,13 @@ func (h *BankAccountImpl) HandleGetBankAccountBalanceByFilter(w http.ResponseWri
 
 // HandleUpdateBankAccountBalance handles the request
 func (h *BankAccountImpl) HandleUpdateBankAccountBalance(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
-	var input model.BankAccountBalanceInput
-	err = json.NewDecoder(r.Body).Decode(&input)
+	input, err := h.getBalanceInputFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -278,11 +254,8 @@ func (h *BankAccountImpl) HandleUpdateBankAccountBalance(w http.ResponseWriter, 
 
 // HandleDeleteBankAccountBalance handles the request
 func (h *BankAccountImpl) HandleDeleteBankAccountBalance(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	id, err := uuid.FromString(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
@@ -294,4 +267,22 @@ func (h *BankAccountImpl) HandleDeleteBankAccountBalance(w http.ResponseWriter, 
 	}
 
 	response.RespondWithJSON(w, http.StatusCreated, bankAccountBalance.ToOutput())
+}
+
+func (h *BankAccountImpl) getInputFromRequest(w http.ResponseWriter, r *http.Request) (input model.BankAccountInput, err error) {
+	err = json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.RespondWithError(w, failure.BadRequest(err))
+	}
+
+	return
+}
+
+func (h *BankAccountImpl) getBalanceInputFromRequest(w http.ResponseWriter, r *http.Request) (input model.BankAccountBalanceInput, err error) {
+	err = json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.RespondWithError(w, failure.BadRequest(err))
+	}
+
+	return
 }
