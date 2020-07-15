@@ -12,16 +12,14 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { requestLogout } from "../data/actions/auth";
-import { useCookies } from "react-cookie";
 
 const TheHeaderDropdown = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const [, , removeCookie] = useCookies();
   const { t } = useTranslation("app");
 
   const handleLogout = () => {
-    dispatch(requestLogout(removeCookie, history));
+    dispatch(requestLogout(history));
   };
 
   return (

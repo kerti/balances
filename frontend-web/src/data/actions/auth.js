@@ -1,8 +1,9 @@
 import actionTypes from "./actionTypes";
 import auth from "../sources/auth/auth";
+import Cookies from "cookies-js";
 import cookieNames from "../cookies";
 
-export function requestLogin(setCookie, username, password, history) {
+export function requestLogin(username, password, history) {
   return (dispatch) => {
     dispatch(loginLoading());
     auth
@@ -10,23 +11,23 @@ export function requestLogin(setCookie, username, password, history) {
       .then((payload) => {
         const loginResponse = payload.data.data;
 
-        setCookie(cookieNames.auth.token, loginResponse.token, {
+        Cookies.set(cookieNames.auth.token, loginResponse.token, {
           expires: new Date(loginResponse.expiration),
         });
 
-        setCookie(cookieNames.auth.userId, loginResponse.user.id, {
+        Cookies.set(cookieNames.auth.userId, loginResponse.user.id, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookie(cookieNames.auth.userEmail, loginResponse.user.email, {
+        Cookies.set(cookieNames.auth.userEmail, loginResponse.user.email, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookie(cookieNames.auth.userProfileName, loginResponse.user.name, {
+        Cookies.set(cookieNames.auth.userProfileName, loginResponse.user.name, {
           expires: new Date(payload.data.data.expiration),
         });
 
-        setCookie(cookieNames.auth.username, loginResponse.user.username, {
+        Cookies.set(cookieNames.auth.username, loginResponse.user.username, {
           expires: new Date(payload.data.data.expiration),
         });
 
@@ -59,14 +60,14 @@ export function loginFailure(error) {
   };
 }
 
-export function requestLogout(removeCookie, history) {
+export function requestLogout(history) {
   history.push("/logout");
 
-  removeCookie(cookieNames.auth.token);
-  removeCookie(cookieNames.auth.userId);
-  removeCookie(cookieNames.auth.userEmail);
-  removeCookie(cookieNames.auth.userProfileName);
-  removeCookie(cookieNames.auth.username);
+  Cookies.expire(cookieNames.auth.token);
+  Cookies.expire(cookieNames.auth.userId);
+  Cookies.expire(cookieNames.auth.userEmail);
+  Cookies.expire(cookieNames.auth.userProfileName);
+  Cookies.expire(cookieNames.auth.username);
 
   return {
     type: actionTypes.auth.logout.REQUEST,

@@ -11,12 +11,11 @@ import { icons } from "./assets/icons";
 import { Provider } from "react-redux";
 import initStore from "./data/store";
 
-import { CookiesProvider } from "react-cookie";
-
 import { I18nextProvider } from "react-i18next";
 import i18next from "i18next";
 
 import { initTranslations } from "./translations/translations";
+import { setLangFromCookie } from "./data/actions/ui";
 
 initTranslations();
 
@@ -24,14 +23,14 @@ React.icons = icons;
 
 const store = initStore();
 
+store.dispatch(setLangFromCookie());
+
 ReactDOM.render(
-  <CookiesProvider>
-    <Provider store={store}>
-      <I18nextProvider i18n={i18next}>
-        <App />
-      </I18nextProvider>
-    </Provider>
-  </CookiesProvider>,
+  <Provider store={store}>
+    <I18nextProvider i18n={i18next}>
+      <App />
+    </I18nextProvider>
+  </Provider>,
   document.getElementById("root")
 );
 
