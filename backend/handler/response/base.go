@@ -3,12 +3,23 @@ package response
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/kerti/balances/backend/util/failure"
 )
+
+var failureStatusMap = map[failure.Code]int{
+	failure.CodeBadRequest:            http.StatusBadRequest,
+	failure.CodeUnauthorized:          http.StatusUnauthorized,
+	failure.CodeInternalError:         http.StatusInternalServerError,
+	failure.CodeUnimplemented:         http.StatusNotImplemented,
+	failure.CodeEntityNotFound:        http.StatusNotFound,
+	failure.CodeOperationNotPermitted: http.StatusConflict,
+}
 
 // BaseResponse is the base object of all responses
 type BaseResponse struct {
 	Data    *interface{} `json:"data,omitempty"`
-	Error   *interface{} `json:"error,omitempty"`
+	Error   *string      `json:"error,omitempty"`
 	Message *string      `json:"message,omitempty"`
 }
 
@@ -28,8 +39,24 @@ func RespondWithJSON(w http.ResponseWriter, code int, jsonPayload interface{}) {
 }
 
 // RespondWithError sends a response with an error message
-func RespondWithError(w http.ResponseWriter, code int, errorMessage interface{}) {
-	respond(w, code, BaseResponse{Error: &errorMessage})
+func RespondWithError(w http.ResponseWriter, err error) {
+	code := failure.GetCode(err)
+	status, ok := failureStatusMap[code]
+	if !ok {
+		status = http.StatusInternalServerError
+	}
+	errMsg := err.Error()
+	respond(w, status, BaseResponse{Error: &errMsg})
+}
+
+// RespondWithPreparingShutdown sends a default response for when the server is preparing to shut down
+func RespondWithPreparingShutdown(w http.ResponseWriter) {
+	RespondWithMessage(w, http.StatusServiceUnavailable, "SERVER PREPARING TO SHUT DOWN")
+}
+
+// RespondWithUnhealthy sends a default response for when the server is unhealthy
+func RespondWithUnhealthy(w http.ResponseWriter) {
+	RespondWithMessage(w, http.StatusServiceUnavailable, "SERVER UNHEALTHY")
 }
 
 func respond(w http.ResponseWriter, code int, payload interface{}) {

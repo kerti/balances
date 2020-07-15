@@ -4,65 +4,69 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kerti/balances/backend/model"
-
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler/response"
+	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
+	"github.com/kerti/balances/backend/util/ctxprops"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
-// User handles all requests related to users
-type User struct {
-	Service *service.User `inject:""`
+// User is the handler interface for Users
+type User interface {
+	Startup()
+	Shutdown()
+	HandleGetUserByID(w http.ResponseWriter, r *http.Request)
+	HandleCreateUser(w http.ResponseWriter, r *http.Request)
+	HandleUpdateUser(w http.ResponseWriter, r *http.Request)
+}
+
+// UserImpl is the handler implementation for Users
+type UserImpl struct {
+	Service service.User `inject:"userService"`
 }
 
 // Startup perform startup functions
-func (h *User) Startup() {
+func (h *UserImpl) Startup() {
 	logger.Trace("User Handler starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (h *User) Shutdown() {
+func (h *UserImpl) Shutdown() {
 	logger.Trace("User Handler shutting down...")
 }
 
 // HandleGetUserByID handles the request
-func (h *User) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
-	users, err := h.Service.GetByIDs([]uuid.UUID{id})
+	user, err := h.Service.GetByID(id)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
-	if len(users) != 1 {
-		response.RespondWithError(w, http.StatusInternalServerError, "user not found")
-		return
-	}
-
-	response.RespondWithJSON(w, http.StatusOK, users[0].ToOutput())
+	response.RespondWithJSON(w, http.StatusOK, user.ToOutput())
 }
 
 // HandleCreateUser handles the request
-func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var input model.UserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, err.Error())
+		response.RespondWithError(w, failure.BadRequest(err))
 	}
 
-	// TODO: FIX THIS!
-	userID := uuid.NewV4()
-	user, err := h.Service.Create(input, userID)
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
+	user, err := h.Service.Create(input, *userID)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -71,25 +75,24 @@ func (h *User) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleUpdateUser handles the request
-func (h *User) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.FromString(vars["id"])
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
 	var input model.UserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		response.RespondWithError(w, http.StatusBadRequest, err.Error())
+		response.RespondWithError(w, failure.BadRequest(err))
 	}
 	input.ID = id
 
-	// TODO: FIX THIS!
-	userID := uuid.NewV4()
-	user, err := h.Service.Update(input, userID)
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
+	user, err := h.Service.Update(input, *userID)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, err)
 		return
 	}
 

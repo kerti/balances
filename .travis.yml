@@ -1,0 +1,19 @@
+os: linux
+dist: xenial
+language: ruby
+jobs:
+  include:
+    - language: go
+      go: 1.14.x
+      before_install:
+        - go get github.com/mattn/goveralls
+        - go get github.com/stretchr/testify/assert
+      before_script:
+        - cd backend
+      script:
+        - env GO111MODULE=on go build -ldflags="-s -w"
+        - bash coverage.sh
+        - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=.cover/cover.out
+
+notifications:
+  email: false

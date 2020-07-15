@@ -3,40 +3,50 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/ctxprops"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
-// Auth handles all requests related to authentication and authorization
-type Auth struct {
-	Service     *service.Auth `inject:""`
-	UserService *service.User `inject:""`
+// Auth is the authentication handler interface
+type Auth interface {
+	Startup()
+	Shutdown()
+	HandlePreflight(w http.ResponseWriter, r *http.Request)
+	HandleAuthLogin(w http.ResponseWriter, r *http.Request)
+	HandleGetToken(w http.ResponseWriter, r *http.Request)
+}
+
+// AuthImpl handles all requests related to authentication and authorization
+type AuthImpl struct {
+	Service     service.Auth `inject:"authService"`
+	UserService service.User `inject:"userService"`
 }
 
 // Startup perform startup functions
-func (h *Auth) Startup() {
+func (h *AuthImpl) Startup() {
 	logger.Trace("Auth Handler starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (h *Auth) Shutdown() {
+func (h *AuthImpl) Shutdown() {
 	logger.Trace("Auth Handler shutting down...")
 }
 
 // HandlePreflight handles a preflight check for logins
-func (h *Auth) HandlePreflight(w http.ResponseWriter, r *http.Request) {
+func (h *AuthImpl) HandlePreflight(w http.ResponseWriter, r *http.Request) {
 	response.RespondWithMessage(w, http.StatusOK, "OK")
 }
 
 // HandleAuthLogin performs a login action and returns the JWT token
-func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
+func (h *AuthImpl) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	authInfo, err := h.Service.Authenticate(r.Header.Get("Authorization"))
 	if err != nil {
-		response.RespondWithError(w, http.StatusUnauthorized, err.Error())
+		response.RespondWithError(w, failure.Unauthorized(err.Error()))
 		return
 	}
 
@@ -49,25 +59,18 @@ func (h *Auth) HandleAuthLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleGetToken fetches a new token for the currently logged-in user
-func (h *Auth) HandleGetToken(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(ctxprops.PropUserID)
-	if userID == nil {
-		response.RespondWithError(w, http.StatusUnauthorized, "user is not logged in")
-		return
-	}
+func (h *AuthImpl) HandleGetToken(w http.ResponseWriter, r *http.Request) {
+	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
 
-	uuidSlice := []uuid.UUID{
-		*(userID.(*uuid.UUID)),
-	}
-	users, err := h.UserService.GetByIDs(uuidSlice)
-	if err != nil || len(users) != 1 {
-		response.RespondWithError(w, http.StatusUnauthorized, "user not found")
-		return
-	}
-
-	token, expiration, err := h.Service.GetToken(users[0])
+	user, err := h.UserService.GetByID(*userID)
 	if err != nil {
-		response.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		response.RespondWithError(w, failure.Unauthorized("user not found"))
+		return
+	}
+
+	token, expiration, err := h.Service.GetToken(*user)
+	if err != nil {
+		response.RespondWithError(w, err)
 		return
 	}
 

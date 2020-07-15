@@ -6,12 +6,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kerti/balances/backend/repository"
-
 	"github.com/kerti/balances/backend/config"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/handler"
 	"github.com/kerti/balances/backend/inject"
+	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/server"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/logger"
@@ -32,16 +31,19 @@ func main() {
 	container.RegisterService("mysql", &db)
 
 	// Prepare containers - repositories
-	container.RegisterService("userRepository", new(repository.User))
+	container.RegisterService("bankAccountRepository", new(repository.BankAccountMySQLRepo))
+	container.RegisterService("userRepository", new(repository.UserMySQLRepo))
 
 	// Prepare containers - services
-	container.RegisterService("authService", new(service.Auth))
-	container.RegisterService("userService", new(service.User))
+	container.RegisterService("authService", new(service.AuthImpl))
+	container.RegisterService("bankAccountService", new(service.BankAccountImpl))
+	container.RegisterService("userService", new(service.UserImpl))
 
 	// Prepare containers - handlers
-	container.RegisterService("authHandler", new(handler.Auth))
-	container.RegisterService("healthHandler", new(handler.Health))
-	container.RegisterService("userHandler", new(handler.User))
+	container.RegisterService("authHandler", new(handler.AuthImpl))
+	container.RegisterService("bankAccountHandler", new(handler.BankAccountImpl))
+	container.RegisterService("healthHandler", new(handler.HealthImpl))
+	container.RegisterService("userHandler", new(handler.UserImpl))
 
 	// Prepare containers - HTTP server
 	var s server.Server
@@ -49,7 +51,7 @@ func main() {
 
 	// call this after all dependencies are registered
 	if err := container.Ready(); err != nil {
-		logger.Fatal("Failed to populate services %v", err)
+		logger.Fatal("Failed to populate services -- %v", err)
 	} else {
 		logger.Info("Service registry started successfully.")
 	}
