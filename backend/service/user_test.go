@@ -66,10 +66,12 @@ func TestUserService(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{testUserModel}, nil)
 
 			result, err := svc.GetByID(testID1)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.Nil(t, err)
@@ -81,10 +83,12 @@ func TestUserService(t *testing.T) {
 		t.Run("errorOnRepo", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{}, errors.New("error"))
 
 			result, err := svc.GetByID(testID1)
+			svc.Shutdown()
 
 			assert.Nil(t, result)
 			assert.NotNil(t, err)
@@ -97,10 +101,12 @@ func TestUserService(t *testing.T) {
 		t.Run("notFound", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{}, nil)
 
 			result, err := svc.GetByID(testID1)
+			svc.Shutdown()
 
 			assert.Nil(t, result)
 			assert.NotNil(t, err)
@@ -118,10 +124,12 @@ func TestUserService(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("Create", mock.AnythingOfType("model.User")).Return(nil)
 
 			result, err := svc.Create(testUserInput, testUserID)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.Nil(t, err)
@@ -133,10 +141,12 @@ func TestUserService(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("Create", mock.AnythingOfType("model.User")).Return(errors.New(""))
 
 			result, err := svc.Create(testUserInput, testUserID)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.NotNil(t, err)
@@ -152,11 +162,13 @@ func TestUserService(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{testUserModel}, nil)
 			mockRepo.On("Update", mock.AnythingOfType("model.User")).Return(nil)
 
 			result, err := svc.Update(testUserInput, testUserID)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.Nil(t, err)
@@ -170,10 +182,12 @@ func TestUserService(t *testing.T) {
 		t.Run("errorOnResolve", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{testUserModel}, errors.New(""))
 
 			result, err := svc.Update(testUserInput, testUserID)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.NotNil(t, err)
@@ -186,10 +200,12 @@ func TestUserService(t *testing.T) {
 		t.Run("notFound", func(t *testing.T) {
 			mockRepo := mockUserRepository{}
 			svc := UserImpl{Repository: &mockRepo}
+			svc.Startup()
 
 			mockRepo.On("ResolveByIDs", []uuid.UUID{testID1}).Return([]model.User{}, nil)
 
 			result, err := svc.Update(testUserInput, testUserID)
+			svc.Shutdown()
 
 			assert.NotNil(t, result)
 			assert.NotNil(t, err)

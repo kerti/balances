@@ -58,6 +58,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ExistsByID(testID1)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -77,6 +78,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ExistsByID(testID1)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -95,6 +97,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs([]uuid.UUID{})
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -120,6 +123,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -146,6 +150,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -167,6 +172,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -191,6 +197,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIdentity(testUserModel.Email)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -210,6 +217,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIdentity(testUserModel.Email)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -252,6 +260,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -271,6 +280,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -294,6 +304,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 			assert.IsType(t, &failure.Failure{}, err)
@@ -323,6 +334,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -361,6 +373,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -403,6 +416,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
+			repo.Shutdown()
 
 			assert.Nil(t, err)
 
@@ -422,6 +436,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -445,6 +460,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 			assert.IsType(t, &failure.Failure{}, err)
@@ -474,6 +490,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
@@ -512,6 +529,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
+			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
