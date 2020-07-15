@@ -1,38 +1,54 @@
 package service
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
-// BankAccount is the service provider
-type BankAccount struct {
-	Repository *repository.BankAccount `inject:"bankAccountRepository"`
+// BankAccount is the service provider interface
+type BankAccount interface {
+	Startup()
+	Shutdown()
+	Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error)
+	GetByID(id uuid.UUID, withBalances bool, balanceCount int) (*model.BankAccount, error)
+	GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error)
+	Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
+	Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error)
+	CreateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error)
+	GetBalanceByID(id uuid.UUID) (*model.BankAccountBalance, error)
+	GetBalancesByFilter(input model.BankAccountBalanceFilterInput) ([]model.BankAccountBalance, model.PageInfoOutput, error)
+	UpdateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error)
+	DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.BankAccountBalance, error)
+}
+
+// BankAccountImpl is the service provider implementation
+type BankAccountImpl struct {
+	Repository repository.BankAccount `inject:"bankAccountRepository"`
 }
 
 // Startup perform startup functions
-func (s *BankAccount) Startup() {
+func (s *BankAccountImpl) Startup() {
 	logger.Trace("Bank Account Service starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (s *BankAccount) Shutdown() {
+func (s *BankAccountImpl) Shutdown() {
 	logger.Trace("Bank Account Service shutting down...")
 }
 
 // Create creates a new Bank Account
-func (s *BankAccount) Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error) {
+func (s *BankAccountImpl) Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error) {
 	bankAccount := model.NewBankAccountFromInput(input, userID)
 	err := s.Repository.Create(bankAccount)
 	return bankAccount, err
 }
 
 // GetByID fetches a Bank Account by its ID
-func (s *BankAccount) GetByID(id uuid.UUID, withBalances bool, balanceCount int) (*model.BankAccount, error) {
+func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceCount int) (*model.BankAccount, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err
@@ -56,12 +72,12 @@ func (s *BankAccount) GetByID(id uuid.UUID, withBalances bool, balanceCount int)
 }
 
 // GetByFilter fetches a set of Bank Accounts by its filter
-func (s *BankAccount) GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error) {
+func (s *BankAccountImpl) GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error) {
 	return s.Repository.ResolveByFilter(input.ToFilter())
 }
 
 // Update updates an existing Bank Account
-func (s *BankAccount) Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error) {
+func (s *BankAccountImpl) Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{input.ID})
 	if err != nil {
 		return nil, err
@@ -91,7 +107,7 @@ func (s *BankAccount) Update(input model.BankAccountInput, userID uuid.UUID) (*m
 }
 
 // Delete deletes an existing Bank Account
-func (s *BankAccount) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error) {
+func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err
@@ -121,7 +137,7 @@ func (s *BankAccount) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount
 }
 
 // CreateBalance creates a new Bank Account Balance
-func (s *BankAccount) CreateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error) {
+func (s *BankAccountImpl) CreateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{input.BankAccountID})
 	if err != nil {
 		return nil, err
@@ -169,7 +185,7 @@ func (s *BankAccount) CreateBalance(input model.BankAccountBalanceInput, userID 
 }
 
 // GetBalanceByID fetches a Bank Account Balance by its ID
-func (s *BankAccount) GetBalanceByID(id uuid.UUID) (*model.BankAccountBalance, error) {
+func (s *BankAccountImpl) GetBalanceByID(id uuid.UUID) (*model.BankAccountBalance, error) {
 	bankAccountBalances, err := s.Repository.ResolveBalancesByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err
@@ -183,12 +199,12 @@ func (s *BankAccount) GetBalanceByID(id uuid.UUID) (*model.BankAccountBalance, e
 }
 
 // GetBalancesByFilter fetches a set of Bank Account Balances by its filter
-func (s *BankAccount) GetBalancesByFilter(input model.BankAccountBalanceFilterInput) ([]model.BankAccountBalance, model.PageInfoOutput, error) {
+func (s *BankAccountImpl) GetBalancesByFilter(input model.BankAccountBalanceFilterInput) ([]model.BankAccountBalance, model.PageInfoOutput, error) {
 	return s.Repository.ResolveBalancesByFilter(input.ToFilter())
 }
 
 // UpdateBalance updates an existing Bank Account Balance
-func (s *BankAccount) UpdateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error) {
+func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{input.BankAccountID})
 	if err != nil {
 		return nil, err
@@ -255,7 +271,7 @@ func (s *BankAccount) UpdateBalance(input model.BankAccountBalanceInput, userID 
 }
 
 // DeleteBalance deletes an existing Bank Account Balance
-func (s *BankAccount) DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.BankAccountBalance, error) {
+func (s *BankAccountImpl) DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.BankAccountBalance, error) {
 	bankAccountBalances, err := s.Repository.ResolveBalancesByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err

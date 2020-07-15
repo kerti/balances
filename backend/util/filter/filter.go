@@ -88,18 +88,17 @@ func (c *Clause) GetArgs(args []interface{}) []interface{} {
 	return args
 }
 
-// ToQueryString returns the string representation of the clause
-func (c *Clause) ToQueryString() (string, error) {
+func (c *Clause) handlePointers() error {
 	switch c.Operand1.(type) {
 	case *Field:
 		if c.Operand1 == nil {
-			return "", fmt.Errorf("operand1 is nil, expected non-nil *Field")
+			return fmt.Errorf("operand1 is nil, expected non-nil *Field")
 		}
 		operand1 := c.Operand1.(*Field)
 		c.Operand1 = *operand1
 	case *Clause:
 		if c.Operand1 == nil {
-			return "", fmt.Errorf("operand1 is nil, expected non-nil *Clause")
+			return fmt.Errorf("operand1 is nil, expected non-nil *Clause")
 		}
 		operand1 := c.Operand1.(*Clause)
 		c.Operand1 = *operand1
@@ -109,17 +108,27 @@ func (c *Clause) ToQueryString() (string, error) {
 	switch c.Operand2.(type) {
 	case *Field:
 		if c.Operand2 == nil {
-			return "", fmt.Errorf("operand2 is nil, expected non-nil *Field")
+			return fmt.Errorf("operand2 is nil, expected non-nil *Field")
 		}
 		operand2 := c.Operand2.(*Field)
 		c.Operand2 = *operand2
 	case *Clause:
 		if c.Operand2 == nil {
-			return "", fmt.Errorf("operand2 is nil, expected non-nil *Clause")
+			return fmt.Errorf("operand2 is nil, expected non-nil *Clause")
 		}
 		operand2 := c.Operand2.(*Clause)
 		c.Operand2 = *operand2
 	default:
+	}
+
+	return nil
+}
+
+// ToQueryString returns the string representation of the clause
+func (c *Clause) ToQueryString() (string, error) {
+	err := c.handlePointers()
+	if err != nil {
+		return "", err
 	}
 
 	switch c.Operand1.(type) {

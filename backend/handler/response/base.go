@@ -49,6 +49,16 @@ func RespondWithError(w http.ResponseWriter, err error) {
 	respond(w, status, BaseResponse{Error: &errMsg})
 }
 
+// RespondWithPreparingShutdown sends a default response for when the server is preparing to shut down
+func RespondWithPreparingShutdown(w http.ResponseWriter) {
+	RespondWithMessage(w, http.StatusServiceUnavailable, "SERVER PREPARING TO SHUT DOWN")
+}
+
+// RespondWithUnhealthy sends a default response for when the server is unhealthy
+func RespondWithUnhealthy(w http.ResponseWriter) {
+	RespondWithMessage(w, http.StatusServiceUnavailable, "SERVER UNHEALTHY")
+}
+
 func respond(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")

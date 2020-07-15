@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	uuid "github.com/satori/uuid"
+	"github.com/gofrs/uuid"
 )
 
 // NUUID is a nullable UUID, Use it if you want to make UUID nullable in DB/Json model/etc

@@ -4,10 +4,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/nuuid"
-	"github.com/satori/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,9 +27,10 @@ type User struct {
 // NewUserFromInput creates a new User from its input struct
 func NewUserFromInput(input UserInput, userID uuid.UUID) (u User) {
 	now := time.Now()
+	newUUID, _ := uuid.NewV4()
 
 	u = User{
-		ID:        uuid.NewV4(),
+		ID:        newUUID,
 		Username:  input.Username,
 		Email:     input.Email,
 		Password:  input.Password,

@@ -1,13 +1,13 @@
 package repository
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
 const (
@@ -137,23 +137,40 @@ const (
 		WHERE entity_id = :entity_id`
 )
 
-// BankAccount is the repository for Bank Accounts
-type BankAccount struct {
+// BankAccount is the Bank Account repository interface
+type BankAccount interface {
+	Startup()
+	Shutdown()
+	ExistsByID(id uuid.UUID) (exists bool, err error)
+	ExistsBalanceByID(id uuid.UUID) (exists bool, err error)
+	ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAccount, err error)
+	ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error)
+	ResolveByFilter(filter filter.Filter) (bankAccounts []model.BankAccount, pageInfo model.PageInfoOutput, err error)
+	ResolveBalancesByFilter(filter filter.Filter) (bankAccountBalances []model.BankAccountBalance, pageInfo model.PageInfoOutput, err error)
+	ResolveLastBalancesByBankAccountID(id uuid.UUID, count int) (bankAccountBalances []model.BankAccountBalance, err error)
+	Create(bankAccount model.BankAccount) error
+	Update(bankAccount model.BankAccount) error
+	CreateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error
+	UpdateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error
+}
+
+// BankAccountMySQLRepo is the repository for Bank Accounts implemented with MySQL backend
+type BankAccountMySQLRepo struct {
 	DB *database.MySQL `inject:"mysql"`
 }
 
 // Startup perform startup functions
-func (r *BankAccount) Startup() {
+func (r *BankAccountMySQLRepo) Startup() {
 	logger.Trace("BankAccount repository starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (r *BankAccount) Shutdown() {
+func (r *BankAccountMySQLRepo) Shutdown() {
 	logger.Trace("BankAccount repository shutting down...")
 }
 
 // ExistsByID checks the existence of a Bank Account by its ID
-func (r *BankAccount) ExistsByID(id uuid.UUID) (exists bool, err error) {
+func (r *BankAccountMySQLRepo) ExistsByID(id uuid.UUID) (exists bool, err error) {
 	err = r.DB.Get(
 		&exists,
 		"SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?",
@@ -165,7 +182,7 @@ func (r *BankAccount) ExistsByID(id uuid.UUID) (exists bool, err error) {
 }
 
 // ExistsBalanceByID checks the existence of a Bank Account Balance by its ID
-func (r *BankAccount) ExistsBalanceByID(id uuid.UUID) (exists bool, err error) {
+func (r *BankAccountMySQLRepo) ExistsBalanceByID(id uuid.UUID) (exists bool, err error) {
 	err = r.DB.Get(
 		&exists,
 		"SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?",
@@ -177,12 +194,12 @@ func (r *BankAccount) ExistsBalanceByID(id uuid.UUID) (exists bool, err error) {
 }
 
 // ResolveByIDs resolves Bank Accounts by their IDs
-func (r *BankAccount) ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAccount, err error) {
+func (r *BankAccountMySQLRepo) ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAccount, err error) {
 	if len(ids) == 0 {
 		return
 	}
 
-	query, args, err := sqlx.In(querySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(querySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -197,12 +214,12 @@ func (r *BankAccount) ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAc
 }
 
 // ResolveBalancesByIDs resoloves Bank Account Balances by their IDs
-func (r *BankAccount) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error) {
+func (r *BankAccountMySQLRepo) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error) {
 	if len(ids) == 0 {
 		return
 	}
 
-	query, args, err := sqlx.In(querySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(querySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -217,14 +234,14 @@ func (r *BankAccount) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances
 }
 
 // ResolveByFilter resolves Banks Accounts by a specified filter
-func (r *BankAccount) ResolveByFilter(filter filter.Filter) (bankAccounts []model.BankAccount, pageInfo model.PageInfoOutput, err error) {
+func (r *BankAccountMySQLRepo) ResolveByFilter(filter filter.Filter) (bankAccounts []model.BankAccount, pageInfo model.PageInfoOutput, err error) {
 	filterQueryString, err := filter.ToQueryString()
 	if err != nil {
 		return bankAccounts, pageInfo, err
 	}
 
 	filterArgs := filter.GetArgs(true)
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccount+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
@@ -259,7 +276,7 @@ func (r *BankAccount) ResolveByFilter(filter filter.Filter) (bankAccounts []mode
 }
 
 // ResolveBalancesByFilter resolves Banks Account Balances by a specified filter
-func (r *BankAccount) ResolveBalancesByFilter(filter filter.Filter) (bankAccountBalances []model.BankAccountBalance, pageInfo model.PageInfoOutput, err error) {
+func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (bankAccountBalances []model.BankAccountBalance, pageInfo model.PageInfoOutput, err error) {
 	filterQueryString, err := filter.ToQueryString()
 	if err != nil {
 		return bankAccountBalances, pageInfo, err
@@ -268,7 +285,7 @@ func (r *BankAccount) ResolveBalancesByFilter(filter filter.Filter) (bankAccount
 	filterArgs := filter.GetArgs(true)
 	logger.Warn(querySelectBankAccountBalance + filterQueryString + filter.Pagination.ToQueryString())
 	logger.Warn("%#v", filterArgs)
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccountBalance+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
@@ -303,13 +320,13 @@ func (r *BankAccount) ResolveBalancesByFilter(filter filter.Filter) (bankAccount
 }
 
 // ResolveLastBalancesByBankAccountID resolves last X Bank Account Balances by their Bank Account ID and count param
-func (r *BankAccount) ResolveLastBalancesByBankAccountID(id uuid.UUID, count int) (bankAccountBalances []model.BankAccountBalance, err error) {
+func (r *BankAccountMySQLRepo) ResolveLastBalancesByBankAccountID(id uuid.UUID, count int) (bankAccountBalances []model.BankAccountBalance, err error) {
 	if count == 0 {
 		return
 	}
 
 	whereClause := " WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?"
-	query, args, err := sqlx.In(
+	query, args, err := r.DB.In(
 		querySelectBankAccountBalance+whereClause, id, count)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -325,7 +342,7 @@ func (r *BankAccount) ResolveLastBalancesByBankAccountID(id uuid.UUID, count int
 }
 
 // Create creates a Bank Account
-func (r *BankAccount) Create(bankAccount model.BankAccount) error {
+func (r *BankAccountMySQLRepo) Create(bankAccount model.BankAccount) error {
 	exists, err := r.ExistsByID(bankAccount.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -354,7 +371,7 @@ func (r *BankAccount) Create(bankAccount model.BankAccount) error {
 }
 
 // Update updates a bank account
-func (r *BankAccount) Update(bankAccount model.BankAccount) error {
+func (r *BankAccountMySQLRepo) Update(bankAccount model.BankAccount) error {
 	exists, err := r.ExistsByID(bankAccount.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -378,7 +395,7 @@ func (r *BankAccount) Update(bankAccount model.BankAccount) error {
 }
 
 // CreateBalance creates a new Bank Account Balance and optionally updates the Bank Account transactionally
-func (r *BankAccount) CreateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error {
+func (r *BankAccountMySQLRepo) CreateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error {
 	exists, err := r.ExistsBalanceByID(bankAccountBalance.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -409,7 +426,7 @@ func (r *BankAccount) CreateBalance(bankAccountBalance model.BankAccountBalance,
 }
 
 // UpdateBalance updates an existing Bank Account Balance and optionally updates the Bank Account transactionally
-func (r *BankAccount) UpdateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error {
+func (r *BankAccountMySQLRepo) UpdateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error {
 	exists, err := r.ExistsBalanceByID(bankAccountBalance.ID)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -439,7 +456,7 @@ func (r *BankAccount) UpdateBalance(bankAccountBalance model.BankAccountBalance,
 	})
 }
 
-func (r *BankAccount) txCreateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
+func (r *BankAccountMySQLRepo) txCreateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
 	stmt, err := tx.PrepareNamed(queryInsertBankAccount)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -455,7 +472,7 @@ func (r *BankAccount) txCreateBankAccount(tx *sqlx.Tx, bankAccount model.BankAcc
 	return nil
 }
 
-func (r *BankAccount) txCreateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
+func (r *BankAccountMySQLRepo) txCreateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
 	stmt, err := tx.PrepareNamed(queryInsertBankAccountBalance)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -471,7 +488,7 @@ func (r *BankAccount) txCreateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance
 	return nil
 }
 
-func (r *BankAccount) txUpdateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
+func (r *BankAccountMySQLRepo) txUpdateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
 	stmt, err := tx.PrepareNamed(queryUpdateBankAccount)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -487,7 +504,7 @@ func (r *BankAccount) txUpdateBankAccount(tx *sqlx.Tx, bankAccount model.BankAcc
 	return nil
 }
 
-func (r *BankAccount) txUpdateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
+func (r *BankAccountMySQLRepo) txUpdateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
 	stmt, err := tx.PrepareNamed(queryUpdateBankAccountBalance)
 	if err != nil {
 		logger.ErrNoStack("%v", err)

@@ -1,30 +1,39 @@
 package service
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
-	"github.com/satori/uuid"
 )
 
-// User is the service provider
-type User struct {
-	Repository *repository.User `inject:"userRepository"`
+// User is the service provider interface
+type User interface {
+	Startup()
+	Shutdown()
+	GetByID(id uuid.UUID) (*model.User, error)
+	Create(input model.UserInput, userID uuid.UUID) (model.User, error)
+	Update(input model.UserInput, userID uuid.UUID) (model.User, error)
+}
+
+// UserImpl is the service provider implementation
+type UserImpl struct {
+	Repository repository.User `inject:"userRepository"`
 }
 
 // Startup perform startup functions
-func (s *User) Startup() {
+func (s *UserImpl) Startup() {
 	logger.Trace("User Service starting up...")
 }
 
 // Shutdown cleans up everything and shuts down
-func (s *User) Shutdown() {
+func (s *UserImpl) Shutdown() {
 	logger.Trace("User Service shutting down...")
 }
 
 // GetByID fetches a User by its ID
-func (s *User) GetByID(id uuid.UUID) (*model.User, error) {
+func (s *UserImpl) GetByID(id uuid.UUID) (*model.User, error) {
 	users, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err
@@ -38,14 +47,14 @@ func (s *User) GetByID(id uuid.UUID) (*model.User, error) {
 }
 
 // Create creates a new User
-func (s *User) Create(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (s *UserImpl) Create(input model.UserInput, userID uuid.UUID) (model.User, error) {
 	user := model.NewUserFromInput(input, userID)
 	err := s.Repository.Create(user)
 	return user, err
 }
 
 // Update updates an existing User
-func (s *User) Update(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (s *UserImpl) Update(input model.UserInput, userID uuid.UUID) (model.User, error) {
 	users, err := s.Repository.ResolveByIDs([]uuid.UUID{input.ID})
 	if err != nil {
 		return model.User{}, err
