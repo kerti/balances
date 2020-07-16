@@ -46,6 +46,7 @@ func (s *Server) Shutdown() {
 func (s *Server) InitMiddleware() {
 	s.router.Use(s.loggingMiddleware)
 	s.router.Use(s.jwtMiddleware)
+	s.router.Use(s.corsMiddleware)
 }
 
 // Serve runs the server
@@ -68,7 +69,13 @@ func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 		}
 		headers := fmt.Sprintf("- HEADERS:\n%s", strings.Join(headerList, "\n"))
 
-		logger.Trace("### RECEIEVED %v %v\n%s", r.Method, r.RequestURI, headers)
+		cookieList := make([]string, 0)
+		for _, v := range r.Cookies() {
+			cookieList = append(cookieList, fmt.Sprintf(" - %s: %v", v.Name, v.Value))
+		}
+		cookies := fmt.Sprintf("- COOKIES:\n%s", strings.Join(cookieList, "\n"))
+
+		logger.Trace("### RECEIEVED %v %v\n%s\n%s", r.Method, r.RequestURI, headers, cookies)
 
 		next.ServeHTTP(w, r)
 	})
@@ -77,13 +84,23 @@ func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 func (s *Server) jwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// no JWT checks for health checks and logins
-		if r.RequestURI == "/health" || r.RequestURI == "/auth/login" {
+		// no JWT checks for preflights, health checks and logins
+		if r.Method == http.MethodOptions || r.RequestURI == "/health" || r.RequestURI == "/auth/login" {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		userID, err := s.AuthService.Authorize(r.Header.Get("Authorization"))
+		token := ""
+		tokenCookie, _ := r.Cookie(s.config.JWT.TokenCookie)
+		if tokenCookie != nil {
+			token = fmt.Sprintf("Bearer %s", tokenCookie.Value)
+		}
+
+		if len(token) == 0 {
+			token = r.Header.Get("Authorization")
+		}
+
+		userID, err := s.AuthService.Authorize(token)
 		if err != nil {
 			logger.Trace(fmt.Sprintf("authorization failed: %v", err.Error()))
 			response.RespondWithError(w, err)
@@ -93,6 +110,28 @@ func (s *Server) jwtMiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), ctxprops.PropUserID, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
+	})
+}
+
+func (s *Server) corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		headers := r.Header
+		origins := headers["Origin"]
+
+		if len(origins) > 0 {
+			origin := origins[0]
+			for _, allowedOrigin := range s.config.CORS.AllowedOrigins {
+				if allowedOrigin == origin {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+				}
+			}
+		}
+
+		w.Header().Set("Access-Control-Allow-Methods", "GET PUT POST PATCH DELETE OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Vary", "Origin")
+		next.ServeHTTP(w, r)
 	})
 }
 

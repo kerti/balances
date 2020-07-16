@@ -24,8 +24,8 @@ type BaseResponse struct {
 }
 
 // RespondWithNoContent sends a response without any content
-func RespondWithNoContent(w http.ResponseWriter, code int) {
-	respond(w, code, BaseResponse{})
+func RespondWithNoContent(w http.ResponseWriter) {
+	respond(w, http.StatusNoContent, nil)
 }
 
 // RespondWithMessage sends a response with a simple text message
@@ -62,9 +62,6 @@ func RespondWithUnhealthy(w http.ResponseWriter) {
 func respond(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET PUT POST PATCH DELETE OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 	w.WriteHeader(code)
 	w.Write(response)
 }
