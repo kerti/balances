@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CRow,
@@ -16,6 +16,9 @@ import {
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
 import { CChartLine } from "@coreui/react-chartjs";
+import { useDispatch, useSelector } from "react-redux";
+import { requestBankDetailByID } from "../../../data/actions/assets/banks";
+import { useParams } from "react-router-dom";
 
 // TODO: remove this and use actual data
 const balanceHistoryData = [
@@ -119,11 +122,21 @@ const chartOptions = {
 const Properties = () => {
   const { t } = useTranslation("assets");
   const { t: f } = useTranslation("formats");
+  const dispatch = useDispatch();
   const balanceHistoryFields = [
     { key: "date", label: t("common.date") },
     { key: "setBy", label: t("banks.balanceSetBy") },
     { key: "balance", label: t("banks.balance"), _classes: ["text-right"] },
   ];
+
+  const { id } = useParams();
+  const bankData = useSelector((state) => state.pages.assets.banks);
+  console.log("ASDASDASDASD");
+  console.log(bankData);
+
+  useEffect(() => {
+    dispatch(requestBankDetailByID(id, true, 10));
+  }, [dispatch, id]);
   return (
     <>
       <CRow>

@@ -10,15 +10,8 @@ const auth = (state = {}, action) => {
     case actionTypes.auth.login.LOADCOOKIES:
       const data = action.payload.data;
       return {
-        expiration: data.expiration,
         loading: false,
         token: data.token,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.name,
-          username: data.user.username,
-        },
       };
     case actionTypes.auth.login.FAILURE:
       return {

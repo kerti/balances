@@ -10,6 +10,22 @@ const actionTypes = {
       REQUEST: "AUTH_LOGOUT_REQUEST",
     },
   },
+  pages: {
+    assets: {
+      banks: {
+        list: {
+          LOADING: "PAGES_ASSETS_BANKS_LIST_LOADING",
+          FAILURE: "PAGES_ASSETS_BANKS_LIST_FAILURE",
+          SUCCESS: "PAGES_ASSETS_BANKS_LIST_SUCCESS",
+        },
+        detail: {
+          LOADING: "PAGES_ASSETS_BANKS_DETAIL_LOADING",
+          FAILURE: "PAGES_ASSETS_BANKS_DETAIL_FAILURE",
+          SUCCESS: "PAGES_ASSETS_BANKS_DETAIL_SUCCESS",
+        },
+      },
+    },
+  },
   ui: {
     lang: {
       SET: "UI_LANG_SET",

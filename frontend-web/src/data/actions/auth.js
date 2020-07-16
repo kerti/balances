@@ -15,30 +15,6 @@ export function requestLogin(username, password, history) {
           expires: new Date(loginResponse.expiration),
         });
 
-        Cookies.set(
-          cookieNames.auth.tokenExpiration,
-          loginResponse.expiration,
-          {
-            expires: new Date(loginResponse.expiration),
-          }
-        );
-
-        Cookies.set(cookieNames.auth.userId, loginResponse.user.id, {
-          expires: new Date(payload.data.data.expiration),
-        });
-
-        Cookies.set(cookieNames.auth.userEmail, loginResponse.user.email, {
-          expires: new Date(payload.data.data.expiration),
-        });
-
-        Cookies.set(cookieNames.auth.userProfileName, loginResponse.user.name, {
-          expires: new Date(payload.data.data.expiration),
-        });
-
-        Cookies.set(cookieNames.auth.username, loginResponse.user.username, {
-          expires: new Date(payload.data.data.expiration),
-        });
-
         dispatch(loginSuccess(history, payload.data));
         history.push("/");
       })
@@ -51,14 +27,7 @@ export function requestLogin(username, password, history) {
 export function loadAuthCookies() {
   const payload = {
     data: {
-      expiration: parseInt(Cookies.get(cookieNames.auth.tokenExpiration)),
       token: Cookies.get(cookieNames.auth.token),
-      user: {
-        id: Cookies.get(cookieNames.auth.userId),
-        email: Cookies.get(cookieNames.auth.userEmail),
-        name: Cookies.get(cookieNames.auth.userProfileName),
-        username: Cookies.get(cookieNames.auth.username),
-      },
     },
   };
   return {
@@ -91,11 +60,6 @@ export function requestLogout(history) {
   history.push("/login");
 
   Cookies.expire(cookieNames.auth.token);
-  Cookies.expire(cookieNames.auth.tokenExpiration);
-  Cookies.expire(cookieNames.auth.userId);
-  Cookies.expire(cookieNames.auth.userEmail);
-  Cookies.expire(cookieNames.auth.userProfileName);
-  Cookies.expire(cookieNames.auth.username);
 
   return {
     type: actionTypes.auth.logout.REQUEST,
