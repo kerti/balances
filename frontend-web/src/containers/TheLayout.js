@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TheContent, TheSidebar, TheFooter, TheHeader } from "./index";
-import { useSelector } from "react-redux";
-import { Redirect } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { requestAuthCheck } from "../data/actions/auth";
 
 const TheLayout = () => {
-  const token = useSelector((state) => state.auth.token);
-  const tokenExpiration = useSelector((state) => state.auth.expiration);
-  const expirationDate = new Date(tokenExpiration);
-  const expired = new Date() > expirationDate;
-  return token && !expired ? (
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  useEffect(() => {
+    dispatch(requestAuthCheck(history));
+  });
+
+  return (
     <div className="c-app c-default-layout">
       <TheSidebar />
       <div className="c-wrapper">
@@ -19,8 +23,6 @@ const TheLayout = () => {
         <TheFooter />
       </div>
     </div>
-  ) : (
-    <Redirect to="/login" />
   );
 };
 

@@ -101,3 +101,11 @@ export function requestLogout(history) {
     type: actionTypes.auth.logout.REQUEST,
   };
 }
+
+export function requestAuthCheck(history) {
+  const token = Cookies.get(cookieNames.auth.token);
+  return (dispatch) => {
+    // TODO: send refresh token here instead of forcing a logout?
+    if (!token) dispatch(requestLogout(history));
+  };
+}
