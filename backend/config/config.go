@@ -17,6 +17,9 @@ var (
 
 // Config is the configuration struct
 type Config struct {
+	CORS struct {
+		AllowedOrigins []string `envconfig:"CORS_ALLOWED_ORIGINS"`
+	}
 	DB struct {
 		Host      string `envconfig:"DB_HOST"`
 		Port      int    `envconfig:"DB_PORT"`
@@ -26,8 +29,9 @@ type Config struct {
 		ConnLimit int    `envconfig:"DB_CONN_LIMIT"`
 	}
 	JWT struct {
-		Expiration time.Duration `envconfig:"JWT_EXPIRATION" default:"120m"`
-		Secret     string        `envconfig:"JWT_SECRET"`
+		Expiration  time.Duration `envconfig:"JWT_EXPIRATION" default:"120m"`
+		Secret      string        `envconfig:"JWT_SECRET"`
+		TokenCookie string        `envconfig:"JWT_TOKEN_COOKIE" default:"__b_a_T"`
 	}
 	Server struct {
 		Port           int           `envconfig:"SERVER_PORT" default:"8080"`

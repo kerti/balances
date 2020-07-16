@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/util/logger"
 )
 
@@ -12,11 +13,15 @@ func (s *Server) InitRoutes() {
 	logger.Trace("Initializing routes...")
 	s.router = mux.NewRouter()
 
+	// Preflight
+	s.router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response.RespondWithNoContent(w)
+	})
+
 	// Health
 	s.router.HandleFunc("/health", s.HealthHandler.HandleHealthCheck).Methods("GET")
 
 	// Authentication/Authorization
-	s.router.HandleFunc("/auth/login", s.AuthHandler.HandlePreflight).Methods("OPTIONS")
 	s.router.HandleFunc("/auth/login", s.AuthHandler.HandleAuthLogin).Methods("POST")
 	s.router.HandleFunc("/auth/token", s.AuthHandler.HandleGetToken).Methods("GET")
 

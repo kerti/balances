@@ -16,7 +16,6 @@ import (
 type Auth interface {
 	Startup()
 	Shutdown()
-	HandlePreflight(w http.ResponseWriter, r *http.Request)
 	HandleAuthLogin(w http.ResponseWriter, r *http.Request)
 	HandleGetToken(w http.ResponseWriter, r *http.Request)
 }
@@ -35,11 +34,6 @@ func (h *AuthImpl) Startup() {
 // Shutdown cleans up everything and shuts down
 func (h *AuthImpl) Shutdown() {
 	logger.Trace("Auth Handler shutting down...")
-}
-
-// HandlePreflight handles a preflight check for logins
-func (h *AuthImpl) HandlePreflight(w http.ResponseWriter, r *http.Request) {
-	response.RespondWithMessage(w, http.StatusOK, "OK")
 }
 
 // HandleAuthLogin performs a login action and returns the JWT token
