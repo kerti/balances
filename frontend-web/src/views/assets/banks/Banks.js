@@ -52,7 +52,7 @@ const Banks = () => {
         requestBankList(
           "",
           currentPage,
-          process.env.REACT_APP_DEFAULT_PAGE_SIZE
+          parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
         )
       );
     }
@@ -75,7 +75,7 @@ const Banks = () => {
         striped
         bordered
         size="sm"
-        itemsPerPage={10}
+        itemsPerPage={parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)}
         clickableRows
         onRowClick={(item) => {
           history.push(`/assets/banks/${item.id}`);
