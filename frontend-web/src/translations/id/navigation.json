@@ -3,6 +3,7 @@
   "assets": {
     "assets": "Harta",
     "bankAccounts": "Rekening Bank",
+    "bankAccountDetails": "Detil Rekening Bank",
     "properties": "Properti",
     "vehicles": "Kendaraan"
   },
