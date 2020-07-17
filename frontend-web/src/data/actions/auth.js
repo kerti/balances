@@ -1,4 +1,4 @@
-import actionTypes from "./actionTypes";
+import types from "./types";
 import auth from "../sources/auth/auth";
 import Cookies from "cookies-js";
 import cookieNames from "../cookies";
@@ -31,27 +31,27 @@ export function loadAuthCookies() {
     },
   };
   return {
-    type: actionTypes.auth.login.LOADCOOKIES,
+    type: types.auth.login.LOADCOOKIES,
     payload: payload,
   };
 }
 
 export function loginLoading() {
   return {
-    type: actionTypes.auth.login.LOADING,
+    type: types.auth.login.LOADING,
   };
 }
 
 export function loginSuccess(history, payload) {
   return {
-    type: actionTypes.auth.login.SUCCESS,
+    type: types.auth.login.SUCCESS,
     payload: payload,
   };
 }
 
 export function loginFailure(error) {
   return {
-    type: actionTypes.auth.login.FAILURE,
+    type: types.auth.login.FAILURE,
     error: error,
   };
 }
@@ -62,7 +62,7 @@ export function requestLogout(history) {
   Cookies.expire(cookieNames.auth.token);
 
   return {
-    type: actionTypes.auth.logout.REQUEST,
+    type: types.auth.logout.REQUEST,
   };
 }
 

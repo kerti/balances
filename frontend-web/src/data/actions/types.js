@@ -1,4 +1,4 @@
-const actionTypes = {
+const types = {
   auth: {
     login: {
       LOADING: "AUTH_LOGIN_LOADING",
@@ -20,4 +20,4 @@ const actionTypes = {
   },
 };
 
-export default actionTypes;
+export default types;
