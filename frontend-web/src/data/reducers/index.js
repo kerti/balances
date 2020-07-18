@@ -1,5 +1,4 @@
 import { combineReducers } from "redux";
-import merge from "lodash/merge";
 import auth from "./auth";
 import paginate from "./paginate";
 import ui from "./ui";
@@ -11,7 +10,8 @@ const entities = (
   action
 ) => {
   if (action.response && action.response.entities) {
-    return merge({}, state, action.response.entities);
+    // TODO: use lodash/merge here if necessary, for now let's just forgo caching
+    return action.response.entities;
   }
 
   return state;
