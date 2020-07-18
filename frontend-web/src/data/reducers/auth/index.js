@@ -1,24 +1,24 @@
-import { types } from "../../actions";
+import { actionTypes } from "../../actions";
 
 const auth = (state = {}, action) => {
   switch (action.type) {
-    case types.auth.login.LOADING:
+    case actionTypes.auth.login.LOADING:
       return {
         loading: true,
       };
-    case types.auth.login.SUCCESS:
-    case types.auth.login.LOADCOOKIES:
+    case actionTypes.auth.login.SUCCESS:
+    case actionTypes.auth.login.LOADCOOKIES:
       const data = action.payload.data;
       return {
         loading: false,
         token: data.token,
       };
-    case types.auth.login.FAILURE:
+    case actionTypes.auth.login.FAILURE:
       return {
         loading: false,
         authError: action.error,
       };
-    case types.auth.logout.REQUEST:
+    case actionTypes.auth.logout.REQUEST:
       return {};
     default:
       return state;
