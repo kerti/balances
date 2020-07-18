@@ -17,8 +17,14 @@ const callApi = (endpoint, schema, options = {}) => {
     withCredentials: true,
   })
     .then((response) => {
+      const pageCount = response.data.data.pageInfo.pageCount;
+      const totalCount = response.data.data.pageInfo.totalCount;
       const camelizedJson = camelizeKeys(response.data.data.items);
-      return Object.assign({}, normalize(camelizedJson, schema));
+
+      return Object.assign({}, normalize(camelizedJson, schema), {
+        pageCount,
+        totalCount,
+      });
     })
     .catch((error) => {
       return Promise.reject(error);
