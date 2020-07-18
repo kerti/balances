@@ -1,6 +1,6 @@
 {
   "assets": "Assets",
-  "banks": {
+  "bankAccounts": {
     "accountName": "Account Name",
     "accountNamePlaceholder": "Enter your account name...",
     "accountNumber": "Account Number",

@@ -25,23 +25,23 @@ const getBadge = (item) => {
   }
 };
 
-const Banks = () => {
+const BankAccounts = () => {
   const { t } = useTranslation(["assets", "formats"]);
   const { t: f } = useTranslation("formats");
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const history = useHistory();
   const fields = [
-    { key: "accountName", label: t("banks.accountName") },
-    { key: "bankName", label: t("banks.name") },
-    { key: "accountHolderName", label: t("banks.accountHolder") },
-    { key: "accountNumber", label: t("banks.accountNumber") },
+    { key: "accountName", label: t("bankAccounts.accountName") },
+    { key: "bankName", label: t("bankAccounts.name") },
+    { key: "accountHolderName", label: t("bankAccounts.accountHolder") },
+    { key: "accountNumber", label: t("bankAccounts.accountNumber") },
     {
       key: "lastBalance",
-      label: t("banks.lastBalance"),
+      label: t("bankAccounts.lastBalance"),
       _classes: ["text-right"],
     },
-    { key: "status", label: t("banks.status") },
+    { key: "status", label: t("bankAccounts.status") },
   ];
 
   const rawData = useSelector((state) => state.entities.bankAccounts);
@@ -72,7 +72,7 @@ const Banks = () => {
 
   useEffect(() => {
     if (currentPage > 0) {
-      dispatch(loadBankAccountPage("", currentPage, 1));
+      dispatch(loadBankAccountPage("", currentPage));
     }
   }, [dispatch, currentPage]);
 
@@ -96,7 +96,7 @@ const Banks = () => {
         itemsPerPage={parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)}
         clickableRows
         onRowClick={(item) => {
-          history.push(`/assets/banks/${item.id}`);
+          history.push(`/assets/bankAccounts/${item.id}`);
         }}
         scopedSlots={{
           lastBalance: (item) => (
@@ -115,7 +115,7 @@ const Banks = () => {
           status: (item) => (
             <td>
               <CBadge color={getBadge(item)}>
-                {t("banks.states." + item.status)}
+                {t("bankAccounts.states." + item.status)}
               </CBadge>
             </td>
           ),
@@ -134,7 +134,7 @@ const Banks = () => {
     <CRow>
       <CCol>
         <CCard>
-          <CCardHeader>{t("banks.listOfBankAccounts")}</CCardHeader>
+          <CCardHeader>{t("bankAccounts.listOfBankAccounts")}</CCardHeader>
           <CCardBody>
             {data.pagination.isFetching ? spinner : dataTable}
           </CCardBody>
@@ -144,4 +144,4 @@ const Banks = () => {
   );
 };
 
-export default Banks;
+export default BankAccounts;

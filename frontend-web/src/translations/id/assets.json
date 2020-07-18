@@ -1,6 +1,6 @@
 {
   "assets": "Harta",
-  "banks": {
+  "bankAccounts": {
     "accountName": "Nama Rekening",
     "accountNamePlaceholder": "Masukkan nama rekening Anda...",
     "accountNumber": "Nomor Rekening",
