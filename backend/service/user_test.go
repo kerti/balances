@@ -8,6 +8,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/failure"
+	"github.com/kerti/balances/backend/util/filter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -33,6 +34,11 @@ func (m *mockUserRepository) ResolveByIDs(ids []uuid.UUID) (users []model.User, 
 func (m *mockUserRepository) ResolveByIdentity(identity string) (user model.User, err error) {
 	args := m.Called(identity)
 	return args.Get(0).(model.User), args.Error(1)
+}
+
+func (m *mockUserRepository) ResolveByFilter(filter filter.Filter) (users []model.User, pageInfo model.PageInfoOutput, err error) {
+	args := m.Called(filter)
+	return args.Get(0).([]model.User), args.Get(1).(model.PageInfoOutput), args.Error(2)
 }
 
 func (m *mockUserRepository) Create(user model.User) error {
