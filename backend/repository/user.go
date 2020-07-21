@@ -5,6 +5,7 @@ import (
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/failure"
+	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/logger"
 )
 
@@ -67,6 +68,7 @@ type User interface {
 	ExistsByID(id uuid.UUID) (exists bool, err error)
 	ResolveByIDs(ids []uuid.UUID) (users []model.User, err error)
 	ResolveByIdentity(identity string) (user model.User, err error)
+	ResolveByFilter(filter filter.Filter) (users []model.User, pageInfo model.PageInfoOutput, err error)
 	Create(user model.User) error
 	Update(user model.User) error
 }
@@ -129,6 +131,48 @@ func (r *UserMySQLRepo) ResolveByIdentity(identity string) (user model.User, err
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 	}
+	return
+}
+
+// ResolveByFilter resolves Users by a specified filter
+func (r *UserMySQLRepo) ResolveByFilter(filter filter.Filter) (users []model.User, pageInfo model.PageInfoOutput, err error) {
+	filterQueryString, err := filter.ToQueryString()
+	if err != nil {
+		return users, pageInfo, err
+	}
+
+	filterArgs := filter.GetArgs(true)
+	query, args, err := r.DB.In(
+		querySelectUser+filterQueryString+filter.Pagination.ToQueryString(),
+		filterArgs...)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return
+	}
+
+	err = r.DB.Select(&users, query, args...)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+	}
+
+	var count int
+	filterArgsNoPagination := filter.GetArgs(false)
+	err = r.DB.Get(
+		&count,
+		"SELECT COUNT(entity_id) FROM users "+filterQueryString,
+		filterArgsNoPagination...)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return
+	}
+
+	pageInfo = model.PageInfoOutput{
+		Page:       filter.Pagination.Page,
+		PageSize:   filter.Pagination.PageSize,
+		TotalCount: count,
+		PageCount:  filter.Pagination.GetPageCount(count),
+	}
+
 	return
 }
 

@@ -27,6 +27,7 @@ func (s *Server) InitRoutes() {
 
 	// Users
 	s.router.HandleFunc("/users/{id}", s.UserHandler.HandleGetUserByID).Methods("GET")
+	s.router.HandleFunc("/users/search", s.UserHandler.HandleGetUserByFilter).Methods("POST")
 	s.router.HandleFunc("/users", s.UserHandler.HandleCreateUser).Methods("POST")
 	s.router.HandleFunc("/users/{id}", s.UserHandler.HandleUpdateUser).Methods("PATCH")
 

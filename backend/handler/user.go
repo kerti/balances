@@ -19,6 +19,7 @@ type User interface {
 	Startup()
 	Shutdown()
 	HandleGetUserByID(w http.ResponseWriter, r *http.Request)
+	HandleGetUserByFilter(w http.ResponseWriter, r *http.Request)
 	HandleCreateUser(w http.ResponseWriter, r *http.Request)
 	HandleUpdateUser(w http.ResponseWriter, r *http.Request)
 }
@@ -54,6 +55,34 @@ func (h *UserImpl) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.RespondWithJSON(w, http.StatusOK, user.ToOutput())
+}
+
+// HandleGetUserByFilter handles the request
+func (h *UserImpl) HandleGetUserByFilter(w http.ResponseWriter, r *http.Request) {
+	var input model.UserFilterInput
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.RespondWithError(w, failure.BadRequest(err))
+		return
+	}
+
+	users, pageInfo, err := h.Service.GetByFilter(input)
+	if err != nil {
+		response.RespondWithError(w, failure.BadRequest(err))
+		return
+	}
+
+	outputs := make([]model.UserOutput, 0)
+	for _, user := range users {
+		outputs = append(outputs, user.ToOutput())
+	}
+
+	pageOutput := model.PageOutput{
+		Items:    outputs,
+		PageInfo: pageInfo,
+	}
+
+	response.RespondWithJSON(w, http.StatusOK, pageOutput)
 }
 
 // HandleCreateUser handles the request

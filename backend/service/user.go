@@ -13,6 +13,7 @@ type User interface {
 	Startup()
 	Shutdown()
 	GetByID(id uuid.UUID) (*model.User, error)
+	GetByFilter(input model.UserFilterInput) ([]model.User, model.PageInfoOutput, error)
 	Create(input model.UserInput, userID uuid.UUID) (model.User, error)
 	Update(input model.UserInput, userID uuid.UUID) (model.User, error)
 }
@@ -44,6 +45,11 @@ func (s *UserImpl) GetByID(id uuid.UUID) (*model.User, error) {
 	}
 
 	return &users[0], nil
+}
+
+// GetByFilter fetches a set of Users by its filter
+func (s *UserImpl) GetByFilter(input model.UserFilterInput) ([]model.User, model.PageInfoOutput, error) {
+	return s.Repository.ResolveByFilter(input.ToFilter())
 }
 
 // Create creates a new User
