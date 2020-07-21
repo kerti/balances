@@ -5,7 +5,7 @@ type PageInfoOutput struct {
 	Page       int `json:"page"`
 	PageSize   int `json:"pageSize"`
 	TotalCount int `json:"totalCount"`
-	TotalPages int `json:"totalPages"`
+	PageCount  int `json:"pageCount"`
 }
 
 // PageOutput is a wrapper for any output that requires pagination information

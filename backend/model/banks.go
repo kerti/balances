@@ -313,7 +313,7 @@ func (bb *BankAccountBalance) ToOutput() BankAccountBalanceOutput {
 	return BankAccountBalanceOutput{
 		ID:            bb.ID,
 		BankAccountID: bb.BankAccountID,
-		Date:          bb.Date,
+		Date:          cachetime.CacheTime(bb.Date),
 		Balance:       bb.Balance,
 		Created:       cachetime.CacheTime(bb.Created),
 		CreatedBy:     bb.CreatedBy,
@@ -336,7 +336,7 @@ type BankAccountBalanceInput struct {
 type BankAccountBalanceOutput struct {
 	ID            uuid.UUID            `json:"id"`
 	BankAccountID uuid.UUID            `json:"bankAccountId"`
-	Date          time.Time            `json:"date"`
+	Date          cachetime.CacheTime  `json:"date"`
 	Balance       float64              `json:"balance"`
 	Created       cachetime.CacheTime  `json:"created"`
 	CreatedBy     uuid.UUID            `json:"createdBy"`

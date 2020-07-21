@@ -269,7 +269,7 @@ func (r *BankAccountMySQLRepo) ResolveByFilter(filter filter.Filter) (bankAccoun
 		Page:       filter.Pagination.Page,
 		PageSize:   filter.Pagination.PageSize,
 		TotalCount: count,
-		TotalPages: filter.Pagination.GetPageCount(count),
+		PageCount:  filter.Pagination.GetPageCount(count),
 	}
 
 	return
@@ -283,8 +283,6 @@ func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (ba
 	}
 
 	filterArgs := filter.GetArgs(true)
-	logger.Warn(querySelectBankAccountBalance + filterQueryString + filter.Pagination.ToQueryString())
-	logger.Warn("%#v", filterArgs)
 	query, args, err := r.DB.In(
 		querySelectBankAccountBalance+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
@@ -313,7 +311,7 @@ func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (ba
 		Page:       filter.Pagination.Page,
 		PageSize:   filter.Pagination.PageSize,
 		TotalCount: count,
-		TotalPages: filter.Pagination.GetPageCount(count),
+		PageCount:  filter.Pagination.GetPageCount(count),
 	}
 
 	return
