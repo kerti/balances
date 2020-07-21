@@ -4,11 +4,34 @@ import (
 	"log"
 	"time"
 
+	"github.com/kerti/balances/backend/util/filter"
+
 	"github.com/gofrs/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/nuuid"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	// UserColumnID represents the corresponding column in User table
+	UserColumnID filter.Field = "users.entity_id"
+	// UserColumnUsername represents the corresponding column in User table
+	UserColumnUsername filter.Field = "users.username"
+	// UserColumnEmail represents the corresponding column in User table
+	UserColumnEmail filter.Field = "users.email"
+	// UserColumnPassword represents the corresponding column in User table
+	UserColumnPassword filter.Field = "users.password"
+	// UserColumnName represents the corresponding column in User table
+	UserColumnName filter.Field = "users.name"
+	// UserColumnCreated represents the corresponding column in User table
+	UserColumnCreated filter.Field = "users.created"
+	// UserColumnCreatedBy represents the corresponding column in User table
+	UserColumnCreatedBy filter.Field = "users.created_by"
+	// UserColumnUpdated represents the corresponding column in User table
+	UserColumnUpdated filter.Field = "users.updated"
+	// UserColumnUpdatedBy represents the corresponding column in User table
+	UserColumnUpdatedBy filter.Field = "users.updated_by"
 )
 
 // User represents a User entity object
@@ -126,4 +149,39 @@ type UserOutput struct {
 	CreatedBy uuid.UUID            `json:"createdBy"`
 	Updated   cachetime.NCacheTime `json:"updated,omitempty"`
 	UpdatedBy nuuid.NUUID          `json:"updatedBy,omitempty"`
+}
+
+// UserFilterInput is the filter input object for Users
+type UserFilterInput struct {
+	filter.BaseFilterInput
+	IDs *[]uuid.UUID `json:"ids,omitempty"`
+}
+
+// ToFilter converts this entity-specific filter into a generic filter.Filter object
+func (f *UserFilterInput) ToFilter() filter.Filter {
+	theFilter := filter.Filter{
+		TableName:      "users",
+		IncludeDeleted: true,
+		Pagination:     f.BaseFilterInput.GetPagination(),
+	}
+
+	if f.IDs != nil {
+		for _, id := range *f.IDs {
+			theFilter.AddClause(filter.Clause{
+				Operand1: UserColumnID,
+				Operand2: id,
+				Operator: filter.OperatorEqual,
+			}, filter.OperatorOr)
+		}
+	}
+
+	keywordFields := []filter.Field{
+		UserColumnUsername,
+		UserColumnEmail,
+		UserColumnName,
+	}
+	keywordClause := f.BaseFilterInput.GetKeywordFilter(keywordFields, false)
+	theFilter.AddClause(*keywordClause, filter.OperatorAnd)
+
+	return theFilter
 }
