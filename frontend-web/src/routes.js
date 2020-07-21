@@ -64,6 +64,9 @@ const User = React.lazy(() => import("./views/users/User"));
 const BankAccounts = React.lazy(() =>
   import("./views/assets/bankAccounts/BankAccounts")
 );
+const BankAccountDetails = React.lazy(() =>
+  import("./views/assets/bankAccounts/BankAccountDetails")
+);
 const Properties = React.lazy(() =>
   import("./views/assets/properties/Properties")
 );
@@ -108,6 +111,12 @@ const getRoutes = (t) => {
       path: "/assets/bankAccounts",
       name: t("assets.bankAccounts"),
       component: BankAccounts,
+      exact: true,
+    },
+    {
+      path: "/assets/bankAccounts/:id",
+      name: t("assets.bankAccountDetails"),
+      component: BankAccountDetails,
     },
     {
       path: "/assets/properties",

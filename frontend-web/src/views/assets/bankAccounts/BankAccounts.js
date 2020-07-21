@@ -11,6 +11,7 @@ import {
   CBadge,
   CPagination,
 } from "@coreui/react";
+import CardSpinner from "../../common/CardSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import { loadBankAccountPage } from "../../../data/actions/assets/bankAccounts";
 
@@ -76,14 +77,6 @@ const BankAccounts = () => {
     }
   }, [dispatch, currentPage]);
 
-  const spinner = (
-    <div className="pt-3 text-center">
-      <div className="spinner-border text-primary" role="status">
-        <span className="sr-only">Loading...</span>
-      </div>
-    </div>
-  );
-
   const dataTable = (
     <>
       <CDataTable
@@ -136,7 +129,7 @@ const BankAccounts = () => {
         <CCard>
           <CCardHeader>{t("bankAccounts.listOfBankAccounts")}</CCardHeader>
           <CCardBody>
-            {data.pagination.isFetching ? spinner : dataTable}
+            {data.pagination.isFetching ? <CardSpinner /> : dataTable}
           </CCardBody>
         </CCard>
       </CCol>

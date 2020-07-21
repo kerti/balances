@@ -3,6 +3,7 @@
   "assets": {
     "assets": "Assets",
     "bankAccounts": "Bank Accounts",
+    "bankAccountDetails": "Bank Account Detail",
     "properties": "Properties",
     "vehicles": "Vehicles"
   },

@@ -3,6 +3,7 @@ import auth from "./auth";
 import paginate from "./paginate";
 import ui from "./ui";
 import { actionTypes } from "../actions";
+import merge from "lodash/merge";
 
 // Updates an entity cache in response to any action with response.entities.
 const entities = (
@@ -10,8 +11,7 @@ const entities = (
   action
 ) => {
   if (action.response && action.response.entities) {
-    // TODO: use lodash/merge here if necessary, for now let's just forgo caching
-    return action.response.entities;
+    return merge({}, state, action.response.entities);
   }
 
   return state;
@@ -35,9 +35,29 @@ const pagination = combineReducers({
   bankAccountsByKeyword: paginate({
     mapActionToKey: (action) => action.keyword,
     types: [
-      actionTypes.entities.bankAccountPage.REQUEST,
-      actionTypes.entities.bankAccountPage.SUCCESS,
-      actionTypes.entities.bankAccountPage.FAILURE,
+      actionTypes.entities.bankAccount.page.REQUEST,
+      actionTypes.entities.bankAccount.page.SUCCESS,
+      actionTypes.entities.bankAccount.page.FAILURE,
+    ],
+  }),
+  bankAccountBalancesByBankAccountId: paginate({
+    mapActionToKey: (action) => action.bankAccountId,
+    types: [
+      actionTypes.entities.bankAccountBalance.page.REQUEST,
+      actionTypes.entities.bankAccountBalance.page.SUCCESS,
+      actionTypes.entities.bankAccountBalance.page.FAILURE,
+    ],
+  }),
+  usersByFilter: paginate({
+    mapActionToKey: (action) => {
+      const { ids, keyword, page, pageSize } = action;
+      const filter = { ids, keyword, page, pageSize };
+      return JSON.stringify(filter);
+    },
+    types: [
+      actionTypes.entities.user.page.REQUEST,
+      actionTypes.entities.user.page.SUCCESS,
+      actionTypes.entities.user.page.FAILURE,
     ],
   }),
 });

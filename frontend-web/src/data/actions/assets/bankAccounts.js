@@ -12,8 +12,9 @@ const fetchBankAccount = (id) => ({
       actionTypes.entities.bankAccount.SUCCESS,
       actionTypes.entities.bankAccount.FAILURE,
     ],
-    endpoint: `bankAccounts/${id}`,
+    endpoint: `bankAccounts/${id}?withBalances&balanceCount=12`,
     schema: Schemas.BANK_ACCOUNT,
+    method: "GET",
   },
 });
 
@@ -26,6 +27,8 @@ export const loadBankAccount = (id, requiredFields = []) => (
   const bankAccount = getState().entities.bankAccounts[id];
   if (
     bankAccount &&
+    bankAccount.balances &&
+    bankAccount.balances.length > 0 &&
     requiredFields.every((key) => bankAccount.hasOwnProperty(key))
   ) {
     return null;
@@ -45,9 +48,9 @@ const fetchBankAccountPage = (
   page,
   [CALL_API]: {
     types: [
-      actionTypes.entities.bankAccountPage.REQUEST,
-      actionTypes.entities.bankAccountPage.SUCCESS,
-      actionTypes.entities.bankAccountPage.FAILURE,
+      actionTypes.entities.bankAccount.page.REQUEST,
+      actionTypes.entities.bankAccount.page.SUCCESS,
+      actionTypes.entities.bankAccount.page.FAILURE,
     ],
     endpoint: `bankAccounts/search`,
     schema: Schemas.BANK_ACCOUNT_ARRAY,
@@ -76,4 +79,81 @@ export const loadBankAccountPage = (
   }
 
   return dispatch(fetchBankAccountPage(keyword, page, pageSize));
+};
+
+// Fetches a single Bank Account Balance from Balances API.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+const fetchBankAccountBalance = (id) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccountBalance.REQUEST,
+      actionTypes.entities.bankAccountBalance.SUCCESS,
+      actionTypes.entities.bankAccountBalance.FAILURE,
+    ],
+    endpoint: `bankAccounts/balances/${id}`,
+    schema: Schemas.BANK_ACCOUNT_BALANCE,
+    method: "GET",
+  },
+});
+
+// Fetches a single Bank Account Balance from Balances API.
+// Relies on Redux Thunk middleware.
+export const loadBankAccountBalance = (id, requiredFields = []) => (
+  dispatch,
+  getState
+) => {
+  const bankAccountBalance = getState().entities.bankAccountBalances[id];
+  if (
+    bankAccountBalance &&
+    requiredFields.every((key) => bankAccountBalance.hasOwnProperty(key))
+  ) {
+    return null;
+  }
+
+  return dispatch(fetchBankAccountBalance(id));
+};
+
+// Fetches a page of Bank Account Balances for a particular Bank Account.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+const fetchBankAccountBalancePage = (
+  bankAccountId,
+  page,
+  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
+) => ({
+  bankAccountId,
+  page,
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccountBalance.page.REQUEST,
+      actionTypes.entities.bankAccountBalance.page.SUCCESS,
+      actionTypes.entities.bankAccountBalance.page.FAILURE,
+    ],
+    endpoint: `bankAccounts/balances/search`,
+    schema: Schemas.BANK_ACCOUNT_BALANCE_ARRAY,
+    method: "POST",
+    body: {
+      bankAccountId,
+      page,
+      pageSize,
+    },
+  },
+});
+
+// Fetches a page of Bank Account Balances for a particular Bank Account.
+// Bails out if page is cached and user didn't specifically request next page.
+// Relies on Redux Thunk middleware.
+export const loadBankAccountBalancePage = (
+  bankAccountId,
+  page,
+  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
+) => (dispatch, getState) => {
+  const { currentPage = 1, pageCount = 0 } =
+    getState().pagination.bankAccountBalancesByBankAccountId[bankAccountId] ||
+    {};
+
+  if (pageCount > 0 && page === currentPage) {
+    return null;
+  }
+
+  return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize));
 };

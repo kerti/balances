@@ -3,6 +3,25 @@ import { camelizeKeys } from "humps";
 import axios from "axios";
 import sources from "../sources";
 
+const getPageInfo = (response) => {
+  const data = response.data.data;
+  if (data.pageInfo) {
+    return {
+      pageCount: data.pageInfo.pageCount,
+      totalCount: data.pageInfo.totalCount,
+    };
+  }
+  return { pageCount: null, totalCount: null };
+};
+
+const getItems = (response) => {
+  const data = response.data.data;
+  if (data.items && Array.isArray(data.items)) {
+    return data.items;
+  }
+  return data;
+};
+
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
 const callApi = (endpoint, schema, options = {}) => {
@@ -17,11 +36,11 @@ const callApi = (endpoint, schema, options = {}) => {
     withCredentials: true,
   })
     .then((response) => {
-      const pageCount = response.data.data.pageInfo.pageCount;
-      const totalCount = response.data.data.pageInfo.totalCount;
-      const camelizedJson = camelizeKeys(response.data.data.items);
+      const { pageCount, totalCount } = getPageInfo(response);
+      const camelizedJson = camelizeKeys(getItems(response));
+      const normalized = normalize(camelizedJson, schema);
 
-      return Object.assign({}, normalize(camelizedJson, schema), {
+      return Object.assign({}, normalized, {
         pageCount,
         totalCount,
       });
