@@ -143,7 +143,7 @@ func (h *BankAccountImpl) HandleUpdateBankAccount(w http.ResponseWriter, r *http
 		return
 	}
 
-	response.RespondWithJSON(w, http.StatusCreated, bankAccount.ToOutput())
+	response.RespondWithJSON(w, http.StatusOK, bankAccount.ToOutput())
 }
 
 // HandleDeleteBankAccount handles the request
