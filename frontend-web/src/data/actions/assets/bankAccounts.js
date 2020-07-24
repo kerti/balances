@@ -5,14 +5,14 @@ import { Schemas } from "../../schemas";
 
 // Fetches a single Bank Acccount from Balances API.
 // Relies on the custom API middlewre defined in ../middleware/api.js.
-const fetchBankAccount = (id) => ({
+const fetchBankAccount = (id, withBalances = true, balanceCount = 12) => ({
   [CALL_API]: {
     types: [
       actionTypes.entities.bankAccount.REQUEST,
       actionTypes.entities.bankAccount.SUCCESS,
       actionTypes.entities.bankAccount.FAILURE,
     ],
-    endpoint: `bankAccounts/${id}?withBalances&balanceCount=12`,
+    endpoint: `bankAccounts/${id}?withBalances=${withBalances}&balanceCount=${balanceCount}`,
     schema: Schemas.BANK_ACCOUNT,
     method: "GET",
   },
@@ -20,10 +20,12 @@ const fetchBankAccount = (id) => ({
 
 // Fetches a single Bank Account from Balances API unless it is cached.
 // Relies on Redux Thunk middleware.
-export const loadBankAccount = (id, requiredFields = []) => (
-  dispatch,
-  getState
-) => {
+export const loadBankAccount = (
+  id,
+  withBalances = true,
+  balanceCount = 12,
+  requiredFields = []
+) => (dispatch, getState) => {
   const bankAccount = getState().entities.bankAccounts[id];
   if (
     bankAccount &&
@@ -34,7 +36,7 @@ export const loadBankAccount = (id, requiredFields = []) => (
     return null;
   }
 
-  return dispatch(fetchBankAccount(id));
+  return dispatch(fetchBankAccount(id, withBalances, balanceCount));
 };
 
 // Fetches a page of Bank Accounts for a particular keyword.
@@ -157,3 +159,32 @@ export const loadBankAccountBalancePage = (
 
   return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize));
 };
+
+// Store a bank account.
+export const updateBankAccount = (
+  id,
+  accountName,
+  bankName,
+  accountHolderName,
+  accountNumber,
+  status
+) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccount.update.REQUEST,
+      actionTypes.entities.bankAccount.update.SUCCESS,
+      actionTypes.entities.bankAccount.update.FAILURE,
+    ],
+    endpoint: `bankAccounts/${id}`,
+    schema: Schemas.BANK_ACCOUNT,
+    method: "PATCH",
+    body: {
+      id,
+      accountName,
+      bankName,
+      accountHolderName,
+      accountNumber,
+      status,
+    },
+  },
+});

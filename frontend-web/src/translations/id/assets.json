@@ -7,10 +7,6 @@
     "accountNumberPlaceholder": "Masukkan nomor rekening Anda...",
     "accountHolder": "Nama Pemegang Rekening",
     "accountHolderPlaceholder": "Masukkan nama pemegang rekening Anda...",
-    "actionActivate": "Aktifkan",
-    "actionDeactivate": "Nonaktifkan",
-    "actionEdit": "Ubah",
-    "actionSetBalance": "Atur Saldo",
     "balance": "Saldo",
     "balanceHistory": "Riwayat Saldo",
     "balanceSetBy": "Disimpan Oleh",
@@ -18,22 +14,26 @@
     "name": "Nama Bank",
     "namePlaceholder": "Masukkan nama bank Anda...",
     "details": "Detil Rekening Bank",
-    "editBank": "Ubah Bank",
     "lastBalance": "Saldo Terakhir",
     "listOfBankAccounts": "Daftar Rekening Bank",
-    "status": "Status",
+    "status": "Status"
+  },
+  "common": {
+    "actions": {
+      "activate": "Aktifkan",
+      "add": "Tambah",
+      "deactivate": "Nonaktifkan",
+      "delete": "Hapus",
+      "edit": "Ubah",
+      "reset": "Ulangi",
+      "setBalance": "Atur Saldo",
+      "submit": "Kirim"
+    },
+    "date": "Tanggal",
     "states": {
       "active": "Aktif",
       "inactive": "Tidak Aktif"
     }
-  },
-  "common": {
-    "add": "Tambah",
-    "date": "Tanggal",
-    "delete": "Hapus",
-    "edit": "Ubah",
-    "reset": "Ulangi",
-    "submit": "Kirim"
   },
   "properties": {
     "properties": "Properti",

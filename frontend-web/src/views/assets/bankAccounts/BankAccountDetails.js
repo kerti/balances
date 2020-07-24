@@ -21,6 +21,7 @@ import { useParams } from "react-router-dom";
 import {
   loadBankAccount,
   loadBankAccountBalancePage,
+  updateBankAccount,
 } from "../../../data/actions/assets/bankAccounts";
 import CardSpinner from "../../common/CardSpinner";
 import uniq from "lodash/uniq";
@@ -37,11 +38,27 @@ const getLabelsFromBalanceHistory = (balanceHistoryData) => {
   return balanceHistoryData.map((hist) => new Date(hist.date));
 };
 
-const chartOptions = {
-  scales: {
-    xAxes: [{ type: "time" }],
-  },
-  tooltips: { enabled: true },
+const getChartOptions = (t) => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+      display: false,
+    },
+    scales: {
+      xAxes: [{ type: "time" }],
+      yAxes: [
+        {
+          ticks: {
+            callback: function (label, index, labels) {
+              return label / 1000000 + "M";
+            },
+          },
+        },
+      ],
+    },
+    tooltips: { enabled: true },
+  };
 };
 
 const getBalanceHistoryFields = (t) => [
@@ -81,6 +98,8 @@ const Properties = () => {
     accountHolderName: "",
     accountNumber: "",
   });
+
+  const chartOptions = getChartOptions(t);
 
   const balanceHistoryFields = getBalanceHistoryFields(t);
 
@@ -124,19 +143,19 @@ const Properties = () => {
     // fetch bank account if necessary
     if (!accountReady) {
       console.log("dispatching loadBankAccount");
-      dispatch(loadBankAccount(id));
+      dispatch(loadBankAccount(id, true, 36));
     }
 
     // fetch balances if necessary
     if (accountReady && !balancesReady) {
       console.log("dispatching loadBankAccountBalancePage");
-      dispatch(loadBankAccountBalancePage(id, 1, 12));
+      dispatch(loadBankAccountBalancePage(id, 1, 36));
     }
 
     // fetch users if necessary
     if (balancesReady && !usersReady) {
       console.log("dispatching loadUserPage");
-      dispatch(loadUserPage(getUserIDs(balances), "", 1, 12));
+      dispatch(loadUserPage(getUserIDs(balances), "", 1, 36));
     }
 
     // set state if necessary
@@ -162,6 +181,17 @@ const Properties = () => {
   const handleAccountSubmit = (e) => {
     e.preventDefault();
     console.log("handling submit");
+    console.log(e.target.accountName.value);
+    dispatch(
+      updateBankAccount(
+        id,
+        e.target.accountName.value,
+        e.target.bankName.value,
+        e.target.accountHolderName.value,
+        e.target.accountNumber.value,
+        "active"
+      )
+    );
   };
 
   const balanceDataTable = (
@@ -200,6 +230,7 @@ const Properties = () => {
     <>
       <CChartLine
         type="line"
+        style={{ height: "300px" }}
         datasets={[
           {
             label: t("bankAccounts.balanceHistory"),
@@ -217,6 +248,14 @@ const Properties = () => {
     <>
       <CRow>
         <CCol xs="12" md="12">
+          <CCard>
+            <CCardHeader>{t("bankAccounts.balanceHistoryGraph")}</CCardHeader>
+            <CCardBody>{ready ? balanceChart : <CardSpinner />}</CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs="12" md="6">
           <CForm
             action=""
             method="post"
@@ -293,27 +332,19 @@ const Properties = () => {
               </CCardBody>
               <CCardFooter>
                 <CButton type="submit" size="sm" color="primary">
-                  <CIcon name="cil-scrubber" /> {t("common.submit")}
+                  <CIcon name="cil-scrubber" /> {t("common.actions.submit")}
                 </CButton>{" "}
                 <CButton type="reset" size="sm" color="danger">
-                  <CIcon name="cil-ban" /> {t("common.reset")}
+                  <CIcon name="cil-ban" /> {t("common.actions.reset")}
                 </CButton>
               </CCardFooter>
             </CCard>
           </CForm>
         </CCol>
-      </CRow>
-      <CRow>
         <CCol xs="12" md="6">
           <CCard>
             <CCardHeader>{t("bankAccounts.balanceHistory")}</CCardHeader>
             <CCardBody>{ready ? balanceDataTable : <CardSpinner />}</CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs="12" md="6">
-          <CCard>
-            <CCardHeader>{t("bankAccounts.balanceHistoryGraph")}</CCardHeader>
-            <CCardBody>{ready ? balanceChart : <CardSpinner />}</CCardBody>
           </CCard>
         </CCol>
       </CRow>

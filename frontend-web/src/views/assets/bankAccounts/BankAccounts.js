@@ -108,7 +108,7 @@ const BankAccounts = () => {
           status: (item) => (
             <td>
               <CBadge color={getBadge(item)}>
-                {t("bankAccounts.states." + item.status)}
+                {t("common.states." + item.status)}
               </CBadge>
             </td>
           ),

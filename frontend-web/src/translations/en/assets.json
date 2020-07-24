@@ -7,7 +7,6 @@
     "accountNumberPlaceholder": "Enter your account number...",
     "accountHolder": "Account Holder",
     "accountHolderPlaceholder": "Enter your account holder...",
-    "setBalance": "Set Balance",
     "balance": "Balance",
     "balanceHistory": "Balance History",
     "balanceSetBy": "Balance Set By",
@@ -24,12 +23,13 @@
       "activate": "Activate",
       "add": "Add",
       "deactivate": "Deactivate",
-      "date": "Date",
       "delete": "Delete",
       "edit": "Edit",
       "reset": "Reset",
+      "setBalance": "Set Balance",
       "submit": "Submit"
     },
+    "date": "Date",
     "states": {
       "active": "Active",
       "inactive": "Inactive"
