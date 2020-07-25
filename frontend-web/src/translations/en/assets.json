@@ -22,6 +22,7 @@
     "actions": {
       "activate": "Activate",
       "add": "Add",
+      "addNew": "Add New",
       "deactivate": "Deactivate",
       "delete": "Delete",
       "edit": "Edit",

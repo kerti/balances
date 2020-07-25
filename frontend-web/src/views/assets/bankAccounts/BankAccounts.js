@@ -10,10 +10,12 @@ import {
   CDataTable,
   CBadge,
   CPagination,
+  CButton,
 } from "@coreui/react";
 import CardSpinner from "../../common/CardSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import { loadBankAccountPage } from "../../../data/actions/assets/bankAccounts";
+import CIcon from "@coreui/icons-react";
 
 const getBadge = (item) => {
   switch (item.status) {
@@ -127,7 +129,18 @@ const BankAccounts = () => {
     <CRow>
       <CCol>
         <CCard>
-          <CCardHeader>{t("bankAccounts.listOfBankAccounts")}</CCardHeader>
+          <CCardHeader>
+            {t("bankAccounts.listOfBankAccounts")}
+            <div className="card-header-actions">
+              <CButton
+                size="sm"
+                color="primary"
+                onClick={() => history.push(`/assets/bankAccounts/new`)}
+              >
+                <CIcon name="cil-plus" /> {t("common.actions.addNew")}
+              </CButton>
+            </div>
+          </CCardHeader>
           <CCardBody>
             {data.pagination.isFetching ? <CardSpinner /> : dataTable}
           </CCardBody>

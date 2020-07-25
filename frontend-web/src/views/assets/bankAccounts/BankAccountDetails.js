@@ -140,32 +140,34 @@ const Properties = () => {
   const ready = accountReady && balancesReady && usersReady && stateReady;
 
   useEffect(() => {
-    // fetch bank account if necessary
-    if (!accountReady) {
-      console.log("dispatching loadBankAccount");
-      dispatch(loadBankAccount(id, true, 36));
-    }
+    if (id) {
+      // fetch bank account if necessary
+      if (!accountReady) {
+        console.log("dispatching loadBankAccount");
+        dispatch(loadBankAccount(id, true, 36));
+      }
 
-    // fetch balances if necessary
-    if (accountReady && !balancesReady) {
-      console.log("dispatching loadBankAccountBalancePage");
-      dispatch(loadBankAccountBalancePage(id, 1, 36));
-    }
+      // fetch balances if necessary
+      if (accountReady && !balancesReady) {
+        console.log("dispatching loadBankAccountBalancePage");
+        dispatch(loadBankAccountBalancePage(id, 1, 36));
+      }
 
-    // fetch users if necessary
-    if (balancesReady && !usersReady) {
-      console.log("dispatching loadUserPage");
-      dispatch(loadUserPage(getUserIDs(balances), "", 1, 36));
-    }
+      // fetch users if necessary
+      if (balancesReady && !usersReady) {
+        console.log("dispatching loadUserPage");
+        dispatch(loadUserPage(getUserIDs(balances), "", 1, 36));
+      }
 
-    // set state if necessary
-    if (usersReady && !stateReady) {
-      setState({
-        accountName: account.accountName,
-        bankName: account.bankName,
-        accountHolderName: account.accountHolderName,
-        accountNumber: account.accountNumber,
-      });
+      // set state if necessary
+      if (usersReady && !stateReady) {
+        setState({
+          accountName: account.accountName,
+          bankName: account.bankName,
+          accountHolderName: account.accountHolderName,
+          accountNumber: account.accountNumber,
+        });
+      }
     }
   }, [
     dispatch,
@@ -182,16 +184,20 @@ const Properties = () => {
     e.preventDefault();
     console.log("handling submit");
     console.log(e.target.accountName.value);
-    dispatch(
-      updateBankAccount(
-        id,
-        e.target.accountName.value,
-        e.target.bankName.value,
-        e.target.accountHolderName.value,
-        e.target.accountNumber.value,
-        "active"
-      )
-    );
+    if (id) {
+      dispatch(
+        updateBankAccount(
+          id,
+          e.target.accountName.value,
+          e.target.bankName.value,
+          e.target.accountHolderName.value,
+          e.target.accountNumber.value,
+          "active"
+        )
+      );
+    } else {
+      console.log("should be sending new account here");
+    }
   };
 
   const balanceDataTable = (

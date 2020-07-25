@@ -114,6 +114,12 @@ const getRoutes = (t) => {
       exact: true,
     },
     {
+      path: "/assets/bankAccounts/new",
+      name: t("assets.bankAccountNew"),
+      component: BankAccountDetails,
+      exact: true,
+    },
+    {
       path: "/assets/bankAccounts/:id",
       name: t("assets.bankAccountDetails"),
       component: BankAccountDetails,
