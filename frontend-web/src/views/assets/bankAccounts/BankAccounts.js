@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useHistory } from 'react-router-dom'
 import {
   CRow,
   CCol,
@@ -11,73 +11,73 @@ import {
   CBadge,
   CPagination,
   CButton,
-} from "@coreui/react";
-import CardSpinner from "../../common/CardSpinner";
-import { useDispatch, useSelector } from "react-redux";
-import { loadBankAccountPage } from "../../../data/actions/assets/bankAccounts";
-import CIcon from "@coreui/icons-react";
+} from '@coreui/react'
+import CardSpinner from '../../common/CardSpinner'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadBankAccountPage } from '../../../data/actions/assets/bankAccounts'
+import CIcon from '@coreui/icons-react'
 
 const getBadge = (item) => {
   switch (item.status) {
-    case "active":
-      return "success";
-    case "inactive":
-      return "secondary";
+    case 'active':
+      return 'success'
+    case 'inactive':
+      return 'secondary'
     default:
-      return "primary";
+      return 'primary'
   }
-};
+}
 
 const BankAccounts = () => {
-  const { t } = useTranslation(["assets", "formats"]);
-  const { t: f } = useTranslation("formats");
-  const dispatch = useDispatch();
-  const [currentPage, setCurrentPage] = useState(1);
-  const history = useHistory();
+  const { t } = useTranslation(['assets', 'formats'])
+  const { t: f } = useTranslation('formats')
+  const dispatch = useDispatch()
+  const [currentPage, setCurrentPage] = useState(1)
+  const history = useHistory()
   const fields = [
-    { key: "accountName", label: t("bankAccounts.accountName") },
-    { key: "bankName", label: t("bankAccounts.name") },
-    { key: "accountHolderName", label: t("bankAccounts.accountHolder") },
-    { key: "accountNumber", label: t("bankAccounts.accountNumber") },
+    { key: 'accountName', label: t('bankAccounts.accountName') },
+    { key: 'bankName', label: t('bankAccounts.name') },
+    { key: 'accountHolderName', label: t('bankAccounts.accountHolder') },
+    { key: 'accountNumber', label: t('bankAccounts.accountNumber') },
     {
-      key: "lastBalance",
-      label: t("bankAccounts.lastBalance"),
-      _classes: ["text-right"],
+      key: 'lastBalance',
+      label: t('bankAccounts.lastBalance'),
+      _classes: ['text-right'],
     },
-    { key: "status", label: t("bankAccounts.status") },
-  ];
+    { key: 'status', label: t('bankAccounts.status') },
+  ]
 
-  const rawData = useSelector((state) => state.entities.bankAccounts);
+  const rawData = useSelector((state) => state.entities.bankAccounts)
   const paginations = useSelector(
     (state) => state.pagination.bankAccountsByKeyword
-  );
+  )
 
   const parseData = (rawData, paginations, keyword) => {
-    const currentPageInfo = paginations[keyword];
+    const currentPageInfo = paginations[keyword]
     if (currentPageInfo !== undefined) {
       return {
         items: currentPageInfo.ids.map((id) => {
-          return rawData[id];
+          return rawData[id]
         }),
         pagination: currentPageInfo,
-      };
+      }
     } else {
       return {
         items: [],
         pagination: {
           isFetching: true,
         },
-      };
+      }
     }
-  };
+  }
 
-  const data = parseData(rawData, paginations, "");
+  const data = parseData(rawData, paginations, '')
 
   useEffect(() => {
     if (currentPage > 0) {
-      dispatch(loadBankAccountPage("", currentPage));
+      dispatch(loadBankAccountPage('', currentPage))
     }
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage])
 
   const dataTable = (
     <>
@@ -91,17 +91,17 @@ const BankAccounts = () => {
         itemsPerPage={parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)}
         clickableRows
         onRowClick={(item) => {
-          history.push(`/assets/bankAccounts/${item.id}`);
+          history.push(`/assets/bankAccounts/${item.id}`)
         }}
         scopedSlots={{
           lastBalance: (item) => (
             <td className="text-right">
-              {f("number.decimal.2fractions", {
+              {f('number.decimal.2fractions', {
                 value: item.lastBalance,
               })}
               <br />
               <small>
-                {f("date.long", {
+                {f('date.long', {
                   value: item.lastBalanceDate,
                 })}
               </small>
@@ -110,7 +110,7 @@ const BankAccounts = () => {
           status: (item) => (
             <td>
               <CBadge color={getBadge(item)}>
-                {t("common.states." + item.status)}
+                {t('common.states.' + item.status)}
               </CBadge>
             </td>
           ),
@@ -123,21 +123,21 @@ const BankAccounts = () => {
         onActivePageChange={setCurrentPage}
       />
     </>
-  );
+  )
 
   return (
     <CRow>
       <CCol>
         <CCard>
           <CCardHeader>
-            {t("bankAccounts.listOfBankAccounts")}
+            {t('bankAccounts.listOfBankAccounts')}
             <div className="card-header-actions">
               <CButton
                 size="sm"
                 color="primary"
                 onClick={() => history.push(`/assets/bankAccounts/new`)}
               >
-                <CIcon name="cil-plus" /> {t("common.actions.addNew")}
+                <CIcon name="cil-plus" /> {t('common.actions.addNew')}
               </CButton>
             </div>
           </CCardHeader>
@@ -147,7 +147,7 @@ const BankAccounts = () => {
         </CCard>
       </CCol>
     </CRow>
-  );
-};
+  )
+}
 
-export default BankAccounts;
+export default BankAccounts
