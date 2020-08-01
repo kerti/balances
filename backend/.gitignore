@@ -6,3 +6,6 @@
 
 # test coverage files
 .cover
+
+# binaries
+balances
