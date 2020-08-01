@@ -1,37 +1,37 @@
-import { createStore, applyMiddleware } from "redux";
-import thunkMiddleware from "redux-thunk";
-import rootReducer from "../reducers";
+import { createStore, applyMiddleware } from 'redux'
+import thunkMiddleware from 'redux-thunk'
+import rootReducer from '../reducers'
 
-const middlewares = [thunkMiddleware];
+const middlewares = [thunkMiddleware]
 
-if (process.env.NODE_ENV === "development") {
-  const { createLogger } = require("redux-logger");
-  const logger = createLogger();
-  middlewares.push(logger);
+if (process.env.NODE_ENV === 'development') {
+  const { createLogger } = require('redux-logger')
+  const logger = createLogger()
+  middlewares.push(logger)
 }
 
 const initialState = {
   ui: {
     lang: process.env.REACT_APP_DEFAULT_LANG,
-    sidebarShow: "responsive",
+    sidebarShow: 'responsive',
   },
-};
+}
 
 const initStore = () => {
   const store = createStore(
     rootReducer,
     initialState,
     applyMiddleware(...middlewares)
-  );
+  )
 
   if (module.hot) {
-    module.hot.accept("../reducers", () => {
-      const nextRootReducer = require("../reducers").default;
-      store.replaceReducer(nextRootReducer);
-    });
+    module.hot.accept('../reducers', () => {
+      const nextRootReducer = require('../reducers').default
+      store.replaceReducer(nextRootReducer)
+    })
   }
 
-  return store;
-};
+  return store
+}
 
-export default initStore;
+export default initStore

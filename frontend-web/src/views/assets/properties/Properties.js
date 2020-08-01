@@ -1,18 +1,18 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const Properties = () => {
-  const { t } = useTranslation("assets");
+  const { t } = useTranslation('assets')
   return (
     <>
       <div className="card">
-        <div className="card-header">{t("properties.properties")}</div>
+        <div className="card-header">{t('properties.properties')}</div>
         <div className="card-body">
-          <p>{t("properties.description")}</p>
+          <p>{t('properties.description')}</p>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Properties;
+export default Properties

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   CBadge,
   CDropdown,
@@ -6,28 +6,28 @@ import {
   CDropdownMenu,
   CDropdownToggle,
   CImg,
-} from "@coreui/react";
-import CIcon from "@coreui/icons-react";
-import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { requestLogout } from "../data/actions/auth";
+} from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { useDispatch } from 'react-redux'
+import { useHistory } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { requestLogout } from '../data/actions/auth'
 
 const TheHeaderDropdown = () => {
-  const dispatch = useDispatch();
-  const history = useHistory();
-  const { t } = useTranslation("app");
+  const dispatch = useDispatch()
+  const history = useHistory()
+  const { t } = useTranslation('app')
 
   const handleLogout = () => {
-    dispatch(requestLogout(history));
-  };
+    dispatch(requestLogout(history))
+  }
 
   return (
     <CDropdown inNav className="c-header-nav-items mx-2" direction="down">
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={"avatars/6.jpg"}
+            src={'avatars/6.jpg'}
             className="c-avatar-img"
             alt="admin@bootstrapmaster.com"
           />
@@ -93,11 +93,11 @@ const TheHeaderDropdown = () => {
         <CDropdownItem divider />
         <CDropdownItem onClick={handleLogout}>
           <CIcon name="cil-lock-locked" className="mfe-2" />
-          {t("logout.lockAccount")}
+          {t('logout.lockAccount')}
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
-  );
-};
+  )
+}
 
-export default TheHeaderDropdown;
+export default TheHeaderDropdown

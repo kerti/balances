@@ -1,18 +1,18 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const P2pLending = () => {
-  const { t } = useTranslation("investments");
+  const { t } = useTranslation('investments')
   return (
     <>
       <div className="card">
-        <div className="card-header">{t("p2pLending.p2pLending")}</div>
+        <div className="card-header">{t('p2pLending.p2pLending')}</div>
         <div className="card-body">
-          <p>{t("p2pLending.description")}</p>
+          <p>{t('p2pLending.description')}</p>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default P2pLending;
+export default P2pLending

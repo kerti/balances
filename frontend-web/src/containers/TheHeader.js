@@ -1,5 +1,5 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   CHeader,
   CToggler,
@@ -10,42 +10,42 @@ import {
   CSubheader,
   CBreadcrumbRouter,
   CLink,
-} from "@coreui/react";
-import CIcon from "@coreui/icons-react";
-import { useTranslation } from "react-i18next";
+} from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { useTranslation } from 'react-i18next'
 
 // routes config
-import getRoutes from "../routes";
+import getRoutes from '../routes'
 
 // action
-import { setSidebarShow } from "../data/actions/ui";
+import { setSidebarShow } from '../data/actions/ui'
 
 import {
   TheHeaderDropdown,
   TheHeaderDropdownMssg,
   TheHeaderDropdownNotif,
   TheHeaderDropdownTasks,
-} from "./index";
+} from './index'
 
 const TheHeader = () => {
-  const dispatch = useDispatch();
-  const sidebarShow = useSelector((state) => state.ui.sidebarShow);
-  const { t } = useTranslation("navigation");
-  const routes = getRoutes(t);
+  const dispatch = useDispatch()
+  const sidebarShow = useSelector((state) => state.ui.sidebarShow)
+  const { t } = useTranslation('navigation')
+  const routes = getRoutes(t)
 
   const toggleSidebar = () => {
-    const val = [true, "responsive"].includes(sidebarShow)
+    const val = [true, 'responsive'].includes(sidebarShow)
       ? false
-      : "responsive";
-    dispatch(setSidebarShow(val));
-  };
+      : 'responsive'
+    dispatch(setSidebarShow(val))
+  }
 
   const toggleSidebarMobile = () => {
-    const val = [false, "responsive"].includes(sidebarShow)
+    const val = [false, 'responsive'].includes(sidebarShow)
       ? true
-      : "responsive";
-    dispatch(setSidebarShow(val));
-  };
+      : 'responsive'
+    dispatch(setSidebarShow(val))
+  }
 
   return (
     <CHeader withSubheader>
@@ -106,7 +106,7 @@ const TheHeader = () => {
         </div>
       </CSubheader>
     </CHeader>
-  );
-};
+  )
+}
 
-export default TheHeader;
+export default TheHeader

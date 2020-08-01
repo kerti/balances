@@ -1,5 +1,5 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   CCreateElement,
   CSidebar,
@@ -10,24 +10,24 @@ import {
   CSidebarMinimizer,
   CSidebarNavDropdown,
   CSidebarNavItem,
-} from "@coreui/react";
+} from '@coreui/react'
 
-import CIcon from "@coreui/icons-react";
+import CIcon from '@coreui/icons-react'
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next'
 
 // sidebar nav config
-import getNavigation from "./_nav";
+import getNavigation from './_nav'
 
 // action
-import { setSidebarShow } from "../data/actions/ui";
+import { setSidebarShow } from '../data/actions/ui'
 
 const TheSidebar = () => {
-  const dispatch = useDispatch();
-  const show = useSelector((state) => state.ui.sidebarShow);
-  const { t } = useTranslation("navigation");
+  const dispatch = useDispatch()
+  const show = useSelector((state) => state.ui.sidebarShow)
+  const { t } = useTranslation('navigation')
 
-  const translatedNavigation = getNavigation(t);
+  const translatedNavigation = getNavigation(t)
 
   return (
     <CSidebar show={show} onShowChange={(val) => dispatch(setSidebarShow(val))}>
@@ -56,7 +56,7 @@ const TheSidebar = () => {
       </CSidebarNav>
       <CSidebarMinimizer className="c-d-md-down-none" />
     </CSidebar>
-  );
-};
+  )
+}
 
-export default React.memo(TheSidebar);
+export default React.memo(TheSidebar)

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   CBreadcrumb,
   CBreadcrumbItem,
@@ -9,14 +9,14 @@ import {
   CLink,
   CCol,
   CRow,
-} from "@coreui/react";
-import { useTranslation } from "react-i18next";
+} from '@coreui/react'
+import { useTranslation } from 'react-i18next'
 
-import getRoutes from "../../../routes";
+import getRoutes from '../../../routes'
 
 const Breadcrumbs = () => {
-  const { t } = useTranslation("navigation");
-  const routes = getRoutes(t);
+  const { t } = useTranslation('navigation')
+  const routes = getRoutes(t)
   return (
     <CRow>
       <CCol xs="12">
@@ -71,7 +71,7 @@ const Breadcrumbs = () => {
         </CCard>
       </CCol>
     </CRow>
-  );
-};
+  )
+}
 
-export default Breadcrumbs;
+export default Breadcrumbs
