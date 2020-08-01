@@ -1,20 +1,20 @@
-import React, { Suspense } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
-import { CContainer, CFade } from "@coreui/react";
-import { useTranslation } from "react-i18next";
+import React, { Suspense } from 'react'
+import { Redirect, Route, Switch } from 'react-router-dom'
+import { CContainer, CFade } from '@coreui/react'
+import { useTranslation } from 'react-i18next'
 
 // routes config
-import getRoutes from "../routes";
+import getRoutes from '../routes'
 
 const loading = (
   <div className="pt-3 text-center">
     <div className="sk-spinner sk-spinner-pulse"></div>
   </div>
-);
+)
 
 const TheContent = () => {
-  const { t } = useTranslation("navigation");
-  const routes = getRoutes(t);
+  const { t } = useTranslation('navigation')
+  const routes = getRoutes(t)
   return (
     <main className="c-main">
       <CContainer fluid>
@@ -35,14 +35,14 @@ const TheContent = () => {
                     )}
                   />
                 )
-              );
+              )
             })}
             <Redirect from="/" to="/dashboard" />
           </Switch>
         </Suspense>
       </CContainer>
     </main>
-  );
-};
+  )
+}
 
-export default React.memo(TheContent);
+export default React.memo(TheContent)

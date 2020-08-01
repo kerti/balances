@@ -9,15 +9,18 @@ const CoreUIIcons = () => {
       <CCardHeader>
         Free Icons / as CIcon{' '}
         <div className="card-header-actions">
-          <a href="https://github.com/coreui/coreui-icons" rel="noreferrer noopener" target="_blank" className="card-header-action">
+          <a
+            href="https://github.com/coreui/coreui-icons"
+            rel="noreferrer noopener"
+            target="_blank"
+            className="card-header-action"
+          >
             <small className="text-muted">Github</small>
           </a>
         </div>
       </CCardHeader>
       <CCardBody>
-        <CRow className="text-center">
-          {getIconsView(freeSet)}
-        </CRow>
+        <CRow className="text-center">{getIconsView(freeSet)}</CRow>
       </CCardBody>
     </CCard>
   )
