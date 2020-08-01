@@ -16,6 +16,7 @@ import i18next from 'i18next'
 
 import { initTranslations } from './translations'
 import { setLangFromCookie } from './data/actions/ui'
+
 import { loadAuthCookies } from './data/actions/system/auth'
 import DevTools from './containers/DevTools'
 
