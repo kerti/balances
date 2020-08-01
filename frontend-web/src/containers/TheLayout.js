@@ -1,15 +1,15 @@
-import React, { useEffect } from "react";
-import { TheContent, TheSidebar, TheFooter, TheHeader } from "./index";
-import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { requestAuthCheck } from "../data/actions/system/auth";
+import React, { useEffect } from 'react'
+import { TheContent, TheSidebar, TheFooter, TheHeader } from './index'
+import { useDispatch } from 'react-redux'
+import { useHistory } from 'react-router-dom'
+import { requestAuthCheck } from '../data/actions/system/auth'
 
 const TheLayout = () => {
-  const dispatch = useDispatch();
-  const history = useHistory();
+  const dispatch = useDispatch()
+  const history = useHistory()
   useEffect(() => {
-    dispatch(requestAuthCheck(history));
-  });
+    dispatch(requestAuthCheck(history))
+  })
 
   return (
     <div className="c-app c-default-layout">
@@ -22,7 +22,7 @@ const TheLayout = () => {
         <TheFooter />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default TheLayout;
+export default TheLayout

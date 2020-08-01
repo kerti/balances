@@ -1,18 +1,18 @@
-import { schema } from "normalizr";
-import { userSchema } from "./system";
+import { schema } from 'normalizr'
+import { userSchema } from './system'
 
 const bankAccountBalanceSchema = new schema.Entity(
-  "bankAccountBalances",
+  'bankAccountBalances',
   {
     bankAccount: bankAccountSchema,
   },
   {
     idAtribute: (bankAccountBalance) => bankAccountBalance.id.toLowerCase(),
   }
-);
+)
 
 const bankAccountSchema = new schema.Entity(
-  "bankAccounts",
+  'bankAccounts',
   {
     user: userSchema,
     balances: [bankAccountBalanceSchema],
@@ -20,6 +20,6 @@ const bankAccountSchema = new schema.Entity(
   {
     idAttribute: (bank) => bank.id.toLowerCase(),
   }
-);
+)
 
-export { bankAccountSchema, bankAccountBalanceSchema };
+export { bankAccountSchema, bankAccountBalanceSchema }

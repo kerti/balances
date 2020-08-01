@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useState } from 'react'
+import { Link, useHistory } from 'react-router-dom'
 import {
   CButton,
   CCard,
@@ -17,33 +17,33 @@ import {
   CInputGroupPrepend,
   CInputGroupText,
   CRow,
-} from "@coreui/react";
-import CIcon from "@coreui/icons-react";
-import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
-import flagIconMap from "../../../translations/flags.json";
+} from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { useTranslation } from 'react-i18next'
+import { useDispatch, useSelector } from 'react-redux'
+import flagIconMap from '../../../translations/flags.json'
 
 // actions
-import { requestLogin } from "../../../data/actions/system/auth";
-import { setLang } from "../../../data/actions/ui";
+import { requestLogin } from '../../../data/actions/system/auth'
+import { setLang } from '../../../data/actions/ui'
 
 const Login = () => {
-  const { t } = useTranslation("app");
-  const dispatch = useDispatch();
-  const authLoading = useSelector((state) => state.auth.loading);
-  const lang = useSelector((state) => state.ui.lang);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const history = useHistory();
+  const { t } = useTranslation('app')
+  const dispatch = useDispatch()
+  const authLoading = useSelector((state) => state.auth.loading)
+  const lang = useSelector((state) => state.ui.lang)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const history = useHistory()
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(requestLogin(username, password, history));
-  };
+    e.preventDefault()
+    dispatch(requestLogin(username, password, history))
+  }
 
   const selectLang = (lang) => {
-    dispatch(setLang(lang));
-  };
+    dispatch(setLang(lang))
+  }
 
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
@@ -56,9 +56,9 @@ const Login = () => {
                   <CForm onSubmit={handleSubmit}>
                     <CRow>
                       <CCol xs="6">
-                        <h1>{t("login.login")}</h1>
+                        <h1>{t('login.login')}</h1>
                         <p className="text-muted">
-                          {t("login.signInToYourAccount")}
+                          {t('login.signInToYourAccount')}
                         </p>
                       </CCol>
                       <CCol xs="6" className="text-right">
@@ -67,10 +67,10 @@ const Login = () => {
                             <CIcon name={flagIconMap[lang]} size="lg" />
                           </CDropdownToggle>
                           <CDropdownMenu>
-                            <CDropdownItem onClick={() => selectLang("en")}>
+                            <CDropdownItem onClick={() => selectLang('en')}>
                               English
                             </CDropdownItem>
-                            <CDropdownItem onClick={() => selectLang("id")}>
+                            <CDropdownItem onClick={() => selectLang('id')}>
                               Bahasa Indonesia
                             </CDropdownItem>
                           </CDropdownMenu>
@@ -85,7 +85,7 @@ const Login = () => {
                       </CInputGroupPrepend>
                       <CInput
                         type="text"
-                        placeholder={t("login.username")}
+                        placeholder={t('login.username')}
                         autoComplete="username"
                         value={username}
                         onChange={(u) => setUsername(u.target.value)}
@@ -99,7 +99,7 @@ const Login = () => {
                       </CInputGroupPrepend>
                       <CInput
                         type="password"
-                        placeholder={t("login.password")}
+                        placeholder={t('login.password')}
                         autoComplete="current-password"
                         value={password}
                         onChange={(p) => setPassword(p.target.value)}
@@ -113,7 +113,7 @@ const Login = () => {
                           className="px-4"
                           disabled={authLoading}
                         >
-                          {t("login.login")}
+                          {t('login.login')}
                         </CButton>
                       </CCol>
                       <CCol hidden xs="6" className="text-right">
@@ -127,7 +127,7 @@ const Login = () => {
               </CCard>
               <CCard
                 className="text-white bg-primary py-5 d-md-down-none"
-                style={{ width: "44%" }}
+                style={{ width: '44%' }}
                 hidden
               >
                 <CCardBody className="text-center">
@@ -156,7 +156,7 @@ const Login = () => {
         </CRow>
       </CContainer>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

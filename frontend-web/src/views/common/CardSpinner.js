@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 const CardSpinner = () => {
   return (
@@ -9,7 +9,7 @@ const CardSpinner = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default CardSpinner;
+export default CardSpinner

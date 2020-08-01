@@ -1,7 +1,7 @@
-import { actionTypes } from "../../actions";
+import { actionTypes } from '../../actions'
 
-import { CALL_API } from "../../middleware/api";
-import { Schemas } from "../../schemas";
+import { CALL_API } from '../../middleware/api'
+import { Schemas } from '../../schemas'
 
 // Fetches a single Bank Acccount from Balances API.
 // Relies on the custom API middlewre defined in ../middleware/api.js.
@@ -14,9 +14,9 @@ const fetchBankAccount = (id, withBalances = true, balanceCount = 12) => ({
     ],
     endpoint: `bankAccounts/${id}?withBalances=${withBalances}&balanceCount=${balanceCount}`,
     schema: Schemas.BANK_ACCOUNT,
-    method: "GET",
+    method: 'GET',
   },
-});
+})
 
 // Fetches a single Bank Account from Balances API unless it is cached.
 // Relies on Redux Thunk middleware.
@@ -26,18 +26,18 @@ export const loadBankAccount = (
   balanceCount = 12,
   requiredFields = []
 ) => (dispatch, getState) => {
-  const bankAccount = getState().entities.bankAccounts[id];
+  const bankAccount = getState().entities.bankAccounts[id]
   if (
     bankAccount &&
     bankAccount.balances &&
     bankAccount.balances.length > 0 &&
     requiredFields.every((key) => bankAccount.hasOwnProperty(key))
   ) {
-    return null;
+    return null
   }
 
-  return dispatch(fetchBankAccount(id, withBalances, balanceCount));
-};
+  return dispatch(fetchBankAccount(id, withBalances, balanceCount))
+}
 
 // Fetches a page of Bank Accounts for a particular keyword.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -56,14 +56,14 @@ const fetchBankAccountPage = (
     ],
     endpoint: `bankAccounts/search`,
     schema: Schemas.BANK_ACCOUNT_ARRAY,
-    method: "POST",
+    method: 'POST',
     body: {
       keyword: keyword,
       page: page,
       pageSize: pageSize,
     },
   },
-});
+})
 
 // Fetches a page of Bank Accounts for a particular keyword.
 // Bails out if page is cached and user didn't specifically request next page.
@@ -74,14 +74,14 @@ export const loadBankAccountPage = (
   pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
 ) => (dispatch, getState) => {
   const { currentPage = 1, pageCount = 0 } =
-    getState().pagination.bankAccountsByKeyword[keyword] || {};
+    getState().pagination.bankAccountsByKeyword[keyword] || {}
 
   if (pageCount > 0 && page === currentPage) {
-    return null;
+    return null
   }
 
-  return dispatch(fetchBankAccountPage(keyword, page, pageSize));
-};
+  return dispatch(fetchBankAccountPage(keyword, page, pageSize))
+}
 
 // Fetches a single Bank Account Balance from Balances API.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -94,9 +94,9 @@ const fetchBankAccountBalance = (id) => ({
     ],
     endpoint: `bankAccounts/balances/${id}`,
     schema: Schemas.BANK_ACCOUNT_BALANCE,
-    method: "GET",
+    method: 'GET',
   },
-});
+})
 
 // Fetches a single Bank Account Balance from Balances API.
 // Relies on Redux Thunk middleware.
@@ -104,16 +104,16 @@ export const loadBankAccountBalance = (id, requiredFields = []) => (
   dispatch,
   getState
 ) => {
-  const bankAccountBalance = getState().entities.bankAccountBalances[id];
+  const bankAccountBalance = getState().entities.bankAccountBalances[id]
   if (
     bankAccountBalance &&
     requiredFields.every((key) => bankAccountBalance.hasOwnProperty(key))
   ) {
-    return null;
+    return null
   }
 
-  return dispatch(fetchBankAccountBalance(id));
-};
+  return dispatch(fetchBankAccountBalance(id))
+}
 
 // Fetches a page of Bank Account Balances for a particular Bank Account.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -132,14 +132,14 @@ const fetchBankAccountBalancePage = (
     ],
     endpoint: `bankAccounts/balances/search`,
     schema: Schemas.BANK_ACCOUNT_BALANCE_ARRAY,
-    method: "POST",
+    method: 'POST',
     body: {
       bankAccountId,
       page,
       pageSize,
     },
   },
-});
+})
 
 // Fetches a page of Bank Account Balances for a particular Bank Account.
 // Bails out if page is cached and user didn't specifically request next page.
@@ -151,14 +151,14 @@ export const loadBankAccountBalancePage = (
 ) => (dispatch, getState) => {
   const { currentPage = 1, pageCount = 0 } =
     getState().pagination.bankAccountBalancesByBankAccountId[bankAccountId] ||
-    {};
+    {}
 
   if (pageCount > 0 && page === currentPage) {
-    return null;
+    return null
   }
 
-  return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize));
-};
+  return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize))
+}
 
 // Store a bank account.
 export const updateBankAccount = (
@@ -177,7 +177,7 @@ export const updateBankAccount = (
     ],
     endpoint: `bankAccounts/${id}`,
     schema: Schemas.BANK_ACCOUNT,
-    method: "PATCH",
+    method: 'PATCH',
     body: {
       id,
       accountName,
@@ -187,4 +187,4 @@ export const updateBankAccount = (
       status,
     },
   },
-});
+})

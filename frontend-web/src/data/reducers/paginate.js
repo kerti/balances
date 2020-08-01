@@ -2,16 +2,16 @@
 // and a function telling how to extract the key from an action.
 const paginate = ({ types, mapActionToKey }) => {
   if (!Array.isArray(types) || types.length !== 3) {
-    throw new Error("Expected types to be an array of three elements.");
+    throw new Error('Expected types to be an array of three elements.')
   }
-  if (!types.every((t) => typeof t === "string")) {
-    throw new Error("Expected types to be strings.");
+  if (!types.every((t) => typeof t === 'string')) {
+    throw new Error('Expected types to be strings.')
   }
-  if (typeof mapActionToKey !== "function") {
-    throw new Error("Expected mapActionToKey to be a function.");
+  if (typeof mapActionToKey !== 'function') {
+    throw new Error('Expected mapActionToKey to be a function.')
   }
 
-  const [requestType, successType, failureType] = types;
+  const [requestType, successType, failureType] = types
 
   const updatePagination = (
     state = {
@@ -28,7 +28,7 @@ const paginate = ({ types, mapActionToKey }) => {
         return {
           ...state,
           isFetching: true,
-        };
+        }
       case successType:
         return {
           ...state,
@@ -37,16 +37,16 @@ const paginate = ({ types, mapActionToKey }) => {
           currentPage: action.page,
           pageCount: action.response.pageCount,
           totalCount: action.response.totalCount,
-        };
+        }
       case failureType:
         return {
           ...state,
           isFetching: false,
-        };
+        }
       default:
-        return state;
+        return state
     }
-  };
+  }
 
   return (state = {}, action) => {
     // Update pagination by key
@@ -54,19 +54,19 @@ const paginate = ({ types, mapActionToKey }) => {
       case requestType:
       case successType:
       case failureType:
-        const key = mapActionToKey(action);
-        if (typeof key !== "string") {
-          console.log(key);
-          throw new Error("Expected key to be a string.");
+        const key = mapActionToKey(action)
+        if (typeof key !== 'string') {
+          console.log(key)
+          throw new Error('Expected key to be a string.')
         }
         return {
           ...state,
           [key]: updatePagination(state[key], action),
-        };
+        }
       default:
-        return state;
+        return state
     }
-  };
-};
+  }
+}
 
-export default paginate;
+export default paginate
