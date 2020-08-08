@@ -15,7 +15,7 @@ export function requestLogin(username, password, history) {
           expires: new Date(loginResponse.expiration),
         })
 
-        dispatch(loginSuccess(history, payload.data))
+        dispatch(loginSuccess(payload.data))
         history.push('/')
       })
       .catch((error) => {
@@ -42,7 +42,7 @@ export function loginLoading() {
   }
 }
 
-export function loginSuccess(history, payload) {
+export function loginSuccess(payload) {
   return {
     type: actionTypes.auth.login.SUCCESS,
     payload: payload,
