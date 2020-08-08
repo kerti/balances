@@ -11,7 +11,7 @@ import CIcon from '@coreui/icons-react'
 import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { requestLogout } from '../data/actions/auth'
+import { requestLogout } from '../data/actions/system/auth'
 
 const TheHeaderDropdown = () => {
   const dispatch = useDispatch()

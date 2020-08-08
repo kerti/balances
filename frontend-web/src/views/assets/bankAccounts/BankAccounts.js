@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-const Banks = () => {
+const BankAccounts = () => {
   const { t } = useTranslation('assets')
   return (
     <>
@@ -15,4 +15,4 @@ const Banks = () => {
   )
 }
 
-export default Banks
+export default BankAccounts
