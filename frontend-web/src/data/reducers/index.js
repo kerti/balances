@@ -1,13 +1,18 @@
 import { combineReducers } from 'redux'
 import auth from './auth'
 import paginate from './paginate'
+import fetchState from './fetchState'
 import ui from './ui'
 import { actionTypes } from '../actions'
 import merge from 'lodash/merge'
 
 // Updates an entity cache in response to any action with response.entities.
 const entities = (
-  state = { users: {}, bankAccounts: {}, bankAccountBalances: {} },
+  state = {
+    users: {},
+    bankAccounts: {},
+    bankAccountBalances: {},
+  },
   action
 ) => {
   if (action.response && action.response.entities) {
@@ -62,11 +67,23 @@ const pagination = combineReducers({
   }),
 })
 
+// Updates the fetchState data for different actions.
+const fetchStatus = combineReducers({
+  updateBankAccount: fetchState({
+    types: [
+      actionTypes.entities.bankAccount.update.REQUEST,
+      actionTypes.entities.bankAccount.update.SUCCESS,
+      actionTypes.entities.bankAccount.update.FAILURE,
+    ],
+  }),
+})
+
 const rootReducer = combineReducers({
   auth,
   entities,
   errorMessage,
   pagination,
+  fetchStatus,
   ui,
 })
 

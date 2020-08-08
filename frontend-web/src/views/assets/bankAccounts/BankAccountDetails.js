@@ -13,6 +13,11 @@ import {
   CCardFooter,
   CButton,
   CDataTable,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { CChartLine } from '@coreui/react-chartjs'
@@ -97,8 +102,12 @@ const Properties = () => {
     accountNumber: '',
   })
 
-  const chartOptions = getChartOptions(t)
+  const updateBankAccountIsFetching = useSelector(
+    (state) => state.fetchStatus.updateBankAccount
+  )
+  const [addBalanceModal, setAddBalanceModal] = useState(false)
 
+  const chartOptions = getChartOptions(t)
   const balanceHistoryFields = getBalanceHistoryFields(t)
 
   const account = rawBankAccounts[id]
@@ -141,19 +150,16 @@ const Properties = () => {
     if (id) {
       // fetch bank account if necessary
       if (!accountReady) {
-        console.log('dispatching loadBankAccount')
         dispatch(loadBankAccount(id, true, 36))
       }
 
       // fetch balances if necessary
       if (accountReady && !balancesReady) {
-        console.log('dispatching loadBankAccountBalancePage')
         dispatch(loadBankAccountBalancePage(id, 1, 36))
       }
 
       // fetch users if necessary
       if (balancesReady && !usersReady) {
-        console.log('dispatching loadUserPage')
         dispatch(loadUserPage(getUserIDs(balances), '', 1, 36))
       }
 
@@ -180,8 +186,6 @@ const Properties = () => {
 
   const handleAccountSubmit = (e) => {
     e.preventDefault()
-    console.log('handling submit')
-    console.log(e.target.accountName.value)
     if (id) {
       dispatch(
         updateBankAccount(
@@ -196,6 +200,11 @@ const Properties = () => {
     } else {
       console.log('should be sending new account here')
     }
+  }
+
+  const handleNewBalanceSubmit = (e) => {
+    e.preventDefault()
+    console.log('handling new balance submit')
   }
 
   const balanceDataTable = (
@@ -335,10 +344,20 @@ const Properties = () => {
                 </CFormGroup>
               </CCardBody>
               <CCardFooter>
-                <CButton type="submit" size="sm" color="primary">
+                <CButton
+                  type="submit"
+                  size="sm"
+                  color="primary"
+                  disabled={updateBankAccountIsFetching}
+                >
                   <CIcon name="cil-scrubber" /> {t('common.actions.submit')}
                 </CButton>{' '}
-                <CButton type="reset" size="sm" color="danger">
+                <CButton
+                  type="reset"
+                  size="sm"
+                  color="danger"
+                  disabled={updateBankAccountIsFetching}
+                >
                   <CIcon name="cil-ban" /> {t('common.actions.reset')}
                 </CButton>
               </CCardFooter>
@@ -347,11 +366,82 @@ const Properties = () => {
         </CCol>
         <CCol xs="12" md="6">
           <CCard>
-            <CCardHeader>{t('bankAccounts.balanceHistory')}</CCardHeader>
+            <CCardHeader>
+              {t('bankAccounts.balanceHistory')}
+              <div className="card-header-actions">
+                <CButton
+                  size="sm"
+                  color="primary"
+                  onClick={() => setAddBalanceModal(true)}
+                >
+                  <CIcon name="cil-plus" /> {t('common.actions.addNew')}
+                </CButton>
+              </div>
+            </CCardHeader>
             <CCardBody>{ready ? balanceDataTable : <CardSpinner />}</CCardBody>
           </CCard>
         </CCol>
       </CRow>
+      <CModal
+        show={addBalanceModal}
+        onClose={() => setAddBalanceModal(!addBalanceModal)}
+        size="lg"
+      >
+        <CModalHeader closeButton>
+          <CModalTitle>{t('bankAccounts.addBalanceModalTitle')}</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CForm
+            action=""
+            method="post"
+            className="form-horizontal"
+            onSubmit={handleNewBalanceSubmit}
+          >
+            <CFormGroup row>
+              <CCol md="3">
+                <CLabel htmlFor="date">{t('bankAccounts.balanceDate')}</CLabel>
+              </CCol>
+              <CCol xs="12" md="9">
+                <CInput
+                  type="date"
+                  id="balanceDate"
+                  name="balanceDate"
+                  placeholder={t('bankAccounts.balanceDatePlaceholder')}
+                />
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol md="3">
+                <CLabel htmlFor="date">
+                  {t('bankAccounts.balanceAtDate')}
+                </CLabel>
+              </CCol>
+              <CCol xs="12" md="9">
+                <CInput
+                  type="text"
+                  id="balanceAtDate"
+                  name="balanceAtDate"
+                  placeholder={t('bankAccounts.balanceAtDatePlaceholder')}
+                />
+              </CCol>
+            </CFormGroup>
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="primary"
+            onClick={() => setAddBalanceModal(!addBalanceModal)}
+          >
+            {t('common.actions.submit')}
+          </CButton>{' '}
+          <CButton
+            color="secondary"
+            onClick={() => setAddBalanceModal(!addBalanceModal)}
+          >
+            {t('common.actions.cancel')}
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </>
   )
 }
