@@ -51,14 +51,14 @@ const pagination = combineReducers({
 })
 
 // Updates the fetchState data for different actions.
-const fetchStatus = combineReducers({})
+// const fetchStatus = combineReducers({})
 
 const rootReducer = combineReducers({
   auth,
   entities,
   errorMessage,
   pagination,
-  fetchStatus,
+  // fetchStatus,
   ui,
 })
 
