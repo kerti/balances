@@ -62,7 +62,7 @@ const User = React.lazy(() => import('./views/users/User'))
 
 // Assets Section
 const BankAccounts = React.lazy(() =>
-  import('./views/assets/banks/BankAccounts')
+  import('./views/assets/bankAccounts/BankAccounts')
 )
 const Properties = React.lazy(() =>
   import('./views/assets/properties/Properties')

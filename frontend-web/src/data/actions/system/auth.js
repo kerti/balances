@@ -9,6 +9,7 @@ export function requestLogin(username, password, history) {
     auth
       .login(username, password)
       .then((payload) => {
+        // TODO: figure out a way to solve the samesite cookie issue
         const loginResponse = payload.data.data
 
         Cookies.set(cookieNames.auth.token, loginResponse.token, {
