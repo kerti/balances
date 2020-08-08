@@ -61,7 +61,9 @@ const Users = React.lazy(() => import('./views/users/Users'))
 const User = React.lazy(() => import('./views/users/User'))
 
 // Assets Section
-const Banks = React.lazy(() => import('./views/assets/banks/Banks'))
+const BankAccounts = React.lazy(() =>
+  import('./views/assets/banks/BankAccounts')
+)
 const Properties = React.lazy(() =>
   import('./views/assets/properties/Properties')
 )
@@ -99,13 +101,13 @@ const getRoutes = (t) => {
     {
       path: '/assets',
       name: t('assets.assets'),
-      component: Banks,
+      component: BankAccounts,
       exact: true,
     },
     {
-      path: '/assets/banks',
+      path: '/assets/bankAccounts',
       name: t('assets.bankAccounts'),
-      component: Banks,
+      component: BankAccounts,
     },
     {
       path: '/assets/properties',

@@ -1,7 +1,7 @@
-import types from './types'
-import auth from '../sources/auth/auth'
+import { actionTypes } from '../../actions'
+import auth from '../../sources/auth/auth'
 import Cookies from 'cookies-js'
-import cookieNames from '../cookies'
+import cookieNames from '../../cookies'
 
 export function requestLogin(username, password, history) {
   return (dispatch) => {
@@ -31,27 +31,27 @@ export function loadAuthCookies() {
     },
   }
   return {
-    type: types.auth.login.LOADCOOKIES,
+    type: actionTypes.auth.login.LOADCOOKIES,
     payload: payload,
   }
 }
 
 export function loginLoading() {
   return {
-    type: types.auth.login.LOADING,
+    type: actionTypes.auth.login.LOADING,
   }
 }
 
 export function loginSuccess(history, payload) {
   return {
-    type: types.auth.login.SUCCESS,
+    type: actionTypes.auth.login.SUCCESS,
     payload: payload,
   }
 }
 
 export function loginFailure(error) {
   return {
-    type: types.auth.login.FAILURE,
+    type: actionTypes.auth.login.FAILURE,
     error: error,
   }
 }
@@ -62,7 +62,7 @@ export function requestLogout(history) {
   Cookies.expire(cookieNames.auth.token)
 
   return {
-    type: types.auth.logout.REQUEST,
+    type: actionTypes.auth.logout.REQUEST,
   }
 }
 

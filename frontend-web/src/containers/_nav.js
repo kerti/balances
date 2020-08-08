@@ -18,7 +18,7 @@ const getNavigation = (t) => {
     {
       _tag: 'CSidebarNavItem',
       name: t('assets.bankAccounts'),
-      to: '/assets/banks',
+      to: '/assets/bankAccounts',
       icon: 'cil-cash',
     },
     {

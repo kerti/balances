@@ -16,7 +16,8 @@ import i18next from 'i18next'
 
 import { initTranslations } from './translations'
 import { setLangFromCookie } from './data/actions/ui'
-import { loadAuthCookies } from './data/actions/auth'
+import { loadAuthCookies } from './data/actions/system/auth'
+import DevTools from './containers/DevTools'
 
 initTranslations()
 
@@ -31,6 +32,7 @@ ReactDOM.render(
   <Provider store={store}>
     <I18nextProvider i18n={i18next}>
       <App />
+      <DevTools />
     </I18nextProvider>
   </Provider>,
   document.getElementById('root')
