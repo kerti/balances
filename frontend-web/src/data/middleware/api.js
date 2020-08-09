@@ -62,7 +62,8 @@ export default (store) => (next) => (action) => {
   }
 
   let { endpoint } = callAPI
-  const { schema, types, method, body } = callAPI
+  const { schema, types, method, body, options } = callAPI
+  let { nextAction } = options || {}
 
   if (typeof endpoint === 'function') {
     endpoint = endpoint(store.getState())
@@ -90,22 +91,36 @@ export default (store) => (next) => (action) => {
     return finalAction
   }
 
+  if (nextAction !== undefined) {
+    if (typeof nextAction === 'string') {
+      nextAction = actionWith({ type: nextAction })
+    }
+
+    if (typeof nextAction === 'function') {
+      nextAction = nextAction()
+    }
+  }
+
   const [requestType, successType, failureType] = types
   next(actionWith({ type: requestType }))
 
-  const options = {
+  const apiOptions = {
     method: method || 'GET',
     data: body,
   }
 
-  return callApi(endpoint, schema, options).then(
-    (response) =>
+  return callApi(endpoint, schema, apiOptions).then(
+    (response) => {
       next(
         actionWith({
           response,
           type: successType,
         })
-      ),
+      )
+      if (nextAction !== undefined) {
+        next(nextAction)
+      }
+    },
     (error) =>
       next(
         actionWith({

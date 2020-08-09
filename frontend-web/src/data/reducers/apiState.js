@@ -1,6 +1,5 @@
-// Creates a reducer managing fetchState, given the action types to handle,
-// and a function telling how to extract the key from an action.
-const fetchState = ({ types }) => {
+// Creates a reducer managing apiState, given the action types to handle.
+const apiState = ({ types }) => {
   if (!Array.isArray(types) || types.length !== 3) {
     throw new Error('Expected types to be an array of three elements.')
   }
@@ -10,17 +9,32 @@ const fetchState = ({ types }) => {
 
   const [requestType, successType, failureType] = types
 
-  return (state = false, action) => {
+  return (
+    state = {
+      isFetching: false,
+    },
+    action
+  ) => {
     switch (action.type) {
       case requestType:
-        return true
+        return {
+          ...state,
+          isFetching: true,
+        }
       case successType:
+        return {
+          ...state,
+          isFetching: false,
+        }
       case failureType:
-        return false
+        return {
+          ...state,
+          isFetching: false,
+        }
       default:
         return state
     }
   }
 }
 
-export default fetchState
+export default apiState

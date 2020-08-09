@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux'
 import auth from './auth'
 import paginate from './paginate'
+import apiState from './apiState'
 import ui from './ui'
 import { actionTypes } from '../actions'
 import merge from 'lodash/merge'
@@ -36,6 +37,22 @@ const errorMessage = (state = null, action) => {
 
 // Updates the pagination data for different actions.
 const pagination = combineReducers({
+  bankAccountsByKeyword: paginate({
+    mapActionToKey: (action) => action.keyword,
+    types: [
+      actionTypes.entities.bankAccount.page.REQUEST,
+      actionTypes.entities.bankAccount.page.SUCCESS,
+      actionTypes.entities.bankAccount.page.FAILURE,
+    ],
+  }),
+  bankAccountBalancesByBankAccountId: paginate({
+    mapActionToKey: (action) => action.bankAccountId,
+    types: [
+      actionTypes.entities.bankAccountBalance.page.REQUEST,
+      actionTypes.entities.bankAccountBalance.page.SUCCESS,
+      actionTypes.entities.bankAccountBalance.page.FAILURE,
+    ],
+  }),
   usersByFilter: paginate({
     mapActionToKey: (action) => {
       const { ids, keyword, page, pageSize } = action
@@ -50,15 +67,31 @@ const pagination = combineReducers({
   }),
 })
 
-// Updates the fetchState data for different actions.
-// const fetchStatus = combineReducers({})
+// Updates the apiState data for different actions.
+const api = combineReducers({
+  // bank accounts
+  updateBankAccount: apiState({
+    types: [
+      actionTypes.entities.bankAccount.update.REQUEST,
+      actionTypes.entities.bankAccount.update.SUCCESS,
+      actionTypes.entities.bankAccount.update.FAILURE,
+    ],
+  }),
+  createBankAccountBalance: apiState({
+    types: [
+      actionTypes.entities.bankAccountBalance.create.REQUEST,
+      actionTypes.entities.bankAccountBalance.create.SUCCESS,
+      actionTypes.entities.bankAccountBalance.create.FAILURE,
+    ],
+  }),
+})
 
 const rootReducer = combineReducers({
   auth,
   entities,
   errorMessage,
   pagination,
-  // fetchStatus,
+  api,
   ui,
 })
 
