@@ -214,7 +214,6 @@ const Properties = () => {
 
   const handleBalanceSubmit = (e) => {
     e.preventDefault()
-    console.log('handling balance submit')
     dispatch(
       createBankAccountBalance(
         id,
@@ -226,7 +225,6 @@ const Properties = () => {
   }
 
   const resetError = () => {
-    console.log('resetting error message')
     dispatch(resetErrorMessage())
   }
 
