@@ -17,7 +17,7 @@ import {
   CModalHeader,
   CModalTitle,
   CModalBody,
-  CModalFooter,
+  CAlert,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { CChartLine } from '@coreui/react-chartjs'
@@ -27,10 +27,14 @@ import {
   loadBankAccount,
   loadBankAccountBalancePage,
   updateBankAccount,
+  createBankAccountBalance,
+  showBalanceModal,
+  hideBalanceModal,
 } from '../../../data/actions/assets/bankAccounts'
 import CardSpinner from '../../common/CardSpinner'
 import uniq from 'lodash/uniq'
 import { loadUserPage } from '../../../data/actions/system/users'
+import { resetErrorMessage } from '../../../data/actions/system/errors'
 
 const getDatasetFromBalanceHistory = (balanceHistoryData) => {
   return balanceHistoryData.map((hist) => ({
@@ -102,10 +106,16 @@ const Properties = () => {
     accountNumber: '',
   })
 
-  const updateBankAccountIsFetching = useSelector(
-    (state) => state.fetchStatus.updateBankAccount
+  const errorMessage = useSelector((state) => state.errorMessage)
+  const updateBankAccountState = useSelector(
+    (state) => state.api.updateBankAccount
   )
-  const [addBalanceModal, setAddBalanceModal] = useState(false)
+  const createBankAccountBalanceState = useSelector(
+    (state) => state.api.createBankAccountBalance
+  )
+  const balanceModalState = useSelector(
+    (state) => state.ui.modals.bankAccountsBalance
+  )
 
   const chartOptions = getChartOptions(t)
   const balanceHistoryFields = getBalanceHistoryFields(t)
@@ -202,9 +212,22 @@ const Properties = () => {
     }
   }
 
-  const handleNewBalanceSubmit = (e) => {
+  const handleBalanceSubmit = (e) => {
     e.preventDefault()
-    console.log('handling new balance submit')
+    console.log('handling balance submit')
+    dispatch(
+      createBankAccountBalance(
+        id,
+        Date.parse(e.target.balanceDate.value),
+        parseInt(e.target.balanceAtDate.value),
+        { nextAction: hideBalanceModal }
+      )
+    )
+  }
+
+  const resetError = () => {
+    console.log('resetting error message')
+    dispatch(resetErrorMessage())
   }
 
   const balanceDataTable = (
@@ -348,7 +371,7 @@ const Properties = () => {
                   type="submit"
                   size="sm"
                   color="primary"
-                  disabled={updateBankAccountIsFetching}
+                  disabled={updateBankAccountState.isFetching}
                 >
                   <CIcon name="cil-scrubber" /> {t('common.actions.submit')}
                 </CButton>{' '}
@@ -356,7 +379,7 @@ const Properties = () => {
                   type="reset"
                   size="sm"
                   color="danger"
-                  disabled={updateBankAccountIsFetching}
+                  disabled={updateBankAccountState.isFetching}
                 >
                   <CIcon name="cil-ban" /> {t('common.actions.reset')}
                 </CButton>
@@ -372,7 +395,7 @@ const Properties = () => {
                 <CButton
                   size="sm"
                   color="primary"
-                  onClick={() => setAddBalanceModal(true)}
+                  onClick={() => dispatch(showBalanceModal())}
                 >
                   <CIcon name="cil-plus" /> {t('common.actions.addNew')}
                 </CButton>
@@ -383,64 +406,69 @@ const Properties = () => {
         </CCol>
       </CRow>
       <CModal
-        show={addBalanceModal}
-        onClose={() => setAddBalanceModal(!addBalanceModal)}
+        show={balanceModalState.show}
+        onClose={() => dispatch(hideBalanceModal())}
         size="lg"
       >
         <CModalHeader closeButton>
           <CModalTitle>{t('bankAccounts.addBalanceModalTitle')}</CModalTitle>
         </CModalHeader>
         <CModalBody>
+          <CAlert
+            color="danger"
+            closeButton
+            onClick={resetError}
+            show={errorMessage !== null}
+          >
+            {errorMessage}
+          </CAlert>
           <CForm
             action=""
             method="post"
             className="form-horizontal"
-            onSubmit={handleNewBalanceSubmit}
+            onSubmit={handleBalanceSubmit}
           >
             <CFormGroup row>
               <CCol md="3">
-                <CLabel htmlFor="date">{t('bankAccounts.balanceDate')}</CLabel>
+                <CLabel htmlFor="date">{t('common.date')}</CLabel>
               </CCol>
               <CCol xs="12" md="9">
-                <CInput
-                  type="date"
-                  id="balanceDate"
-                  name="balanceDate"
-                  placeholder={t('bankAccounts.balanceDatePlaceholder')}
-                />
+                <CInput type="date" id="balanceDate" name="balanceDate" />
               </CCol>
             </CFormGroup>
             <CFormGroup row>
               <CCol md="3">
-                <CLabel htmlFor="date">
-                  {t('bankAccounts.balanceAtDate')}
-                </CLabel>
+                <CLabel htmlFor="date">{t('bankAccounts.balance')}</CLabel>
               </CCol>
               <CCol xs="12" md="9">
                 <CInput
                   type="text"
                   id="balanceAtDate"
                   name="balanceAtDate"
-                  placeholder={t('bankAccounts.balanceAtDatePlaceholder')}
+                  placeholder={t('bankAccounts.balancePlaceholder')}
                 />
+              </CCol>
+            </CFormGroup>
+            <CFormGroup row>
+              <CCol className="text-right">
+                <CButton
+                  color="primary"
+                  type="submit"
+                  disabled={createBankAccountBalanceState.isFetching}
+                >
+                  {t('common.actions.submit')}
+                </CButton>{' '}
+                <CButton
+                  color="secondary"
+                  onClick={() => dispatch(hideBalanceModal())}
+                  disabled={createBankAccountBalanceState.isFetching}
+                >
+                  {t('common.actions.cancel')}
+                </CButton>
               </CCol>
             </CFormGroup>
           </CForm>
         </CModalBody>
-        <CModalFooter>
-          <CButton
-            color="primary"
-            onClick={() => setAddBalanceModal(!addBalanceModal)}
-          >
-            {t('common.actions.submit')}
-          </CButton>{' '}
-          <CButton
-            color="secondary"
-            onClick={() => setAddBalanceModal(!addBalanceModal)}
-          >
-            {t('common.actions.cancel')}
-          </CButton>
-        </CModalFooter>
       </CModal>
     </>
   )

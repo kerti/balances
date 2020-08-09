@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import auth from './auth'
 import paginate from './paginate'
-import fetchState from './fetchState'
+import apiState from './apiState'
 import ui from './ui'
 import { actionTypes } from '../actions'
 import merge from 'lodash/merge'
@@ -67,13 +67,21 @@ const pagination = combineReducers({
   }),
 })
 
-// Updates the fetchState data for different actions.
-const fetchStatus = combineReducers({
-  updateBankAccount: fetchState({
+// Updates the apiState data for different actions.
+const api = combineReducers({
+  // bank accounts
+  updateBankAccount: apiState({
     types: [
       actionTypes.entities.bankAccount.update.REQUEST,
       actionTypes.entities.bankAccount.update.SUCCESS,
       actionTypes.entities.bankAccount.update.FAILURE,
+    ],
+  }),
+  createBankAccountBalance: apiState({
+    types: [
+      actionTypes.entities.bankAccountBalance.create.REQUEST,
+      actionTypes.entities.bankAccountBalance.create.SUCCESS,
+      actionTypes.entities.bankAccountBalance.create.FAILURE,
     ],
   }),
 })
@@ -83,7 +91,7 @@ const rootReducer = combineReducers({
   entities,
   errorMessage,
   pagination,
-  fetchStatus,
+  api,
   ui,
 })
 

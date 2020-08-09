@@ -30,10 +30,10 @@ const actionTypes = {
       REQUEST: 'E_BANK_ACCOUNT_BALANCE_REQUEST',
       SUCCESS: 'E_BANK_ACCOUNT_BALANCE_SUCCESS',
       FAILURE: 'E_BANK_ACCOUNT_BALANCE_FAILURE',
-      update: {
-        REQUEST: 'E_BANK_ACCOUNT_BALANCE_UPDATE_REQUEST',
-        SUCCESS: 'E_BANK_ACCOUNT_BALANCE_UPDATE_SUCCESS',
-        FAILURE: 'E_BANK_ACCOUNT_BALANCE_UPDATE_FAILURE',
+      create: {
+        REQUEST: 'E_BANK_ACCOUNT_BALANCE_CREATE_REQUEST',
+        SUCCESS: 'E_BANK_ACCOUNT_BALANCE_CREATE_SUCCESS',
+        FAILURE: 'E_BANK_ACCOUNT_BALANCE_CREATE_FAILURE',
       },
       page: {
         REQUEST: 'E_BANK_ACCOUNT_BALANCE_PAGE_REQUEST',
@@ -58,6 +58,16 @@ const actionTypes = {
     },
     lang: {
       SET: 'UI_LANG_SET',
+    },
+    modals: {
+      assets: {
+        bankAccounts: {
+          balances: {
+            SHOW: 'UI_MODALS_ASSETS_BANKACCOUNTS_BALANCES_SHOW',
+            HIDE: 'UI_MODALS_ASSETS_BANKACCOUNTS_BALANCES_HIDE',
+          },
+        },
+      },
     },
     sidebarShow: {
       SET: 'UI_SIDEBAR_SHOW_SET',

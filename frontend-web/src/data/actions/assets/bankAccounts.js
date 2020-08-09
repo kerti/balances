@@ -167,7 +167,8 @@ export const updateBankAccount = (
   bankName,
   accountHolderName,
   accountNumber,
-  status
+  status,
+  options = {}
 ) => ({
   [CALL_API]: {
     types: [
@@ -175,6 +176,7 @@ export const updateBankAccount = (
       actionTypes.entities.bankAccount.update.SUCCESS,
       actionTypes.entities.bankAccount.update.FAILURE,
     ],
+    options: options,
     endpoint: `bankAccounts/${id}`,
     schema: Schemas.BANK_ACCOUNT,
     method: 'PATCH',
@@ -187,4 +189,37 @@ export const updateBankAccount = (
       status,
     },
   },
+})
+
+// Create new bank account balance.
+export const createBankAccountBalance = (
+  bankAccountId,
+  date,
+  balance,
+  options = {}
+) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccountBalance.create.REQUEST,
+      actionTypes.entities.bankAccountBalance.create.SUCCESS,
+      actionTypes.entities.bankAccountBalance.create.FAILURE,
+    ],
+    options: options,
+    endpoint: `bankAccounts/balances`,
+    schema: Schemas.BANK_ACCOUNT_BALANCE,
+    method: 'POST',
+    body: {
+      bankAccountId,
+      date,
+      balance,
+    },
+  },
+})
+
+export const showBalanceModal = () => ({
+  type: actionTypes.ui.modals.assets.bankAccounts.balances.SHOW,
+})
+
+export const hideBalanceModal = () => ({
+  type: actionTypes.ui.modals.assets.bankAccounts.balances.HIDE,
 })
