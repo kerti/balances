@@ -1,6 +1,6 @@
 {
-  "short_name": "CoreUI-React",
-  "name": "CoreUI-React sample",
+  "short_name": "Balances",
+  "name": "Balances - a balance-based personal finance management tool",
   "icons": [
     {
       "src": "./assets/img/favicon.png",
