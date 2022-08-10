@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import flagIconMap from '../../../translations/flags.js'
 
 // actions
-import { requestLogin } from '../../../data/actions/auth'
+import { requestLogin } from '../../../data/actions/system/auth'
 import { setLang } from '../../../data/actions/ui'
 
 const Login = () => {

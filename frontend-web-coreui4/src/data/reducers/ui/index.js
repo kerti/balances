@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux'
 
-import { types } from '../../actions'
+import { actionTypes } from '../../actions'
 
 export function lang(state = 'en', action) {
   switch (action.type) {
-    case types.ui.lang.SET:
+    case actionTypes.ui.lang.SET:
       return action.data
     default:
       return state
@@ -13,7 +13,7 @@ export function lang(state = 'en', action) {
 
 export function sidebarUnfoldable(state = false, action) {
   switch (action.type) {
-    case types.ui.sidebarUnfoldable.SET:
+    case actionTypes.ui.sidebarUnfoldable.SET:
       return action.data
     default:
       return state
@@ -22,7 +22,7 @@ export function sidebarUnfoldable(state = false, action) {
 
 export function sidebarShow(state = true, action) {
   switch (action.type) {
-    case types.ui.sidebarShow.SET:
+    case actionTypes.ui.sidebarShow.SET:
       return action.data
     default:
       return state

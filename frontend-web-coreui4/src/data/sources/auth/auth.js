@@ -7,7 +7,6 @@ const auth = {
     return axios.post(`${sources.baseURL}auth/login`, null, {
       headers: {
         Authorization: `Basic ${basic}`,
-        Origin: sources.origin,
       },
     })
   },

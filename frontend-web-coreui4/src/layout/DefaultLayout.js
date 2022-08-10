@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { requestAuthCheck } from '../data/actions/auth'
+import { requestAuthCheck } from '../data/actions/system/auth'
 
 const DefaultLayout = () => {
   const dispatch = useDispatch()

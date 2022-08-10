@@ -27,7 +27,7 @@ import avatar8 from './../../assets/images/avatars/8.jpg'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { requestLogout } from '../../data/actions/auth'
+import { requestLogout } from '../../data/actions/system/auth'
 
 const AppHeaderDropdown = () => {
   const dispatch = useDispatch()
