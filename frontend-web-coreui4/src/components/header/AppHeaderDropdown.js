@@ -24,7 +24,22 @@ import CIcon from '@coreui/icons-react'
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
 
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { requestLogout } from '../../data/actions/auth'
+import { useCookies } from 'react-cookie'
+
 const AppHeaderDropdown = () => {
+  const dispatch = useDispatch()
+  const history = useNavigate()
+  const [, , removeCookie] = useCookies()
+  const { t } = useTranslation('app')
+
+  const handleLogout = () => {
+    dispatch(requestLogout(removeCookie, history))
+  }
+
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
@@ -84,9 +99,9 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        <CDropdownItem href="#" onClick={handleLogout}>
           <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+          {t('logout.lockAccount')}
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>

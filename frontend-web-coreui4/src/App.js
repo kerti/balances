@@ -1,6 +1,10 @@
 import React, { Component, Suspense } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { Cookies, withCookies } from 'react-cookie'
+import { instanceOf } from 'prop-types'
+import i18n from 'i18next'
 import './scss/style.scss'
+import cookieNames from './data/cookies'
 
 const loading = (
   <div className="pt-3 text-center">
@@ -18,6 +22,19 @@ const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
 class App extends Component {
+  static propTypes = {
+    cookies: instanceOf(Cookies).isRequired,
+  }
+
+  constructor(props) {
+    super(props)
+
+    const { cookies } = props
+    const currentLang = cookies.get(cookieNames.ui.lang) || process.env.REACT_APP_DEFAULT_LANG
+
+    i18n.changeLanguage(currentLang)
+  }
+
   render() {
     return (
       <HashRouter>
@@ -35,4 +52,4 @@ class App extends Component {
   }
 }
 
-export default App
+export default withCookies(App)
