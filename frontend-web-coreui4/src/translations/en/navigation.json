@@ -1,0 +1,23 @@
+{
+  "home": "Home",
+  "assets": {
+    "assets": "Assets",
+    "bankAccounts": "Bank Accounts",
+    "properties": "Properties",
+    "vehicles": "Vehicles"
+  },
+  "liabilities": {
+    "liabilities": "Liabilities",
+    "institutional": "Institutional",
+    "personal": "Personal"
+  },
+  "investments": {
+    "investments": "Investments",
+    "deposits": "Deposits",
+    "obligations": "Obligations",
+    "gold": "Gold",
+    "mutualFunds": "Mutual Funds",
+    "stocks": "Stocks",
+    "p2pLending": "P2P Lending"
+  }
+}

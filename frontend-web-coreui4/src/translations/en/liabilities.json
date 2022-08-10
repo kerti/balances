@@ -1,0 +1,11 @@
+{
+  "liabilities": "Liabilities",
+  "institutional": {
+    "institutional": "Institutional",
+    "description": "This is where you can manage all your institutional liabilities."
+  },
+  "personal": {
+    "personal": "Personal",
+    "description": "This is where you can manage all your personal liabilities."
+  }
+}

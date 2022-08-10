@@ -1,11 +1,14 @@
 import React, { Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { CContainer, CSpinner } from '@coreui/react'
+import { useTranslation } from 'react-i18next'
 
 // routes config
-import routes from '../routes'
+import getRoutes from '../routes'
 
 const AppContent = () => {
+  const { t } = useTranslation('navigation')
+  const routes = getRoutes(t)
   return (
     <CContainer lg>
       <Suspense fallback={<CSpinner color="primary" />}>

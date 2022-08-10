@@ -1,0 +1,27 @@
+{
+  "investments": "Investasi",
+  "deposits": {
+    "deposits": "Deposito",
+    "description": "Di sini Anda dapat mengelola semua deposito Anda."
+  },
+  "obligations": {
+    "obligations": "Obligasi",
+    "description": "Di sini Anda dapat mengelola semua obligasi Anda."
+  },
+  "gold": {
+    "gold": "Emas",
+    "description": "Di sini Anda dapat mengelola semua emas Anda."
+  },
+  "mutualFunds": {
+    "mutualFunds": "Reksa Dana",
+    "description": "Di sini Anda dapat mengelola semua reksa dana Anda."
+  },
+  "stocks": {
+    "stocks": "Saham",
+    "description": "Di sini Anda dapat mengelola semua saham Anda."
+  },
+  "p2pLending": {
+    "p2pLending": "Pinjaman Online",
+    "description": "Di sini Anda dapat mengelola semua pinjaman online Anda."
+  }
+}

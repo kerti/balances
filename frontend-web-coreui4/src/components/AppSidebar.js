@@ -12,8 +12,10 @@ import { sygnet } from 'src/assets/brand/sygnet'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 
+import { useTranslation } from 'react-i18next'
+
 // sidebar nav config
-import navigation from '../_nav'
+import getNavigation from '../_nav'
 
 import { setSidebarUnfoldable, setSidebarShow } from '../data/actions/ui'
 
@@ -21,6 +23,8 @@ const AppSidebar = () => {
   const dispatch = useDispatch()
   const unfoldable = useSelector((state) => state.ui.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.ui.sidebarShow)
+  const { t } = useTranslation('navigation')
+  const navigation = getNavigation(t)
 
   return (
     <CSidebar
