@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   CButton,
@@ -20,12 +20,9 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
-import i18n from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import flagIconMap from '../../../translations/flags.js'
-import { useCookies } from 'react-cookie'
-import cookieNames from '../../../data/cookies'
 
 // actions
 import { requestLogin } from '../../../data/actions/auth'
@@ -35,27 +32,19 @@ const Login = () => {
   const { t } = useTranslation('app')
   const dispatch = useDispatch()
   const authLoading = useSelector((state) => state.auth.loading)
-  const [cookie, setCookie] = useCookies()
-  const currentLang = cookie[cookieNames.ui.lang] || process.env.REACT_APP_DEFAULT_LANG
-  const [flag, setFlag] = useState(flagIconMap[currentLang])
+  const lang = useSelector((state) => state.ui.lang)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    dispatch(requestLogin(setCookie, username, password, navigate))
+    dispatch(requestLogin(username, password, navigate))
   }
 
   const selectLang = (lang) => {
-    setFlag(flagIconMap[lang])
-    setCookie(cookieNames.ui.lang, lang)
+    dispatch(setLang(lang))
   }
-
-  useEffect(() => {
-    i18n.changeLanguage(currentLang)
-    dispatch(setLang(currentLang))
-  }, [dispatch, currentLang])
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -74,7 +63,7 @@ const Login = () => {
                       <CCol xs={6} className="text-end">
                         <CDropdown className="m-1">
                           <CDropdownToggle>
-                            <CIcon icon={flag} size="lg" />
+                            <CIcon icon={flagIconMap[lang]} size="lg" />
                           </CDropdownToggle>
                           <CDropdownMenu>
                             <CDropdownItem onClick={() => selectLang('en')}>English</CDropdownItem>

@@ -28,16 +28,14 @@ import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { requestLogout } from '../../data/actions/auth'
-import { useCookies } from 'react-cookie'
 
 const AppHeaderDropdown = () => {
   const dispatch = useDispatch()
-  const history = useNavigate()
-  const [, , removeCookie] = useCookies()
+  const navigate = useNavigate()
   const { t } = useTranslation('app')
 
   const handleLogout = () => {
-    dispatch(requestLogout(removeCookie, history))
+    dispatch(requestLogout(navigate))
   }
 
   return (

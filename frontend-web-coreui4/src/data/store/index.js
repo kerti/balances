@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware } from 'redux'
 import thunkMiddleware from 'redux-thunk'
-import rootReducer from './reducers/root'
+import rootReducer from '../reducers'
 
 const middlewares = [thunkMiddleware]
 
@@ -22,8 +22,8 @@ const initStore = () => {
   const store = createStore(rootReducer, initialState, applyMiddleware(...middlewares))
 
   if (module.hot) {
-    module.hot.accept('./reducers/root', () => {
-      const nextRootReducer = require('./reducers/root').default
+    module.hot.accept('../reducers', () => {
+      const nextRootReducer = require('../reducers').default
       store.replaceReducer(nextRootReducer)
     })
   }

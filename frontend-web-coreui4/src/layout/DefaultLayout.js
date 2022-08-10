@@ -1,14 +1,17 @@
-import React from 'react'
-import { Cookies } from 'react-cookie'
+import React, { useEffect } from 'react'
 import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
-import { Navigate } from 'react-router-dom'
-import cookieNames from '../data/cookies'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { requestAuthCheck } from '../data/actions/auth'
 
 const DefaultLayout = () => {
-  const cookies = new Cookies()
-  const token = cookies.get(cookieNames.auth.token)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  useEffect(() => {
+    dispatch(requestAuthCheck(navigate))
+  })
 
-  return token ? (
+  return (
     <div>
       <AppSidebar />
       <div className="wrapper d-flex flex-column min-vh-100 bg-light">
@@ -19,8 +22,6 @@ const DefaultLayout = () => {
         <AppFooter />
       </div>
     </div>
-  ) : (
-    <Navigate to="/login" />
   )
 }
 

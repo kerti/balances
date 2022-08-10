@@ -1,0 +1,11 @@
+{
+    "date": {
+      "long": "{{value, date.long}}"
+    },
+    "number": {
+      "decimal": {
+        "default": "{{value, number.decimal.default}}",
+        "2fractions": "{{value, number.decimal.2fractions}}"
+      }
+    }
+  }
