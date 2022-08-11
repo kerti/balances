@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+
 import auth from './auth'
 import paginate from './paginate'
 import ui from './ui'
@@ -12,7 +13,7 @@ const entities = (
     bankAccounts: {},
     bankAccountBalances: {},
   },
-  action
+  action,
 ) => {
   if (action.response && action.response.entities) {
     return merge({}, state, action.response.entities)

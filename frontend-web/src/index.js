@@ -1,28 +1,20 @@
-import 'react-app-polyfill/ie11' // For IE 11 support
 import 'react-app-polyfill/stable'
-import './polyfill'
+import 'core-js'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
-import * as serviceWorker from './serviceWorker'
-
-import { icons } from './assets/icons'
-
+import reportWebVitals from './reportWebVitals'
 import { Provider } from 'react-redux'
 import initStore from './data/store'
-
 import { I18nextProvider } from 'react-i18next'
 import i18next from 'i18next'
-
 import { initTranslations } from './translations'
 import { setLangFromCookie } from './data/actions/ui'
 
 import { loadAuthCookies } from './data/actions/system/auth'
-import DevTools from './containers/DevTools'
+import DevTools from './components/DevTools'
 
 initTranslations()
-
-React.icons = icons
 
 const store = initStore()
 
@@ -37,10 +29,10 @@ ReactDOM.render(
       <DevTools />
     </I18nextProvider>
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 )
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister()
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals()
