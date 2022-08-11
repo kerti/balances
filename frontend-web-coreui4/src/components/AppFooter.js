@@ -1,19 +1,32 @@
 import React from 'react'
 import { CFooter } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { cibGithub } from '@coreui/icons'
 
 const AppFooter = () => {
   return (
     <CFooter>
-      <div>
-        <a href="https://coreui.io" target="_blank" rel="noopener noreferrer">
-          CoreUI
-        </a>
-        <span className="ms-1">&copy; 2022 creativeLabs.</span>
+      <div className="small">
+        <span className="ms-1">&copy; 2022 Raditya Kertiyasa</span>
+        <span className="ms-1">
+          <a
+            href="https://github.com/kerti/balances/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            License
+          </a>
+        </span>
       </div>
-      <div className="ms-auto">
-        <span className="me-1">Powered by</span>
-        <a href="https://coreui.io/react" target="_blank" rel="noopener noreferrer">
-          CoreUI React Admin &amp; Dashboard Template
+      <div className="ms-auto small">
+        <span className="me-2">
+          <a href="https://balances-app.io" target="_blank" rel="noopener noreferrer">
+            Balances
+          </a>
+        </span>
+        <span className="me-2">version 0.0.1</span>
+        <a href="https://github.com/kerti/balances" target="_blank" rel="noopener noreferrer">
+          {<CIcon icon={cibGithub} />}
         </a>
       </div>
     </CFooter>
