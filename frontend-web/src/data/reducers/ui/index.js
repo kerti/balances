@@ -11,7 +11,16 @@ export function lang(state = 'en', action) {
   }
 }
 
-export function sidebarShow(state = 'responsive', action) {
+export function sidebarUnfoldable(state = false, action) {
+  switch (action.type) {
+    case actionTypes.ui.sidebarUnfoldable.SET:
+      return action.data
+    default:
+      return state
+  }
+}
+
+export function sidebarShow(state = true, action) {
   switch (action.type) {
     case actionTypes.ui.sidebarShow.SET:
       return action.data
@@ -22,5 +31,6 @@ export function sidebarShow(state = 'responsive', action) {
 
 export default combineReducers({
   lang,
+  sidebarUnfoldable,
   sidebarShow,
 })
