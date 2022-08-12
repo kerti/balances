@@ -7,41 +7,44 @@ import {
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
+  CForm,
+  CFormInput,
+  CImage,
   CNavbar,
   CNavbarNav,
   CNavbarBrand,
   CNavbarText,
-  CToggler,
+  CNavbarToggler,
   CNavLink,
   CDropdown,
-  CForm,
-  CInput,
   CButton,
-  CImg,
 } from '@coreui/react'
-// import CIcon from '@coreui/icons-react'
+import { DocsLink } from 'src/components'
 
 const CNavbars = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [visible, setVisible] = useState(false)
   const [isOpenDropdown, setIsOpenDropdown] = useState(false)
   const [navbarText, setNavbarText] = useState(false)
 
   return (
     <>
-      <CCard>
-        <CCardHeader>CNavbar</CCardHeader>
+      <CCard className="mb-4">
+        <CCardHeader>
+          CNavbar
+          <DocsLink name="CNavbar" />
+        </CCardHeader>
         <CCardBody>
           <CNavbar expandable="sm" color="info">
-            <CToggler inNavbar onClick={() => setIsOpen(!isOpen)} />
+            <CNavbarToggler onClick={() => setVisible(!visible)} />
             <CNavbarBrand>NavbarBrand</CNavbarBrand>
-            <CCollapse show={isOpen} navbar>
+            <CCollapse show={visible} navbar>
               <CNavbarNav>
                 <CNavLink>Home</CNavLink>
                 <CNavLink>Link</CNavLink>
               </CNavbarNav>
-              <CNavbarNav className="ml-auto">
-                <CForm inline>
-                  <CInput className="mr-sm-2" placeholder="Search" size="sm" />
+              <CNavbarNav className="ms-auto">
+                <CForm className="d-flex">
+                  <CFormInput className="me-sm-2" placeholder="Search" size="sm" />
                   <CButton color="light" className="my-2 my-sm-0" type="submit">
                     Search
                   </CButton>
@@ -68,12 +71,12 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
 
-      <CCard>
+      <CCard className="mb-4">
         <CCardHeader>CNavbar brand</CCardHeader>
         <CCardBody>
           <CNavbar color="faded" light>
             <CNavbarBrand>
-              <CImg
+              <CImage
                 src="https://placekitten.com/g/30/30"
                 className="d-inline-block align-top"
                 alt="CoreuiVue"
@@ -84,11 +87,11 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
 
-      <CCard>
+      <CCard className="mb-4">
         <CCardHeader>CNavbar text</CCardHeader>
         <CCardBody>
           <CNavbar toggleable="sm" light color="light">
-            <CToggler
+            <CNavbarToggler
               inNavbar
               onClick={() => {
                 setNavbarText(!navbarText)
@@ -104,11 +107,11 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
 
-      <CCard>
+      <CCard className="mb-4">
         <CCardHeader>CNavbar dropdown</CCardHeader>
         <CCardBody>
           <CNavbar expandable="false" color="primary">
-            <CToggler
+            <CNavbarToggler
               inNavbar
               onClick={() => {
                 setIsOpenDropdown(!isOpenDropdown)
@@ -140,17 +143,13 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
 
-      <CCard>
+      <CCard className="mb-4">
         <CCardHeader>CNavbar form</CCardHeader>
         <CCardBody>
           <CNavbar light color="light">
-            <CForm inline>
-              <CInput className="mr-sm-2" placeholder="Search" size="sm" />
-              <CButton
-                color="outline-success"
-                className="my-2 my-sm-0"
-                type="submit"
-              >
+            <CForm className="d-flex">
+              <CFormInput className="me-sm-2" placeholder="Search" size="sm" />
+              <CButton color="outline-success" className="my-2 my-sm-0" type="submit">
                 Search
               </CButton>
             </CForm>
@@ -158,12 +157,12 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
 
-      <CCard>
+      <CCard className="mb-4">
         <CCardHeader>CNavbar input group</CCardHeader>
         <CCardBody>
           <CNavbar light color="light">
-            <CForm inline>
-              <CInput className="mr-sm-2" placeholder="Username" />
+            <CForm className="d-flex">
+              <CFormInput className="me-sm-2" placeholder="Username" />
             </CForm>
           </CNavbar>
         </CCardBody>
