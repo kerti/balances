@@ -148,7 +148,7 @@ const fetchBankAccountBalancePage = (
 
 // Fetches a page of Bank Account Balances for a particular Bank Account.
 // Bails out if page is cached and user didn't specifically request next page
-// or explicitly request to ignoret the cache.
+// or explicitly request to ignore the cache.
 // Relies on Redux Thunk middleware.
 export const loadBankAccountBalancePage =
   (
