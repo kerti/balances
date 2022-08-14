@@ -1,10 +1,11 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
+import sequenceAction from 'redux-sequence-action'
 import rootReducer from '../reducers'
 import api from '../middleware/api'
 import DevTools from '../../containers/DevTools'
 
-const middlewares = [thunkMiddleware, api]
+const middlewares = [thunkMiddleware, api, sequenceAction]
 
 if (
   process.env.NODE_ENV === 'development' &&

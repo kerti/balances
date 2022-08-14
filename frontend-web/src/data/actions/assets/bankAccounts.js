@@ -4,7 +4,7 @@ import { CALL_API } from '../../middleware/api'
 import { Schemas } from '../../schemas'
 
 // Fetches a single Bank Acccount from Balances API.
-// Relies on the custom API middlewre defined in ../middleware/api.js.
+// Relies on the custom API middleware defined in ../middleware/api.js.
 const fetchBankAccount = (id, withBalances = true, balanceCount = 12) => ({
   [CALL_API]: {
     types: [
@@ -20,24 +20,28 @@ const fetchBankAccount = (id, withBalances = true, balanceCount = 12) => ({
 
 // Fetches a single Bank Account from Balances API unless it is cached.
 // Relies on Redux Thunk middleware.
-export const loadBankAccount = (
-  id,
-  withBalances = true,
-  balanceCount = 12,
-  requiredFields = []
-) => (dispatch, getState) => {
-  const bankAccount = getState().entities.bankAccounts[id]
-  if (
-    bankAccount &&
-    bankAccount.balances &&
-    bankAccount.balances.length > 0 &&
-    requiredFields.every((key) => bankAccount.hasOwnProperty(key))
-  ) {
-    return null
-  }
+export const loadBankAccount =
+  (
+    id,
+    withBalances = true,
+    balanceCount = 12,
+    requiredFields = [],
+    ignoreCache = false
+  ) =>
+  (dispatch, getState) => {
+    const bankAccount = getState().entities.bankAccounts[id]
+    if (
+      bankAccount &&
+      bankAccount.balances &&
+      bankAccount.balances.length > 0 &&
+      requiredFields.every((key) => bankAccount.hasOwnProperty(key)) &&
+      !ignoreCache
+    ) {
+      return null
+    }
 
-  return dispatch(fetchBankAccount(id, withBalances, balanceCount))
-}
+    return dispatch(fetchBankAccount(id, withBalances, balanceCount))
+  }
 
 // Fetches a page of Bank Accounts for a particular keyword.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -68,20 +72,22 @@ const fetchBankAccountPage = (
 // Fetches a page of Bank Accounts for a particular keyword.
 // Bails out if page is cached and user didn't specifically request next page.
 // Relies on Redux Thunk middleware.
-export const loadBankAccountPage = (
-  keyword,
-  page = 1,
-  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
-) => (dispatch, getState) => {
-  const { currentPage = 1, pageCount = 0 } =
-    getState().pagination.bankAccountsByKeyword[keyword] || {}
+export const loadBankAccountPage =
+  (
+    keyword,
+    page = 1,
+    pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
+  ) =>
+  (dispatch, getState) => {
+    const { currentPage = 1, pageCount = 0 } =
+      getState().pagination.bankAccountsByKeyword[keyword] || {}
 
-  if (pageCount > 0 && page === currentPage) {
-    return null
+    if (pageCount > 0 && page === currentPage) {
+      return null
+    }
+
+    return dispatch(fetchBankAccountPage(keyword, page, pageSize))
   }
-
-  return dispatch(fetchBankAccountPage(keyword, page, pageSize))
-}
 
 // Fetches a single Bank Account Balance from Balances API.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -100,20 +106,19 @@ const fetchBankAccountBalance = (id) => ({
 
 // Fetches a single Bank Account Balance from Balances API.
 // Relies on Redux Thunk middleware.
-export const loadBankAccountBalance = (id, requiredFields = []) => (
-  dispatch,
-  getState
-) => {
-  const bankAccountBalance = getState().entities.bankAccountBalances[id]
-  if (
-    bankAccountBalance &&
-    requiredFields.every((key) => bankAccountBalance.hasOwnProperty(key))
-  ) {
-    return null
-  }
+export const loadBankAccountBalance =
+  (id, requiredFields = []) =>
+  (dispatch, getState) => {
+    const bankAccountBalance = getState().entities.bankAccountBalances[id]
+    if (
+      bankAccountBalance &&
+      requiredFields.every((key) => bankAccountBalance.hasOwnProperty(key))
+    ) {
+      return null
+    }
 
-  return dispatch(fetchBankAccountBalance(id))
-}
+    return dispatch(fetchBankAccountBalance(id))
+  }
 
 // Fetches a page of Bank Account Balances for a particular Bank Account.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -142,23 +147,27 @@ const fetchBankAccountBalancePage = (
 })
 
 // Fetches a page of Bank Account Balances for a particular Bank Account.
-// Bails out if page is cached and user didn't specifically request next page.
+// Bails out if page is cached and user didn't specifically request next page
+// or explicitly request to ignoret the cache.
 // Relies on Redux Thunk middleware.
-export const loadBankAccountBalancePage = (
-  bankAccountId,
-  page,
-  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
-) => (dispatch, getState) => {
-  const { currentPage = 1, pageCount = 0 } =
-    getState().pagination.bankAccountBalancesByBankAccountId[bankAccountId] ||
-    {}
+export const loadBankAccountBalancePage =
+  (
+    bankAccountId,
+    page,
+    pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE),
+    ignoreCache = false
+  ) =>
+  (dispatch, getState) => {
+    const { currentPage = 1, pageCount = 0 } =
+      getState().pagination.bankAccountBalancesByBankAccountId[bankAccountId] ||
+      {}
 
-  if (pageCount > 0 && page === currentPage) {
-    return null
+    if (pageCount > 0 && page === currentPage && !ignoreCache) {
+      return null
+    }
+
+    return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize))
   }
-
-  return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize))
-}
 
 // Store a bank account.
 export const updateBankAccount = (
@@ -212,6 +221,54 @@ export const createBankAccountBalance = (
       bankAccountId,
       date,
       balance,
+    },
+  },
+})
+
+// Update existing bank balance.
+export const updateBankAccountBalance = (
+  bankAccountBalanceId,
+  bankAccountId,
+  date,
+  balance,
+  options = {}
+) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccountBalance.update.REQUEST,
+      actionTypes.entities.bankAccountBalance.update.SUCCESS,
+      actionTypes.entities.bankAccountBalance.update.FAILURE,
+    ],
+    options: options,
+    endpoints: 'bankAccounts/balances',
+    schema: Schemas.BANK_ACCOUNT_BALANCE,
+    method: 'PUT',
+    body: {
+      bankAccountBalanceId,
+      bankAccountId,
+      date,
+      balance,
+    },
+  },
+})
+
+// Delete existing bank balance.
+export const deleteBankAccountBalance = (
+  bankAccountBalanceId,
+  options = {}
+) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccountBalance.delete.REQUEST,
+      actionTypes.entities.bankAccountBalance.delete.SUCCESS,
+      actionTypes.entities.bankAccountBalance.delete.FAILURE,
+    ],
+    options: options,
+    endpoints: 'bankAccounts/balances',
+    schema: Schemas.BANK_ACCOUNT_BALANCE,
+    method: 'DELETE',
+    body: {
+      bankAccountBalanceId,
     },
   },
 })

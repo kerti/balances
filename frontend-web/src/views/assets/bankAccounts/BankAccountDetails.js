@@ -25,7 +25,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import {
   loadBankAccount,
-  loadBankAccountBalancePage,
   updateBankAccount,
   createBankAccountBalance,
   showBalanceModal,
@@ -104,6 +103,7 @@ const Properties = () => {
     bankName: '',
     accountHolderName: '',
     accountNumber: '',
+    balances: '',
   })
 
   const errorMessage = useSelector((state) => state.errorMessage)
@@ -158,19 +158,11 @@ const Properties = () => {
 
   useEffect(() => {
     if (id) {
-      // fetch bank account if necessary
-      if (!accountReady) {
-        dispatch(loadBankAccount(id, true, 36))
-      }
-
-      // fetch balances if necessary
-      if (accountReady && !balancesReady) {
-        dispatch(loadBankAccountBalancePage(id, 1, 36))
-      }
-
-      // fetch users if necessary
-      if (balancesReady && !usersReady) {
-        dispatch(loadUserPage(getUserIDs(balances), '', 1, 36))
+      if (!ready) {
+        dispatch([
+          loadBankAccount(id, true, 36),
+          loadUserPage(getUserIDs(balances), '', 1, 36),
+        ])
       }
 
       // set state if necessary
@@ -192,6 +184,7 @@ const Properties = () => {
     balancesReady,
     usersReady,
     stateReady,
+    ready,
   ])
 
   const handleAccountSubmit = (e) => {
@@ -214,18 +207,23 @@ const Properties = () => {
 
   const handleBalanceSubmit = (e) => {
     e.preventDefault()
-    dispatch(
+    dispatch([
       createBankAccountBalance(
         id,
         Date.parse(e.target.balanceDate.value),
         parseInt(e.target.balanceAtDate.value),
         { nextAction: hideBalanceModal }
-      )
-    )
+      ),
+      loadBankAccount(id, true, 36, [], true),
+    ])
   }
 
   const resetError = () => {
     dispatch(resetErrorMessage())
+  }
+
+  const loadBalanceModal = (item) => {
+    alert(item.id)
   }
 
   const balanceDataTable = (
@@ -239,6 +237,8 @@ const Properties = () => {
         size="sm"
         itemsPerPage={10}
         pagination
+        clickableRows
+        onRowClick={(item) => loadBalanceModal(item)}
         scopedSlots={{
           date: (item) => <td>{f('date.long', { value: item.date })}</td>,
           user: (item) => (
