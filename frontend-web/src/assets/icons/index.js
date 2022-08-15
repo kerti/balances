@@ -222,7 +222,6 @@ export const icons = Object.assign(
     cilPaperPlane,
     cilPencil,
     cilPeople,
-    cilPlus,
     cilPhone,
     cilPlus,
     cilPrint,
