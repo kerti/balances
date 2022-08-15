@@ -2,11 +2,14 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import rootReducer from '../reducers'
 import api from '../middleware/api'
-import DevTools from '../../components/DevTools'
+import DevTools from '../../containers/DevTools'
 
 const middlewares = [thunkMiddleware, api]
 
-if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_REDUX_LOGGER === 'true') {
+if (
+  process.env.NODE_ENV === 'development' &&
+  process.env.REACT_APP_USE_REDUX_LOGGER === 'true'
+) {
   const { createLogger } = require('redux-logger')
   const logger = createLogger()
   middlewares.push(logger)
@@ -15,8 +18,7 @@ if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_REDUX_LO
 const initialState = {
   ui: {
     lang: process.env.REACT_APP_DEFAULT_LANG,
-    sidebarUnfoldable: false,
-    sidebarShow: true,
+    sidebarShow: 'responsive',
   },
 }
 
@@ -26,7 +28,7 @@ const initStore = () => {
       ? createStore(
           rootReducer,
           initialState,
-          compose(applyMiddleware(...middlewares), DevTools.instrument()),
+          compose(applyMiddleware(...middlewares), DevTools.instrument())
         )
       : createStore(rootReducer, initialState, applyMiddleware(...middlewares))
 

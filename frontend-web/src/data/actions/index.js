@@ -32,9 +32,6 @@ const actionTypes = {
     sidebarShow: {
       SET: 'UI_SIDEBAR_SHOW_SET',
     },
-    sidebarUnfoldable: {
-      SET: 'UI_SIDEBAR_UNFOLDABLE_SET',
-    },
   },
 }
 

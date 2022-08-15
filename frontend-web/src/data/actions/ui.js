@@ -4,7 +4,8 @@ import Cookies from 'cookies-js'
 import cookieNames from '../cookies'
 
 export function setLangFromCookie() {
-  const lang = Cookies.get(cookieNames.ui.lang) || process.env.REACT_APP_DEFAULT_LANG
+  const lang =
+    Cookies.get(cookieNames.ui.lang) || process.env.REACT_APP_DEFAULT_LANG
   i18n.changeLanguage(lang)
   return {
     type: actionTypes.ui.lang.SET,
@@ -17,13 +18,6 @@ export function setLang(data) {
   i18n.changeLanguage(data)
   return {
     type: actionTypes.ui.lang.SET,
-    data,
-  }
-}
-
-export function setSidebarUnfoldable(data) {
-  return {
-    type: actionTypes.ui.sidebarUnfoldable.SET,
     data,
   }
 }

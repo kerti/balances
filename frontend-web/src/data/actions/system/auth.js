@@ -3,7 +3,7 @@ import auth from '../../sources/auth/auth'
 import Cookies from 'cookies-js'
 import cookieNames from '../../cookies'
 
-export function requestLogin(username, password, navigate) {
+export function requestLogin(username, password, history) {
   return (dispatch) => {
     dispatch(loginLoading())
     auth
@@ -17,7 +17,7 @@ export function requestLogin(username, password, navigate) {
         })
 
         dispatch(loginSuccess(payload.data))
-        navigate('/')
+        history.push('/')
       })
       .catch((error) => {
         dispatch(loginFailure(error.response.data))
@@ -57,8 +57,8 @@ export function loginFailure(error) {
   }
 }
 
-export function requestLogout(navigate) {
-  navigate('/login')
+export function requestLogout(history) {
+  history.push('/login')
 
   Cookies.expire(cookieNames.auth.token)
 
@@ -67,10 +67,10 @@ export function requestLogout(navigate) {
   }
 }
 
-export function requestAuthCheck(navigate) {
+export function requestAuthCheck(history) {
   const token = Cookies.get(cookieNames.auth.token)
   return (dispatch) => {
     // TODO: send refresh token here instead of forcing a logout?
-    if (!token) dispatch(requestLogout(navigate))
+    if (!token) dispatch(requestLogout(history))
   }
 }

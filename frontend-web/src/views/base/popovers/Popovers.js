@@ -1,70 +1,110 @@
 import React from 'react'
-import { CButton, CCard, CCardBody, CCardHeader, CPopover, CRow, CCol } from '@coreui/react'
-import { DocsExample } from 'src/components'
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CPopover,
+  CRow,
+  CCol,
+  CLink,
+} from '@coreui/react'
 
 const Popovers = () => {
+  const placements = [
+    'top-start',
+    'top',
+    'top-end',
+    'bottom-start',
+    'bottom',
+    'bottom-end',
+    'right-start',
+    'right',
+    'right-end',
+    'left-start',
+    'left',
+    'left-end',
+  ]
+
   return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Popover</strong> <small>Basic example</small>
-          </CCardHeader>
-          <CCardBody>
-            <DocsExample href="components/popover">
-              <CPopover
-                title="Popover title"
-                content="And here’s some amazing content. It’s very engaging. Right?"
-                placement="right"
-              >
-                <CButton color="danger" size="lg">
-                  Click to toggle popover
-                </CButton>
-              </CPopover>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>React Popover</strong> <small>Four directions</small>
-          </CCardHeader>
-          <CCardBody>
-            <p className="text-medium-emphasis small">
-              Four options are available: top, right, bottom, and left aligned. Directions are
-              mirrored when using CoreUI for React in RTL.
-            </p>
-            <DocsExample href="components/popover#four-directions">
-              <CPopover
-                content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
-                placement="top"
-              >
-                <CButton color="secondary">Popover on top</CButton>
-              </CPopover>
-              <CPopover
-                content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
-                placement="right"
-              >
-                <CButton color="secondary">Popover on right</CButton>
-              </CPopover>
-              <CPopover
-                content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
-                placement="bottom"
-              >
-                <CButton color="secondary">Popover on bottom</CButton>
-              </CPopover>
-              <CPopover
-                content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
-                placement="left"
-              >
-                <CButton color="secondary">Popover on left</CButton>
-              </CPopover>
-            </DocsExample>
-          </CCardBody>
-        </CCard>
-      </CCol>
-    </CRow>
+    <>
+      <CCard>
+        <CCardHeader>
+          Popovers
+          <div className="card-header-actions">
+            <a
+              href="https://coreui.github.io/components/popovers/"
+              rel="noreferrer noopener"
+              target="_blank"
+              className="card-header-action"
+            >
+              <small className="text-muted">docs</small>
+            </a>
+          </div>
+        </CCardHeader>
+        <CCardBody>
+          {/*eslint-disable-next-line*/}
+
+          <p className="text-muted">
+            Hover over the links below to see popover:
+          </p>
+
+          <p className="muted">
+            Tight pants next level keffiyeh
+            <CPopover header="Popover header" content="Popover text">
+              <CLink> you probably </CLink>
+            </CPopover>
+            haven't heard of them. Photo booth beard raw denim letterpress vegan
+            messenger bag stumptown. Farm-to-table seitan, mcsweeney's fixie
+            sustainable quinoa 8-bit american apparel
+            <CPopover header="Popover header" content="Popover text">
+              <CLink> have a </CLink>
+            </CPopover>
+            terry richardson vinyl chambray. Beard stumptown, cardigans banh mi
+            lomo thundercats. Tofu biodiesel williamsburg marfa, four loko
+            mcsweeney''s cleanse vegan chambray. A really ironic artisan
+            <CPopover header="Popover header" content="Popover text">
+              <CLink> whatever keytar </CLink>
+            </CPopover>
+            scenester farm-to-table banksy Austin
+            <CPopover header="Popover header" content="Popover text">
+              <CLink> twitter handle </CLink>
+            </CPopover>
+            freegan cred raw denim single-origin coffee viral.
+          </p>
+        </CCardBody>
+      </CCard>
+
+      <hr />
+
+      <CCard>
+        <CCardHeader>
+          Popovers
+          <small> placement</small>
+        </CCardHeader>
+        <CCardBody>
+          <div className="my-3">
+            <CRow>
+              {placements.map((placement) => {
+                return (
+                  <CCol md="4" className="py-4 text-center" key={placement}>
+                    <CPopover
+                      header="Popover header"
+                      content={`Popover with placement: ${placement}`}
+                      placement={placement}
+                      interactive={true}
+                      trigger="click"
+                    >
+                      <CButton color="primary">{placement}</CButton>
+                    </CPopover>
+                  </CCol>
+                )
+              })}
+            </CRow>
+          </div>
+        </CCardBody>
+      </CCard>
+    </>
   )
 }
 

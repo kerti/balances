@@ -19,16 +19,14 @@ const fetchUser = (id) => ({
 
 // Fetches a single user from Balances API unless it is cached.
 // Relies on Redux Thunk middleware.
-export const loadUser =
-  (id, requiredFields = []) =>
-  (dispatch, getState) => {
-    const user = getState().entities.users[id]
-    if (user && requiredFields.every((key) => user.hasOwnProperty(key))) {
-      return null
-    }
-
-    return dispatch(fetchUser(id))
+export const loadUser = (id, requiredFields = []) => (dispatch, getState) => {
+  const user = getState().entities.users[id]
+  if (user && requiredFields.every((key) => user.hasOwnProperty(key))) {
+    return null
   }
+
+  return dispatch(fetchUser(id))
+}
 
 // Fetches a page of Users based on a filter.
 // Relies on the custom API middleware defined in ../middleware/api.js.
@@ -36,7 +34,7 @@ const fetchUserPage = (
   ids,
   keyword,
   page,
-  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE),
+  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
 ) => ({
   ids,
   keyword,
@@ -62,17 +60,20 @@ const fetchUserPage = (
 // Fetches a page of Users based on a filter.
 // Bails out if page is cached and user didn't specifically request based on different filter.
 // Relies on Redux Thunk middleware.
-export const loadUserPage =
-  (ids, keyword, page = 1, pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)) =>
-  (dispatch, getState) => {
-    const filter = { ids, keyword, page, pageSize }
-    const filterString = JSON.stringify(filter)
-    const { currentPage = 1, pageCount = 0 } =
-      getState().pagination.usersByFilter[filterString] || {}
+export const loadUserPage = (
+  ids,
+  keyword,
+  page = 1,
+  pageSize = parseInt(process.env.REACT_APP_DEFAULT_PAGE_SIZE)
+) => (dispatch, getState) => {
+  const filter = { ids, keyword, page, pageSize }
+  const filterString = JSON.stringify(filter)
+  const { currentPage = 1, pageCount = 0 } =
+    getState().pagination.usersByFilter[filterString] || {}
 
-    if (pageCount > 0 && page === currentPage) {
-      return null
-    }
-
-    return dispatch(fetchUserPage(ids, keyword, page, pageSize))
+  if (pageCount > 0 && page === currentPage) {
+    return null
   }
+
+  return dispatch(fetchUserPage(ids, keyword, page, pageSize))
+}

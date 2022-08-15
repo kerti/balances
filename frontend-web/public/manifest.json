@@ -1,6 +1,6 @@
 {
   "short_name": "Balances",
-  "name": "Balances - a balance-based personal finance management tool",
+  "name": "Balances",
   "icons": [
     {
       "src": "./assets/img/favicon.png",
