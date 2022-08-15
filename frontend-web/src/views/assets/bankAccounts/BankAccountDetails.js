@@ -18,6 +18,7 @@ import {
   CModalTitle,
   CModalBody,
   CAlert,
+  CSwitch,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { CChartLine } from '@coreui/react-chartjs'
@@ -117,6 +118,7 @@ const BankAccounts = () => {
     accountHolderName: '',
     accountNumber: '',
     balances: '',
+    active: false,
   })
 
   const errorMessage = useSelector((state) => state.errorMessage)
@@ -185,6 +187,7 @@ const BankAccounts = () => {
           bankName: account.bankName,
           accountHolderName: account.accountHolderName,
           accountNumber: account.accountNumber,
+          active: account.status === 'active' ? true : false,
         })
       }
     }
@@ -210,7 +213,7 @@ const BankAccounts = () => {
           e.target.bankName.value,
           e.target.accountHolderName.value,
           e.target.accountNumber.value,
-          'active'
+          e.target.accountActive.checked ? 'active' : 'inactive'
         )
       )
     } else {
@@ -457,6 +460,26 @@ const BankAccounts = () => {
                       name="accountNumber"
                       placeholder={t('bankAccounts.accountNumberPlaceholder')}
                       defaultValue={state.accountNumber}
+                    />
+                  </CCol>
+                </CFormGroup>
+                <CFormGroup row>
+                  <CCol md="3">
+                    <CLabel htmlFor="account-status">
+                      {t('common.states.active')}
+                    </CLabel>
+                  </CCol>
+                  <CCol xs="12" md="9">
+                    <CSwitch
+                      id="accountActive"
+                      name="accountActive"
+                      color={'primary'}
+                      variant={'3d'}
+                      checked={state.active}
+                      onChange={(i) => {
+                        const s = { ...state, active: i.target.checked }
+                        setState(s)
+                      }}
                     />
                   </CCol>
                 </CFormGroup>
