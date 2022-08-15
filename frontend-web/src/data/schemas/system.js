@@ -5,7 +5,7 @@ const userSchema = new schema.Entity(
   {},
   {
     idAttribute: (user) => user.id.toLowerCase(),
-  },
+  }
 )
 
 export { userSchema }

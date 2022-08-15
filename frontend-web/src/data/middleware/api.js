@@ -25,7 +25,10 @@ const getItems = (response) => {
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
 const callApi = (endpoint, schema, options = {}) => {
-  const fullUrl = endpoint.indexOf(sources.baseURL) === -1 ? sources.baseURL + endpoint : endpoint
+  const fullUrl =
+    endpoint.indexOf(sources.baseURL) === -1
+      ? sources.baseURL + endpoint
+      : endpoint
 
   return axios({
     ...options,
@@ -52,7 +55,7 @@ export const CALL_API = 'Call API'
 
 // A Redux middleware that interprets actions with CALL_API info specified.
 // Performs the call and promises when such actions are dispatched.
-const api = (store) => (next) => (action) => {
+export default (store) => (next) => (action) => {
   const callAPI = action[CALL_API]
   if (typeof callAPI === 'undefined') {
     return next(action)
@@ -101,16 +104,14 @@ const api = (store) => (next) => (action) => {
         actionWith({
           response,
           type: successType,
-        }),
+        })
       ),
     (error) =>
       next(
         actionWith({
           type: failureType,
           error: error.message || 'Something bad happened',
-        }),
-      ),
+        })
+      )
   )
 }
-
-export default api

@@ -21,7 +21,7 @@ const paginate = ({ types, mapActionToKey }) => {
       totalCount: 0,
       ids: [],
     },
-    action,
+    action
   ) => {
     switch (action.type) {
       case requestType:

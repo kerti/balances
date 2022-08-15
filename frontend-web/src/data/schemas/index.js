@@ -1,5 +1,5 @@
 import { userSchema } from './system'
-// import { bankAccountSchema, bankAccountBalanceSchema } from './assets'
+import { bankAccountSchema, bankAccountBalanceSchema } from './assets'
 
 // Schemas for Balances API responses
 export const Schemas = {
