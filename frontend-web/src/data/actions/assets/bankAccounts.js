@@ -227,7 +227,7 @@ export const createBankAccountBalance = (
 
 // Update existing bank balance.
 export const updateBankAccountBalance = (
-  bankAccountBalanceId,
+  id,
   bankAccountId,
   date,
   balance,
@@ -240,11 +240,11 @@ export const updateBankAccountBalance = (
       actionTypes.entities.bankAccountBalance.update.FAILURE,
     ],
     options: options,
-    endpoints: 'bankAccounts/balances',
+    endpoint: `bankAccounts/balances/${id}`,
     schema: Schemas.BANK_ACCOUNT_BALANCE,
-    method: 'PUT',
+    method: 'PATCH',
     body: {
-      bankAccountBalanceId,
+      id,
       bankAccountId,
       date,
       balance,
@@ -253,10 +253,7 @@ export const updateBankAccountBalance = (
 })
 
 // Delete existing bank balance.
-export const deleteBankAccountBalance = (
-  bankAccountBalanceId,
-  options = {}
-) => ({
+export const deleteBankAccountBalance = (id, options = {}) => ({
   [CALL_API]: {
     types: [
       actionTypes.entities.bankAccountBalance.delete.REQUEST,
@@ -264,19 +261,19 @@ export const deleteBankAccountBalance = (
       actionTypes.entities.bankAccountBalance.delete.FAILURE,
     ],
     options: options,
-    endpoints: 'bankAccounts/balances',
+    endpoint: `bankAccounts/balances/${id}`,
     schema: Schemas.BANK_ACCOUNT_BALANCE,
     method: 'DELETE',
     body: {
-      bankAccountBalanceId,
+      id,
     },
   },
 })
 
-export const showBalanceModal = () => ({
+export const showBankAccountBalanceModal = () => ({
   type: actionTypes.ui.modals.assets.bankAccounts.balances.SHOW,
 })
 
-export const hideBalanceModal = () => ({
+export const hideBankAccountBalanceModal = () => ({
   type: actionTypes.ui.modals.assets.bankAccounts.balances.HIDE,
 })

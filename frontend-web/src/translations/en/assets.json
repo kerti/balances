@@ -7,7 +7,6 @@
     "accountNumberPlaceholder": "Enter your account number...",
     "accountHolder": "Account Holder",
     "accountHolderPlaceholder": "Enter your account holder...",
-    "addBalanceModalTitle": "Add Balance",
     "balance": "Balance",
     "balanceHistory": "Balance History",
     "balancePlaceholder": "Balance",
@@ -18,7 +17,12 @@
     "details": "Bank Account Details",
     "lastBalance": "Last Balance",
     "listOfBankAccounts": "List of Bank Accounts",
-    "status": "Status"
+    "status": "Status",
+    "modalTitle": {
+      "addBalance": "Add Balance",
+      "deleteBalance": "Delete Balance",
+      "editBalance": "Edit Balance"
+    }
   },
   "common": {
     "actions": {
@@ -26,6 +30,7 @@
       "add": "Add",
       "addNew": "Add New",
       "cancel": "Cancel",
+      "confirm": "Confirm",
       "deactivate": "Deactivate",
       "delete": "Delete",
       "edit": "Edit",

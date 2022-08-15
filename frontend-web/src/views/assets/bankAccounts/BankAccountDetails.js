@@ -27,8 +27,10 @@ import {
   loadBankAccount,
   updateBankAccount,
   createBankAccountBalance,
-  showBalanceModal,
-  hideBalanceModal,
+  showBankAccountBalanceModal,
+  hideBankAccountBalanceModal,
+  updateBankAccountBalance,
+  deleteBankAccountBalance,
 } from '../../../data/actions/assets/bankAccounts'
 import CardSpinner from '../../common/CardSpinner'
 import uniq from 'lodash/uniq'
@@ -86,11 +88,18 @@ const getUserIDs = (balances) => {
   return uniq(userIDs)
 }
 
-const Properties = () => {
+const BankAccounts = () => {
   const { t } = useTranslation('assets')
   const { t: f } = useTranslation('formats')
   const dispatch = useDispatch()
   const { id } = useParams()
+
+  const [modalState, setModalState] = useState({
+    id: '',
+    date: '',
+    balance: '',
+    isDelete: false,
+  })
 
   const rawBankAccounts = useSelector((state) => state.entities.bankAccounts)
   const rawBankAccountBalances = useSelector(
@@ -205,25 +214,84 @@ const Properties = () => {
     }
   }
 
-  const handleBalanceSubmit = (e) => {
+  const handleBalanceModalSubmit = (e) => {
     e.preventDefault()
-    dispatch([
-      createBankAccountBalance(
-        id,
-        Date.parse(e.target.balanceDate.value),
-        parseInt(e.target.balanceAtDate.value),
-        { nextAction: hideBalanceModal }
-      ),
-      loadBankAccount(id, true, 36, [], true),
-    ])
+    if (modalState.isDelete) {
+      dispatch([
+        deleteBankAccountBalance(modalState.id),
+        loadBankAccount(id, true, 36, [], true),
+        resetErrorMessage(),
+        hideBankAccountBalanceModal(),
+      ])
+    } else {
+      if (e.target.balanceModalId.value === '') {
+        dispatch([
+          createBankAccountBalance(
+            id,
+            Date.parse(modalState.date),
+            parseInt(modalState.balance),
+            { nextAction: hideBankAccountBalanceModal }
+          ),
+          loadBankAccount(id, true, 36, [], true),
+          resetErrorMessage(),
+          hideBankAccountBalanceModal(),
+        ])
+      } else {
+        dispatch([
+          updateBankAccountBalance(
+            modalState.id,
+            id,
+            Date.parse(modalState.date),
+            parseInt(modalState.balance),
+            { nextAction: hideBankAccountBalanceModal }
+          ),
+          loadBankAccount(id, true, 36, [], true),
+          resetErrorMessage(),
+          hideBankAccountBalanceModal(),
+        ])
+      }
+    }
   }
 
   const resetError = () => {
     dispatch(resetErrorMessage())
   }
 
-  const loadBalanceModal = (item) => {
-    alert(item.id)
+  const handleInitEdit = (item) => {
+    // TODO: move this to i18next interpolator somehow
+    const yourDate = new Date(item.date)
+    const yodaDate = yourDate.toISOString().split('T')[0]
+    setModalState({
+      id: item.id,
+      date: yodaDate,
+      balance: item.balance,
+      isDelete: false,
+    })
+    dispatch(showBankAccountBalanceModal())
+  }
+
+  const handleInitDelete = (item) => {
+    // TODO: move this to i18next interpolator somehow
+    const yourDate = new Date(item.date)
+    const yodaDate = yourDate.toISOString().split('T')[0]
+    setModalState({
+      id: item.id,
+      date: yodaDate,
+      balance: item.balance,
+      isDelete: true,
+    })
+    dispatch(showBankAccountBalanceModal())
+  }
+
+  const handleBalanceModalClose = (e) => {
+    dispatch(hideBankAccountBalanceModal())
+    dispatch(resetErrorMessage())
+    setModalState({
+      id: '',
+      date: '',
+      balance: '',
+      isDelete: false,
+    })
   }
 
   const balanceDataTable = (
@@ -238,7 +306,6 @@ const Properties = () => {
         itemsPerPage={10}
         pagination
         clickableRows
-        onRowClick={(item) => loadBalanceModal(item)}
         scopedSlots={{
           date: (item) => <td>{f('date.long', { value: item.date })}</td>,
           user: (item) => (
@@ -252,7 +319,29 @@ const Properties = () => {
           ),
           balance: (item) => (
             <td className="text-right">
-              {f('number.decimal.2fractions', { value: item.balance })}
+              {f('number.decimal.2fractions', { value: item.balance })}{' '}
+              {
+                <CButton
+                  className="btn-ghost-primary"
+                  size="sm"
+                  onClick={() => {
+                    handleInitEdit(item)
+                  }}
+                >
+                  <CIcon name="cil-pencil" />
+                </CButton>
+              }{' '}
+              {
+                <CButton
+                  className="btn-ghost-danger"
+                  size="sm"
+                  onClick={() => {
+                    handleInitDelete(item)
+                  }}
+                >
+                  <CIcon name="cil-trash" />
+                </CButton>
+              }
             </td>
           ),
         }}
@@ -393,7 +482,7 @@ const Properties = () => {
                 <CButton
                   size="sm"
                   color="primary"
-                  onClick={() => dispatch(showBalanceModal())}
+                  onClick={() => dispatch(showBankAccountBalanceModal())}
                 >
                   <CIcon name="cil-plus" /> {t('common.actions.addNew')}
                 </CButton>
@@ -405,11 +494,17 @@ const Properties = () => {
       </CRow>
       <CModal
         show={balanceModalState.show}
-        onClose={() => dispatch(hideBalanceModal())}
+        onClose={handleBalanceModalClose}
         size="lg"
       >
         <CModalHeader closeButton>
-          <CModalTitle>{t('bankAccounts.addBalanceModalTitle')}</CModalTitle>
+          <CModalTitle>
+            {modalState.isDelete
+              ? t('bankAccounts.modalTitle.deleteBalance')
+              : modalState.id === ''
+              ? t('bankAccounts.modalTitle.addBalance')
+              : t('bankAccounts.modalTitle.editBalance')}
+          </CModalTitle>
         </CModalHeader>
         <CModalBody>
           <CAlert
@@ -424,14 +519,34 @@ const Properties = () => {
             action=""
             method="post"
             className="form-horizontal"
-            onSubmit={handleBalanceSubmit}
+            onSubmit={handleBalanceModalSubmit}
           >
             <CFormGroup row>
               <CCol md="3">
                 <CLabel htmlFor="date">{t('common.date')}</CLabel>
               </CCol>
               <CCol xs="12" md="9">
-                <CInput type="date" id="balanceDate" name="balanceDate" />
+                <CInput
+                  type="hidden"
+                  id="balanceModalId"
+                  name="balanceModalId"
+                  value={modalState.id}
+                  onChange={(i) => {
+                    const ms = { ...modalState, id: i.target.value }
+                    setModalState(ms)
+                  }}
+                />
+                <CInput
+                  type="date"
+                  id="balanceModalDate"
+                  name="balanceModalDate"
+                  value={modalState.date}
+                  readOnly={modalState.isDelete}
+                  onChange={(i) => {
+                    const ms = { ...modalState, date: i.target.value }
+                    setModalState(ms)
+                  }}
+                />
               </CCol>
             </CFormGroup>
             <CFormGroup row>
@@ -441,24 +556,32 @@ const Properties = () => {
               <CCol xs="12" md="9">
                 <CInput
                   type="text"
-                  id="balanceAtDate"
-                  name="balanceAtDate"
+                  id="balanceModalBalanceAtDate"
+                  name="balanceModalBalanceAtDate"
                   placeholder={t('bankAccounts.balancePlaceholder')}
+                  value={modalState.balance}
+                  readOnly={modalState.isDelete}
+                  onChange={(i) => {
+                    const ms = { ...modalState, balance: i.target.value }
+                    setModalState(ms)
+                  }}
                 />
               </CCol>
             </CFormGroup>
             <CFormGroup row>
               <CCol className="text-right">
                 <CButton
-                  color="primary"
+                  color={modalState.isDelete ? 'danger' : 'primary'}
                   type="submit"
                   disabled={createBankAccountBalanceState.isFetching}
                 >
-                  {t('common.actions.submit')}
+                  {modalState.isDelete
+                    ? t('common.actions.confirm')
+                    : t('common.actions.submit')}
                 </CButton>{' '}
                 <CButton
                   color="secondary"
-                  onClick={() => dispatch(hideBalanceModal())}
+                  onClick={handleBalanceModalClose}
                   disabled={createBankAccountBalanceState.isFetching}
                 >
                   {t('common.actions.cancel')}
@@ -472,4 +595,4 @@ const Properties = () => {
   )
 }
 
-export default Properties
+export default BankAccounts

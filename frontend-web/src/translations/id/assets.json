@@ -7,7 +7,6 @@
     "accountNumberPlaceholder": "Masukkan nomor rekening Anda...",
     "accountHolder": "Nama Pemegang Rekening",
     "accountHolderPlaceholder": "Masukkan nama pemegang rekening Anda...",
-    "addBalanceModalTitle": "Tambah Saldo",
     "balance": "Saldo",
     "balanceHistory": "Riwayat Saldo",
     "balancePlaceholder": "Saldo",
@@ -18,7 +17,12 @@
     "details": "Detil Rekening Bank",
     "lastBalance": "Saldo Terakhir",
     "listOfBankAccounts": "Daftar Rekening Bank",
-    "status": "Status"
+    "status": "Status",
+    "modalTitle": {
+      "addBalance": "Tambah Saldo",
+      "deleteBalance": "Hapus Saldo",
+      "editBalance": "Ubah Saldo"
+    }
   },
   "common": {
     "actions": {
@@ -26,6 +30,7 @@
       "add": "Tambah",
       "addNew": "Tambah Baru",
       "cancel": "Batal",
+      "confirm": "Konfirmasi",
       "deactivate": "Nonaktifkan",
       "delete": "Hapus",
       "edit": "Ubah",
