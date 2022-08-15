@@ -79,6 +79,10 @@ const getBalanceHistoryFields = (t) => [
     label: t('bankAccounts.balance'),
     _classes: ['text-right'],
   },
+  {
+    key: 'balanceActions',
+    label: '',
+  },
 ]
 
 const getUserIDs = (balances) => {
@@ -320,6 +324,10 @@ const BankAccounts = () => {
           balance: (item) => (
             <td className="text-right">
               {f('number.decimal.2fractions', { value: item.balance })}{' '}
+            </td>
+          ),
+          balanceActions: (item) => (
+            <td className="text-right">
               {
                 <CButton
                   className="btn-ghost-primary"
