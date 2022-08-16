@@ -1,7 +1,7 @@
 import axios from 'axios'
 import sources from '..'
 
-export default {
+const auth = {
   login: (username, password) => {
     const basic = btoa(`${username}:${password}`)
     return axios.post(`${sources.baseURL}auth/login`, null, {
@@ -11,3 +11,5 @@ export default {
     })
   },
 }
+
+export default auth
