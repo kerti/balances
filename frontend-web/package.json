@@ -65,9 +65,6 @@
   "bugs": {
     "url": "https://github.com/kerti/balances/issues"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": [
     ">0.2%",
     "not dead",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CRow,
@@ -139,9 +139,13 @@ const BankAccounts = () => {
 
   const accountReady = account !== undefined && account.balances.length > 0
 
-  const balances = accountReady
-    ? account.balances.map((balanceId) => rawBankAccountBalances[balanceId])
-    : []
+  const balances = useMemo(
+    () =>
+      accountReady
+        ? account.balances.map((balanceId) => rawBankAccountBalances[balanceId])
+        : [],
+    [accountReady, account, rawBankAccountBalances]
+  )
 
   const balancesReady =
     accountReady && balances
