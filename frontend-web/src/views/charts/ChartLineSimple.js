@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { getColor, deepObjectsMerge } from '@coreui/utils/src'
 import { CChartLine } from '@coreui/react-chartjs'

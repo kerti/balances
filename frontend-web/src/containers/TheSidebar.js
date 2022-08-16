@@ -1,4 +1,4 @@
-import React from 'react'
+import { memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CCreateElement,
@@ -59,4 +59,4 @@ const TheSidebar = () => {
   )
 }
 
-export default React.memo(TheSidebar)
+export default memo(TheSidebar)

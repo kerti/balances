@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react';
 import {
   CAlert,
   CButton,
@@ -12,7 +12,7 @@ import {
 } from '@coreui/react'
 
 const Alerts = () => {
-  const [visible, setVisible] = React.useState(10)
+  const [visible, setVisible] = useState(10)
 
   return (
     <>

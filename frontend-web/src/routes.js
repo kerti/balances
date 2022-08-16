@@ -1,95 +1,95 @@
-import React from 'react'
+import { lazy } from 'react';
 
-const Toaster = React.lazy(() =>
+const Toaster = lazy(() =>
   import('./views/notifications/toaster/Toaster')
 )
-const Tables = React.lazy(() => import('./views/base/tables/Tables'))
+const Tables = lazy(() => import('./views/base/tables/Tables'))
 
-const Breadcrumbs = React.lazy(() =>
+const Breadcrumbs = lazy(() =>
   import('./views/base/breadcrumbs/Breadcrumbs')
 )
-const Cards = React.lazy(() => import('./views/base/cards/Cards'))
-const Carousels = React.lazy(() => import('./views/base/carousels/Carousels'))
-const Collapses = React.lazy(() => import('./views/base/collapses/Collapses'))
-const BasicForms = React.lazy(() => import('./views/base/forms/BasicForms'))
+const Cards = lazy(() => import('./views/base/cards/Cards'))
+const Carousels = lazy(() => import('./views/base/carousels/Carousels'))
+const Collapses = lazy(() => import('./views/base/collapses/Collapses'))
+const BasicForms = lazy(() => import('./views/base/forms/BasicForms'))
 
-const Jumbotrons = React.lazy(() =>
+const Jumbotrons = lazy(() =>
   import('./views/base/jumbotrons/Jumbotrons')
 )
-const ListGroups = React.lazy(() =>
+const ListGroups = lazy(() =>
   import('./views/base/list-groups/ListGroups')
 )
-const Navbars = React.lazy(() => import('./views/base/navbars/Navbars'))
-const Navs = React.lazy(() => import('./views/base/navs/Navs'))
-const Paginations = React.lazy(() =>
+const Navbars = lazy(() => import('./views/base/navbars/Navbars'))
+const Navs = lazy(() => import('./views/base/navs/Navs'))
+const Paginations = lazy(() =>
   import('./views/base/paginations/Paginations')
 )
-const Popovers = React.lazy(() => import('./views/base/popovers/Popovers'))
-const ProgressBar = React.lazy(() =>
+const Popovers = lazy(() => import('./views/base/popovers/Popovers'))
+const ProgressBar = lazy(() =>
   import('./views/base/progress-bar/ProgressBar')
 )
-const Switches = React.lazy(() => import('./views/base/switches/Switches'))
+const Switches = lazy(() => import('./views/base/switches/Switches'))
 
-const Tabs = React.lazy(() => import('./views/base/tabs/Tabs'))
-const Tooltips = React.lazy(() => import('./views/base/tooltips/Tooltips'))
-const BrandButtons = React.lazy(() =>
+const Tabs = lazy(() => import('./views/base/tabs/Tabs'))
+const Tooltips = lazy(() => import('./views/base/tooltips/Tooltips'))
+const BrandButtons = lazy(() =>
   import('./views/buttons/brand-buttons/BrandButtons')
 )
-const ButtonDropdowns = React.lazy(() =>
+const ButtonDropdowns = lazy(() =>
   import('./views/buttons/button-dropdowns/ButtonDropdowns')
 )
-const ButtonGroups = React.lazy(() =>
+const ButtonGroups = lazy(() =>
   import('./views/buttons/button-groups/ButtonGroups')
 )
-const Buttons = React.lazy(() => import('./views/buttons/buttons/Buttons'))
-const Charts = React.lazy(() => import('./views/charts/Charts'))
-const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
-const CoreUIIcons = React.lazy(() =>
+const Buttons = lazy(() => import('./views/buttons/buttons/Buttons'))
+const Charts = lazy(() => import('./views/charts/Charts'))
+const Dashboard = lazy(() => import('./views/dashboard/Dashboard'))
+const CoreUIIcons = lazy(() =>
   import('./views/icons/coreui-icons/CoreUIIcons')
 )
-const Flags = React.lazy(() => import('./views/icons/flags/Flags'))
-const Brands = React.lazy(() => import('./views/icons/brands/Brands'))
-const Alerts = React.lazy(() => import('./views/notifications/alerts/Alerts'))
-const Badges = React.lazy(() => import('./views/notifications/badges/Badges'))
-const Modals = React.lazy(() => import('./views/notifications/modals/Modals'))
-const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
-const Typography = React.lazy(() =>
+const Flags = lazy(() => import('./views/icons/flags/Flags'))
+const Brands = lazy(() => import('./views/icons/brands/Brands'))
+const Alerts = lazy(() => import('./views/notifications/alerts/Alerts'))
+const Badges = lazy(() => import('./views/notifications/badges/Badges'))
+const Modals = lazy(() => import('./views/notifications/modals/Modals'))
+const Colors = lazy(() => import('./views/theme/colors/Colors'))
+const Typography = lazy(() =>
   import('./views/theme/typography/Typography')
 )
-const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
-const Users = React.lazy(() => import('./views/users/Users'))
-const User = React.lazy(() => import('./views/users/User'))
+const Widgets = lazy(() => import('./views/widgets/Widgets'))
+const Users = lazy(() => import('./views/users/Users'))
+const User = lazy(() => import('./views/users/User'))
 
 // Assets Section
-const BankAccounts = React.lazy(() =>
+const BankAccounts = lazy(() =>
   import('./views/assets/bankAccounts/BankAccounts')
 )
-const Properties = React.lazy(() =>
+const Properties = lazy(() =>
   import('./views/assets/properties/Properties')
 )
-const Vehicles = React.lazy(() => import('./views/assets/vehicles/Vehicles'))
+const Vehicles = lazy(() => import('./views/assets/vehicles/Vehicles'))
 
 // Liabilities Section
-const Institutional = React.lazy(() =>
+const Institutional = lazy(() =>
   import('./views/liabilities/institutional/Institutional')
 )
-const Personal = React.lazy(() =>
+const Personal = lazy(() =>
   import('./views/liabilities/personal/Personal')
 )
 
 // Investments Section
-const Deposits = React.lazy(() =>
+const Deposits = lazy(() =>
   import('./views/investments/deposits/Deposits')
 )
-const Obligations = React.lazy(() =>
+const Obligations = lazy(() =>
   import('./views/investments/obligations/Obligations')
 )
-const Gold = React.lazy(() => import('./views/investments/gold/Gold'))
-const MutualFunds = React.lazy(() =>
+const Gold = lazy(() => import('./views/investments/gold/Gold'))
+const MutualFunds = lazy(() =>
   import('./views/investments/mutualFunds/MutualFunds')
 )
-const Stocks = React.lazy(() => import('./views/investments/stocks/Stocks'))
-const P2pLending = React.lazy(() =>
+const Stocks = lazy(() => import('./views/investments/stocks/Stocks'))
+const P2pLending = lazy(() =>
   import('./views/investments/p2pLending/P2pLending')
 )
 

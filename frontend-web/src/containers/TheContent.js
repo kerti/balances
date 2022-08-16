@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import { memo, Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { CContainer, CFade } from '@coreui/react'
 import { useTranslation } from 'react-i18next'
@@ -45,4 +45,4 @@ const TheContent = () => {
   )
 }
 
-export default React.memo(TheContent)
+export default memo(TheContent)
