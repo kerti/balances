@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react';
 import { TheContent, TheSidebar, TheFooter, TheHeader } from './index'
 import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'

@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react';
 import {
   CBadge,
   CCard,
@@ -15,8 +15,8 @@ import {
 import CIcon from '@coreui/icons-react'
 
 const Cards = () => {
-  const [collapsed, setCollapsed] = React.useState(true)
-  const [showCard, setShowCard] = React.useState(true)
+  const [collapsed, setCollapsed] = useState(true)
+  const [showCard, setShowCard] = useState(true)
 
   return (
     <>

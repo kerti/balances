@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react';
 import {
   CButton,
   CCard,
@@ -33,8 +33,8 @@ import {
 import CIcon from '@coreui/icons-react'
 
 const BasicForms = () => {
-  const [collapsed, setCollapsed] = React.useState(true)
-  const [showElements, setShowElements] = React.useState(true)
+  const [collapsed, setCollapsed] = useState(true)
+  const [showElements, setShowElements] = useState(true)
 
   return (
     <>

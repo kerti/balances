@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react';
 import { CCard, CCardBody, CCardHeader, CPagination } from '@coreui/react'
 
 const Paginations = () => {

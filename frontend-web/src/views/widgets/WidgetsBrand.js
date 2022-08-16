@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { CWidgetBrand, CRow, CCol } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
