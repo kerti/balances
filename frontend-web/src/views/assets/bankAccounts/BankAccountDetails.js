@@ -277,10 +277,6 @@ const BankAccounts = () => {
     }
   }
 
-  const resetError = () => {
-    dispatch(resetErrorMessage())
-  }
-
   const handleInitEdit = (item) => {
     // TODO: move this to i18next interpolator somehow
     const yourDate = new Date(item.date)
@@ -291,8 +287,7 @@ const BankAccounts = () => {
       balance: item.balance,
       isDelete: false,
     })
-    resetError()
-    dispatch(showBankAccountBalanceModal())
+    dispatch([resetErrorMessage(), showBankAccountBalanceModal()])
   }
 
   const handleInitDelete = (item) => {
@@ -305,8 +300,7 @@ const BankAccounts = () => {
       balance: item.balance,
       isDelete: true,
     })
-    resetError()
-    dispatch(showBankAccountBalanceModal())
+    dispatch([resetErrorMessage(), showBankAccountBalanceModal()])
   }
 
   const handleBalanceModalClose = (e) => {
@@ -541,8 +535,10 @@ const BankAccounts = () => {
                   size="sm"
                   color="primary"
                   onClick={() => {
-                    resetError()
-                    dispatch(showBankAccountBalanceModal())
+                    dispatch([
+                      resetErrorMessage(),
+                      showBankAccountBalanceModal(),
+                    ])
                   }}
                 >
                   <CIcon name="cil-plus" /> {t('common.actions.addNew')}
@@ -571,7 +567,9 @@ const BankAccounts = () => {
           <CAlert
             color="danger"
             closeButton
-            onClick={resetError}
+            onClick={() => {
+              dispatch(resetErrorMessage())
+            }}
             show={errorMessage !== null}
           >
             {errorMessage}
