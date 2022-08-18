@@ -489,12 +489,14 @@ const BankAccounts = () => {
                     </CLabel>
                   </CCol>
                   <CCol xs="12" md="9">
-                    {/* TODO: Fix the initial value */}
                     <CSelect
                       custom
                       id="accountStatus"
                       name="accountStatus"
-                      defaultValue={state.accountStatus}
+                      value={state.accountStatus}
+                      onChange={(i) => {
+                        setState({ ...state, accountStatus: i.value })
+                      }}
                     >
                       <option value="">
                         {t('common.actions.selectAnOption')}
