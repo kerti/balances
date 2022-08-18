@@ -1,33 +1,21 @@
-import { lazy } from 'react';
+import { lazy } from 'react'
 
-const Toaster = lazy(() =>
-  import('./views/notifications/toaster/Toaster')
-)
+const Toaster = lazy(() => import('./views/notifications/toaster/Toaster'))
 const Tables = lazy(() => import('./views/base/tables/Tables'))
 
-const Breadcrumbs = lazy(() =>
-  import('./views/base/breadcrumbs/Breadcrumbs')
-)
+const Breadcrumbs = lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
 const Cards = lazy(() => import('./views/base/cards/Cards'))
 const Carousels = lazy(() => import('./views/base/carousels/Carousels'))
 const Collapses = lazy(() => import('./views/base/collapses/Collapses'))
 const BasicForms = lazy(() => import('./views/base/forms/BasicForms'))
 
-const Jumbotrons = lazy(() =>
-  import('./views/base/jumbotrons/Jumbotrons')
-)
-const ListGroups = lazy(() =>
-  import('./views/base/list-groups/ListGroups')
-)
+const Jumbotrons = lazy(() => import('./views/base/jumbotrons/Jumbotrons'))
+const ListGroups = lazy(() => import('./views/base/list-groups/ListGroups'))
 const Navbars = lazy(() => import('./views/base/navbars/Navbars'))
 const Navs = lazy(() => import('./views/base/navs/Navs'))
-const Paginations = lazy(() =>
-  import('./views/base/paginations/Paginations')
-)
+const Paginations = lazy(() => import('./views/base/paginations/Paginations'))
 const Popovers = lazy(() => import('./views/base/popovers/Popovers'))
-const ProgressBar = lazy(() =>
-  import('./views/base/progress-bar/ProgressBar')
-)
+const ProgressBar = lazy(() => import('./views/base/progress-bar/ProgressBar'))
 const Switches = lazy(() => import('./views/base/switches/Switches'))
 
 const Tabs = lazy(() => import('./views/base/tabs/Tabs'))
@@ -44,18 +32,14 @@ const ButtonGroups = lazy(() =>
 const Buttons = lazy(() => import('./views/buttons/buttons/Buttons'))
 const Charts = lazy(() => import('./views/charts/Charts'))
 const Dashboard = lazy(() => import('./views/dashboard/Dashboard'))
-const CoreUIIcons = lazy(() =>
-  import('./views/icons/coreui-icons/CoreUIIcons')
-)
+const CoreUIIcons = lazy(() => import('./views/icons/coreui-icons/CoreUIIcons'))
 const Flags = lazy(() => import('./views/icons/flags/Flags'))
 const Brands = lazy(() => import('./views/icons/brands/Brands'))
 const Alerts = lazy(() => import('./views/notifications/alerts/Alerts'))
 const Badges = lazy(() => import('./views/notifications/badges/Badges'))
 const Modals = lazy(() => import('./views/notifications/modals/Modals'))
 const Colors = lazy(() => import('./views/theme/colors/Colors'))
-const Typography = lazy(() =>
-  import('./views/theme/typography/Typography')
-)
+const Typography = lazy(() => import('./views/theme/typography/Typography'))
 const Widgets = lazy(() => import('./views/widgets/Widgets'))
 const Users = lazy(() => import('./views/users/Users'))
 const User = lazy(() => import('./views/users/User'))
@@ -64,23 +48,21 @@ const User = lazy(() => import('./views/users/User'))
 const BankAccounts = lazy(() =>
   import('./views/assets/bankAccounts/BankAccounts')
 )
-const Properties = lazy(() =>
-  import('./views/assets/properties/Properties')
+
+const BankAccountDetails = lazy(() =>
+  import('./views/assets/bankAccounts/BankAccountDetails')
 )
+const Properties = lazy(() => import('./views/assets/properties/Properties'))
 const Vehicles = lazy(() => import('./views/assets/vehicles/Vehicles'))
 
 // Liabilities Section
 const Institutional = lazy(() =>
   import('./views/liabilities/institutional/Institutional')
 )
-const Personal = lazy(() =>
-  import('./views/liabilities/personal/Personal')
-)
+const Personal = lazy(() => import('./views/liabilities/personal/Personal'))
 
 // Investments Section
-const Deposits = lazy(() =>
-  import('./views/investments/deposits/Deposits')
-)
+const Deposits = lazy(() => import('./views/investments/deposits/Deposits'))
 const Obligations = lazy(() =>
   import('./views/investments/obligations/Obligations')
 )
@@ -108,6 +90,18 @@ const getRoutes = (t) => {
       path: '/assets/bankAccounts',
       name: t('assets.bankAccounts'),
       component: BankAccounts,
+      exact: true,
+    },
+    {
+      path: '/assets/bankAccounts/new',
+      name: t('assets.bankAccountNew'),
+      component: BankAccountDetails,
+      exact: true,
+    },
+    {
+      path: '/assets/bankAccounts/:id',
+      name: t('assets.bankAccountDetails'),
+      component: BankAccountDetails,
     },
     {
       path: '/assets/properties',

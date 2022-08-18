@@ -1,8 +1,49 @@
 {
   "assets": "Harta",
-  "banks": {
-    "bankAccounts": "Rekening Bank",
-    "description": "Di sini Anda dapat mengelola semua rekening bank Anda."
+  "bankAccounts": {
+    "accountName": "Nama Rekening",
+    "accountNamePlaceholder": "Masukkan nama rekening Anda...",
+    "accountNumber": "Nomor Rekening",
+    "accountNumberPlaceholder": "Masukkan nomor rekening Anda...",
+    "accountHolder": "Atas Nama",
+    "accountHolderPlaceholder": "Masukkan nama pemegang rekening Anda...",
+    "balance": "Saldo",
+    "balanceHistory": "Riwayat Saldo",
+    "balancePlaceholder": "Saldo",
+    "balanceSetBy": "Disimpan Oleh",
+    "balanceHistoryGraph": "Grafik Riwayat Saldo",
+    "name": "Nama Bank",
+    "namePlaceholder": "Masukkan nama bank Anda...",
+    "details": "Detil Rekening Bank",
+    "lastBalance": "Saldo Terakhir",
+    "listOfBankAccounts": "Daftar Rekening Bank",
+    "status": "Status",
+    "modalTitle": {
+      "addBalance": "Tambah Saldo",
+      "deleteBalance": "Hapus Saldo",
+      "editBalance": "Ubah Saldo"
+    }
+  },
+  "common": {
+    "actions": {
+      "activate": "Aktifkan",
+      "add": "Tambah",
+      "addNew": "Tambah Baru",
+      "cancel": "Batal",
+      "confirm": "Konfirmasi",
+      "deactivate": "Nonaktifkan",
+      "delete": "Hapus",
+      "edit": "Ubah",
+      "reset": "Ulangi",
+      "selectAnOption": "Pilih Salah Satu",
+      "setBalance": "Atur Saldo",
+      "submit": "Kirim"
+    },
+    "date": "Tanggal",
+    "states": {
+      "active": "Aktif",
+      "inactive": "Tidak Aktif"
+    }
   },
   "properties": {
     "properties": "Properti",
