@@ -169,7 +169,36 @@ export const loadBankAccountBalancePage =
     return dispatch(fetchBankAccountBalancePage(bankAccountId, page, pageSize))
   }
 
-// Store a bank account.
+// Create new bank account.
+export const createBankAccount = (
+  accountName,
+  bankName,
+  accountHolderName,
+  accountNumber,
+  status,
+  options = {}
+) => ({
+  [CALL_API]: {
+    types: [
+      actionTypes.entities.bankAccount.create.REQUEST,
+      actionTypes.entities.bankAccount.create.SUCCESS,
+      actionTypes.entities.bankAccount.create.FAILURE,
+    ],
+    options: options,
+    endpoint: `bankAccounts`,
+    schema: Schemas.BANK_ACCOUNT,
+    method: 'POST',
+    body: {
+      accountName,
+      bankName,
+      accountHolderName,
+      accountNumber,
+      status,
+    },
+  },
+})
+
+// Update existing bank account.
 export const updateBankAccount = (
   id,
   accountName,

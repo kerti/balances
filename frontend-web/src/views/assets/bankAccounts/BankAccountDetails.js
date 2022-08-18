@@ -18,7 +18,7 @@ import {
   CModalTitle,
   CModalBody,
   CAlert,
-  CSwitch,
+  CSelect,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { CChartLine } from '@coreui/react-chartjs'
@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import {
   loadBankAccount,
+  createBankAccount,
   updateBankAccount,
   createBankAccountBalance,
   showBankAccountBalanceModal,
@@ -49,6 +50,7 @@ const getLabelsFromBalanceHistory = (balanceHistoryData) => {
   return balanceHistoryData.map((hist) => new Date(hist.date))
 }
 
+// TODO: dynamic scaling?
 const getChartOptions = (t) => {
   return {
     responsive: true,
@@ -114,11 +116,11 @@ const BankAccounts = () => {
 
   const [state, setState] = useState({
     accountName: '',
-    bankName: '',
+    accountBankName: '',
     accountHolderName: '',
     accountNumber: '',
     balances: '',
-    active: false,
+    accountStatus: '',
   })
 
   const errorMessage = useSelector((state) => state.errorMessage)
@@ -169,9 +171,10 @@ const BankAccounts = () => {
   const stateReady =
     usersReady &&
     state.accountName !== '' &&
-    state.bankName !== '' &&
+    state.accountBankName !== '' &&
     state.accountHolderName !== '' &&
-    state.accountNumber !== ''
+    state.accountNumber !== '' &&
+    state.accountStatus !== ''
 
   const ready = accountReady && balancesReady && usersReady && stateReady
 
@@ -188,10 +191,10 @@ const BankAccounts = () => {
       if (usersReady && !stateReady) {
         setState({
           accountName: account.accountName,
-          bankName: account.bankName,
+          accountBankName: account.bankName,
           accountHolderName: account.accountHolderName,
           accountNumber: account.accountNumber,
-          active: account.status === 'active' ? true : false,
+          accountStatus: account.status,
         })
       }
     }
@@ -210,18 +213,28 @@ const BankAccounts = () => {
   const handleAccountSubmit = (e) => {
     e.preventDefault()
     if (id) {
-      dispatch(
+      dispatch([
         updateBankAccount(
           id,
           e.target.accountName.value,
-          e.target.bankName.value,
+          e.target.accountBankName.value,
           e.target.accountHolderName.value,
           e.target.accountNumber.value,
-          e.target.accountActive.checked ? 'active' : 'inactive'
-        )
-      )
+          e.target.accountStatus.value
+        ),
+        loadBankAccount(id, true, 36, [], true),
+      ])
     } else {
-      console.log('should be sending new account here')
+      dispatch([
+        createBankAccount(
+          e.target.accountName.value,
+          e.target.accountBankName.value,
+          e.target.accountHolderName.value,
+          e.target.accountNumber.value,
+          e.target.accountStatus.value
+        ),
+        loadBankAccount(id, true, 36, [], true),
+      ])
     }
   }
 
@@ -278,6 +291,7 @@ const BankAccounts = () => {
       balance: item.balance,
       isDelete: false,
     })
+    resetError()
     dispatch(showBankAccountBalanceModal())
   }
 
@@ -291,6 +305,7 @@ const BankAccounts = () => {
       balance: item.balance,
       isDelete: true,
     })
+    resetError()
     dispatch(showBankAccountBalanceModal())
   }
 
@@ -428,10 +443,10 @@ const BankAccounts = () => {
                   <CCol xs="12" md="9">
                     <CInput
                       type="text"
-                      id="bankName"
-                      name="bankName"
+                      id="accountBankName"
+                      name="accountBankName"
                       placeholder={t('bankAccounts.namePlaceholder')}
-                      defaultValue={state.bankName}
+                      defaultValue={state.accountBankName}
                     />
                   </CCol>
                 </CFormGroup>
@@ -470,21 +485,27 @@ const BankAccounts = () => {
                 <CFormGroup row>
                   <CCol md="3">
                     <CLabel htmlFor="account-status">
-                      {t('common.states.active')}
+                      {t('bankAccounts.status')}
                     </CLabel>
                   </CCol>
                   <CCol xs="12" md="9">
-                    <CSwitch
-                      id="accountActive"
-                      name="accountActive"
-                      color={'primary'}
-                      variant={'3d'}
-                      checked={state.active}
-                      onChange={(i) => {
-                        const s = { ...state, active: i.target.checked }
-                        setState(s)
-                      }}
-                    />
+                    {/* TODO: Fix the initial value */}
+                    <CSelect
+                      custom
+                      id="accountStatus"
+                      name="accountStatus"
+                      defaultValue={state.accountStatus}
+                    >
+                      <option value="">
+                        {t('common.actions.selectAnOption')}
+                      </option>
+                      <option value="active">
+                        {t('common.states.active')}
+                      </option>
+                      <option value="inactive">
+                        {t('common.states.inactive')}
+                      </option>
+                    </CSelect>
                   </CCol>
                 </CFormGroup>
               </CCardBody>
@@ -517,7 +538,10 @@ const BankAccounts = () => {
                 <CButton
                   size="sm"
                   color="primary"
-                  onClick={() => dispatch(showBankAccountBalanceModal())}
+                  onClick={() => {
+                    resetError()
+                    dispatch(showBankAccountBalanceModal())
+                  }}
                 >
                   <CIcon name="cil-plus" /> {t('common.actions.addNew')}
                 </CButton>
