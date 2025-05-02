@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/model"
@@ -42,7 +42,7 @@ func (h *UserImpl) Shutdown() {
 // HandleGetUserByID handles the request
 func (h *UserImpl) HandleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := uuid.FromString(vars["id"])
+	id, err := uuid.Parse(vars["id"])
 	if err != nil {
 		response.RespondWithError(w, failure.BadRequest(err))
 		return
@@ -106,7 +106,7 @@ func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 // HandleUpdateUser handles the request
 func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := uuid.FromString(vars["id"])
+	id, err := uuid.Parse(vars["id"])
 	if err != nil {
 		response.RespondWithError(w, failure.BadRequest(err))
 		return

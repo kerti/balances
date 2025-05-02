@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"

@@ -6,7 +6,7 @@ import (
 
 	"github.com/kerti/balances/backend/util/filter"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/nuuid"
@@ -50,7 +50,7 @@ type User struct {
 // NewUserFromInput creates a new User from its input struct
 func NewUserFromInput(input UserInput, userID uuid.UUID) (u User) {
 	now := time.Now()
-	newUUID, _ := uuid.NewV4()
+	newUUID, _ := uuid.NewV7()
 
 	u = User{
 		ID:        newUUID,

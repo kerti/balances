@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/filter"
@@ -96,7 +96,7 @@ type BankAccount struct {
 // NewBankAccountFromInput creates a new Bank Account from its input object
 func NewBankAccountFromInput(input BankAccountInput, userID uuid.UUID) (b BankAccount) {
 	now := time.Now()
-	newUUID, _ := uuid.NewV4()
+	newUUID, _ := uuid.NewV7()
 
 	b = BankAccount{
 		ID:                newUUID,
@@ -266,7 +266,7 @@ type BankAccountBalance struct {
 // NewBankAccountBalanceFromInput creates a new Bank Account Balance from its input object
 func NewBankAccountBalanceFromInput(input BankAccountBalanceInput, bankAccountID uuid.UUID, userID uuid.UUID) (bb BankAccountBalance) {
 	now := time.Now()
-	newUUID, _ := uuid.NewV4()
+	newUUID, _ := uuid.NewV7()
 
 	bb = BankAccountBalance{
 		ID:            newUUID,
