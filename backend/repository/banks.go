@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"

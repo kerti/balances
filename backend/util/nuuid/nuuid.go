@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 // NUUID is a nullable UUID, Use it if you want to make UUID nullable in DB/Json model/etc
@@ -22,7 +22,7 @@ func From(id uuid.UUID) NUUID {
 
 // FromString takes a string and returns a NUUID
 func FromString(str string) NUUID {
-	id, err := uuid.FromString(str)
+	id, err := uuid.Parse(str)
 	return New(id, err == nil)
 }
 
@@ -70,7 +70,7 @@ func (nid *NUUID) UnmarshalJSON(data []byte) error {
 	}
 	switch x := v.(type) {
 	case string:
-		id, err = uuid.FromString(x)
+		id, err = uuid.Parse(x)
 		nid.UUID = id
 	case map[string]interface{}:
 		str, strOK := x["UUID"].(string)
@@ -78,7 +78,7 @@ func (nid *NUUID) UnmarshalJSON(data []byte) error {
 		if !strOK || !validOK {
 			return fmt.Errorf(`json: unmarshalling object into Go value of type nuuid.NUUID requires key "UUID" to be of type string and key "Valid" to be of type bool; found %T and %T, respectively`, x["UUID"], x["Valid"])
 		}
-		id, err = uuid.FromString(str)
+		id, err = uuid.Parse(str)
 		nid.UUID = id
 		nid.Valid = valid
 		return err
@@ -111,7 +111,7 @@ func (nid NUUID) MarshalText() ([]byte, error) {
 // UnmarshalText implements the UnmarshalText method
 func (nid *NUUID) UnmarshalText(text []byte) error {
 	str := string(text)
-	id, err := uuid.FromString(str)
+	id, err := uuid.Parse(str)
 	nid.UUID = id
 	if err != nil {
 		return err

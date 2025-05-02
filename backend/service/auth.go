@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofrs/uuid"
 	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/config"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
@@ -150,7 +150,7 @@ func (s *AuthImpl) getUserID(claims jwt.MapClaims) (*uuid.UUID, error) {
 	if err != nil {
 		return nil, failure.Unauthorized("failed decoding ID from JWT token")
 	}
-	userID, err := uuid.FromString(string(userIDBytes))
+	userID, err := uuid.Parse(string(userIDBytes))
 	if err != nil {
 		return nil, failure.Unauthorized("failed decoding ID from JWT token")
 	}
