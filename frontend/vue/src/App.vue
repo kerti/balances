@@ -10,6 +10,7 @@
         Open drawer
       </label>
       <div class="hidden lg:block">I SHOULD BE HIDDEN IN SMALLER SCREENS</div>
+      <router-view></router-view>
     </div>
     <div class="drawer-side">
       <label
