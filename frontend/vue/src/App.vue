@@ -1,28 +1,16 @@
-<script setup></script>
+<script setup>
+import Sidebar from "./components/Sidebar.vue"
+import Header from "./components/Header.vue"
+</script>
 
 <template>
-  <div class="drawer lg:drawer-open">
-    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content flex flex-col items-center justify-center">
-      <!-- Page content here -->
-      test
-      <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden">
-        Open drawer
-      </label>
-      <div class="hidden lg:block">I SHOULD BE HIDDEN IN SMALLER SCREENS</div>
-      <router-view></router-view>
-    </div>
-    <div class="drawer-side">
-      <label
-        for="my-drawer-2"
-        aria-label="close sidebar"
-        class="drawer-overlay"
-      ></label>
-      <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-        <!-- Sidebar content here -->
-        <li><a>Sidebar Item 1</a></li>
-        <li><a>Sidebar Item 2</a></li>
-      </ul>
+  <div class="flex h-screen">
+    <Sidebar />
+    <div class="flex flex-col flex-1">
+      <Header />
+      <main class="flex-1 overflow-y-auto bg-base-200 p-4">
+        <router-view />
+      </main>
     </div>
   </div>
 </template>
