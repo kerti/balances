@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
-
 import { actionTypes } from '../../actions'
+import modalState from './modalState'
 
 export function lang(state = 'en', action) {
   switch (action.type) {
@@ -10,6 +10,16 @@ export function lang(state = 'en', action) {
       return state
   }
 }
+
+// Updates the modalState for different actions.
+const modals = combineReducers({
+  bankAccountsBalance: modalState({
+    types: [
+      actionTypes.ui.modals.assets.bankAccounts.balances.SHOW,
+      actionTypes.ui.modals.assets.bankAccounts.balances.HIDE,
+    ],
+  }),
+})
 
 export function sidebarShow(state = 'responsive', action) {
   switch (action.type) {
@@ -22,5 +32,6 @@ export function sidebarShow(state = 'responsive', action) {
 
 export default combineReducers({
   lang,
+  modals,
   sidebarShow,
 })
