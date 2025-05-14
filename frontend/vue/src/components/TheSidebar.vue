@@ -1,5 +1,5 @@
 <script setup>
-import TheMenu from "./TheMenu.vue"
+import TheMenu from "@/components/TheMenu.vue"
 </script>
 
 <template>
