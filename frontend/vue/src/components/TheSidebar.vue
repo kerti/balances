@@ -1,5 +1,5 @@
 <script setup>
-import Menu from "./Menu.vue"
+import TheMenu from "./TheMenu.vue"
 </script>
 
 <template>
@@ -22,6 +22,6 @@ import Menu from "./Menu.vue"
       >
     </div>
     <div class="h-4"></div>
-    <Menu />
+    <TheMenu />
   </div>
 </template>
