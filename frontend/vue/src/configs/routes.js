@@ -30,7 +30,8 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
+    linkActiveClass: 'font-bold underline'
 })
 
 export default router
