@@ -5,7 +5,7 @@
     <!-- dashboard section -->
     <li>
       <h2 class="menu-title">
-        <router-link to="/dashboard">Dashboard</router-link>
+        <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
       </h2>
     </li>
     <!-- assets section -->
@@ -16,13 +16,19 @@
         </summary>
         <ul>
           <li>
-            <router-link to="/assets/bank-accounts">Bank Accounts</router-link>
+            <router-link :to="{ name: 'assets.bankaccounts' }"
+              >Bank Accounts</router-link
+            >
           </li>
           <li>
-            <router-link to="/assets/vehicles">Vehicles</router-link>
+            <router-link :to="{ name: 'assets.vehicles' }"
+              >Vehicles</router-link
+            >
           </li>
           <li>
-            <router-link to="/assets/properties">Properties</router-link>
+            <router-link :to="{ name: 'assets.properties' }"
+              >Properties</router-link
+            >
           </li>
         </ul>
       </details>
@@ -35,12 +41,12 @@
         </summary>
         <ul>
           <li>
-            <router-link to="/liabilities/personal-debts"
+            <router-link :to="{ name: 'liabilities.personaldebts' }"
               >Personal Debts</router-link
             >
           </li>
           <li>
-            <router-link to="/liabilities/institutional-debts"
+            <router-link :to="{ name: 'liabilities.institutionaldebts' }"
               >Institutional Debts</router-link
             >
           </li>
@@ -55,24 +61,30 @@
         </summary>
         <ul>
           <li>
-            <router-link to="/investments/deposits">Deposits</router-link>
+            <router-link :to="{ name: 'investments.deposits' }"
+              >Deposits</router-link
+            >
           </li>
           <li>
-            <router-link to="/investments/obligations">Obligations</router-link>
+            <router-link :to="{ name: 'investments.obligations' }"
+              >Obligations</router-link
+            >
           </li>
           <li>
-            <router-link to="/investments/gold">Gold</router-link>
+            <router-link :to="{ name: 'investments.gold' }">Gold</router-link>
           </li>
           <li>
-            <router-link to="/investments/mutual-funds"
+            <router-link :to="{ name: 'investments.mutualfunds' }"
               >Mutual Funds</router-link
             >
           </li>
           <li>
-            <router-link to="/investments/stocks">Stocks</router-link>
+            <router-link :to="{ name: 'investments.stocks' }"
+              >Stocks</router-link
+            >
           </li>
           <li>
-            <router-link to="/investments/p2p-lendings"
+            <router-link :to="{ name: 'investments.p2plendings' }"
               >P2P Lendings</router-link
             >
           </li>
@@ -81,10 +93,10 @@
     </li>
     <li></li>
     <li>
-      <router-link to="/about">About</router-link>
+      <router-link :to="{ name: 'misc.about' }">About</router-link>
     </li>
     <li>
-      <router-link to="/docs">Documentation</router-link>
+      <router-link :to="{ name: 'misc.docs' }">Documentation</router-link>
     </li>
   </ul>
 </template>
