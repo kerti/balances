@@ -10,6 +10,7 @@ const bankAccounts = ref([
     number: "1234567890",
     lastDate: "2025-05-18",
     balance: "Rp1,200,000.00",
+    status: "active",
   },
   {
     name: "John's Savings",
@@ -18,6 +19,7 @@ const bankAccounts = ref([
     number: "0987654321",
     lastDate: "2025-05-18",
     balance: "Rp30,000,000.00",
+    status: "active",
   },
   {
     name: "Jane's Main Account",
@@ -26,6 +28,7 @@ const bankAccounts = ref([
     number: "1357924680",
     lastDate: "2025-05-18",
     balance: "Rp1,250,000.00",
+    status: "inactive",
   },
   {
     name: "Jane's Savings",
@@ -34,6 +37,7 @@ const bankAccounts = ref([
     number: "0864297531",
     lastDate: "2025-05-18",
     balance: "Rp27,500,000.00",
+    status: "active",
   },
   {
     name: "Jack's Main Account",
@@ -42,6 +46,7 @@ const bankAccounts = ref([
     number: "1470258369",
     lastDate: "2025-05-18",
     balance: "Rp799,000.00",
+    status: "active",
   },
   {
     name: "Jack's Savings",
@@ -50,6 +55,7 @@ const bankAccounts = ref([
     number: "0741963852",
     lastDate: "2025-05-18",
     balance: "Rp14,764,000.00",
+    status: "inactive",
   },
 ])
 
@@ -86,7 +92,7 @@ const chartData = ref({
 
 <template>
   <div class="space-y-6">
-    <!-- Top Half: Bank Accounts Table -->
+    <!-- List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">List of Accounts</h2>
@@ -94,19 +100,19 @@ const chartData = ref({
           <table class="table table-zebra w-full table-pin-rows">
             <thead>
               <tr>
-                <!-- <th>Account Name</th>
-                <th>Holder Name</th> -->
-                <!-- <th>Bank Name</th>
-                <th>Account Number</th> -->
                 <th>Account</th>
                 <th>Bank</th>
-                <!-- <th>Last Balance Date</th> -->
                 <th class="text-right">Balance</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(account, index) in bankAccounts" :key="index">
+              <tr
+                v-for="(account, index) in bankAccounts"
+                :key="index"
+                class="hover:bg-base-300"
+              >
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
@@ -138,10 +144,26 @@ const chartData = ref({
                   </div>
                 </td>
                 <td>
+                  <div>
+                    <span class="badge badge-sm badge-neutral">{{
+                      account.status
+                    }}</span>
+                  </div>
+                </td>
+                <td>
                   <div class="flex items-center gap-3">
-                    <button class="btn btn-primary">Edit</button>
-                    <button class="btn btn-primary">Activate</button>
-                    <button class="btn btn-primary">Deactivate</button>
+                    <button class="btn btn-primary tooltip" data-tip="Edit">
+                      <font-awesome-icon :icon="['fas', 'edit']" />
+                    </button>
+                    <button class="btn btn-primary tooltip" data-tip="Activate">
+                      <font-awesome-icon :icon="['fas', 'eye']" />
+                    </button>
+                    <button
+                      class="btn btn-primary tooltip"
+                      data-tip="Deactivate"
+                    >
+                      <font-awesome-icon :icon="['fas', 'eye-slash']" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -151,7 +173,7 @@ const chartData = ref({
       </div>
     </div>
 
-    <!-- Bottom Half: Line Chart -->
+    <!-- Line Chart -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Balance Over Time</h2>
