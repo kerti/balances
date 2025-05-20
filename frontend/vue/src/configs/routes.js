@@ -32,7 +32,7 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
-    linkActiveClass: 'font-bold underline'
+    linkActiveClass: 'menu-active'
 })
 
 export default router
