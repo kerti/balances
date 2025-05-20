@@ -92,7 +92,7 @@ const chartData = ref({
 
 <template>
   <div class="space-y-6">
-    <!-- List of Accounts -->
+    <!-- Top Half: List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">List of Accounts</h2>
@@ -173,7 +173,7 @@ const chartData = ref({
       </div>
     </div>
 
-    <!-- Line Chart -->
+    <!-- Bottom Half: Line Chart of the Accounts' Balances -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Balance Over Time</h2>
