@@ -4,6 +4,7 @@ import TheSidebar from "@/components/TheSidebar.vue"
 import { useUiStore } from "./stores/ui"
 
 const uiStore = useUiStore()
+const api = import.meta.env.VITE_API
 </script>
 
 <template>
@@ -16,6 +17,7 @@ const uiStore = useUiStore()
         <div>Theme is {{ uiStore.theme }}.</div>
         <div>Light theme is {{ uiStore.lightTheme }}.</div>
         <div>Dark theme is {{ uiStore.darkTheme }}.</div>
+        <div>API Endpoint is {{ api }}</div>
       </main>
     </div>
   </div>
