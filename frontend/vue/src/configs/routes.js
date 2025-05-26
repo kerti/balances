@@ -6,6 +6,7 @@ import Login from '@/pages/Login.vue'
 
 const routes = [
     // dashboard
+    { path: '/', name: 'base', component: Dashboard },
     { path: '/dashboard', name: 'dashboard', component: Dashboard },
     // assets
     { path: '/assets/bank-accounts', name: 'assets.bankaccounts', component: () => import('@/pages/assets/BankAccounts.vue') },
