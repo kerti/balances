@@ -6,15 +6,15 @@ export const useUtilStore = defineStore('util', () => {
     const utilService = useUtilService()
 
     // reactive state
-    const serverIsHealthy = ref(false)
+    const serverHealth = ref('Unknown')
 
     // actions
     async function getServerHealth() {
-        serverIsHealthy.value = await utilService.isServerHealthy()
+        serverHealth.value = await utilService.getServerHealth()
     }
 
     return {
-        serverIsHealthy,
+        serverHealth,
         getServerHealth,
     }
 })

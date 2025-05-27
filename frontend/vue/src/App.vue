@@ -22,7 +22,7 @@ utilStore.getServerHealth()
         <div>Light theme is {{ uiStore.lightTheme }}.</div>
         <div>Dark theme is {{ uiStore.darkTheme }}.</div>
         <div>API Endpoint is {{ api }}</div>
-        <div>Server Health Response: {{ utilStore.serverIsHealthy }}</div>
+        <div>Server Health Response: {{ utilStore.serverHealth }}</div>
       </main>
     </div>
   </div>
