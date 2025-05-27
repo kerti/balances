@@ -3,12 +3,16 @@ import TheHeader from "@/components/TheHeader.vue"
 import TheSidebar from "@/components/TheSidebar.vue"
 import { useUiStore } from "@/stores/uiStore"
 import { useUtilStore } from "@/stores/utilStore"
+import { useAuthStore } from "./stores/authStore"
 
 const uiStore = useUiStore()
 const api = import.meta.env.VITE_API_BASE_URL
 
 const utilStore = useUtilStore()
 utilStore.getServerHealth()
+
+const authStore = useAuthStore()
+authStore.authenticate("admin", "admin")
 </script>
 
 <template>
@@ -23,6 +27,7 @@ utilStore.getServerHealth()
         <div>Dark theme is {{ uiStore.darkTheme }}.</div>
         <div>API Endpoint is {{ api }}</div>
         <div>Server Health Response: {{ utilStore.serverHealth }}</div>
+        <div>Authentication Response: {{ authStore.isLoggedIn }}</div>
       </main>
     </div>
   </div>
