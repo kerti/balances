@@ -15,3 +15,18 @@ export async function authenticateFromAPI(username, password) {
         }
     }
 }
+
+export async function refreshTokenFromAPI(currentToken) {
+    try {
+        const { data } = await axiosInstance.get('auth/token', {
+            headers: {
+                Authorization: `Bearer ${currentToken}`,
+            },
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

@@ -7,25 +7,42 @@ export const useAuthStore = defineStore('auth', () => {
 
     // reactive state
     const isLoggedIn = ref(false)
-    const username = ref('')
-    const name = ref('')
-    const email = ref('')
+    const user = ref({})
+    const token = ref('')
 
     // actions
     async function authenticate(uname, password) {
         const authenticationResult = await authService.authenticate(uname, password)
-        const user = authenticationResult.data.user
         isLoggedIn.value = true
-        username.value = user.username
-        name.value = user.name
-        email.value = user.email
+        user.value = authenticationResult.data.user
+        token.value = authenticationResult.data.token
+    }
+
+    function deauthenticate() {
+        isLoggedIn.value = false
+        user.value = {}
+        token.value = ''
+    }
+
+    async function refreshToken() {
+        if (token.value === '') {
+            return
+        }
+
+        const refreshResult = await authService.refreshToken(token.value)
+        if (refreshResult.errorMessage) {
+            deauthenticate()
+        } else {
+            token.value = refreshResult.data.token
+        }
     }
 
     return {
         isLoggedIn,
-        username,
-        name,
-        email,
+        user,
+        token,
         authenticate,
+        deauthenticate,
+        refreshToken,
     }
 })

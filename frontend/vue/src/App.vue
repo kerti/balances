@@ -1,18 +1,24 @@
 <script setup>
 import TheHeader from "@/components/TheHeader.vue"
 import TheSidebar from "@/components/TheSidebar.vue"
-import { useUiStore } from "@/stores/uiStore"
-import { useUtilStore } from "@/stores/utilStore"
 import { useAuthStore } from "./stores/authStore"
-
-const uiStore = useUiStore()
-const api = import.meta.env.VITE_API_BASE_URL
-
-const utilStore = useUtilStore()
-utilStore.getServerHealth()
+import { ref } from "vue"
 
 const authStore = useAuthStore()
-authStore.authenticate("admin", "admin")
+const usernameValue = ref("")
+const passwordValue = ref("")
+
+const updateUsernameValue = (event) => {
+  usernameValue.value = event.target.value
+}
+
+const updatePasswordValue = (event) => {
+  passwordValue.value = event.target.value
+}
+
+function authenticate() {
+  authStore.authenticate(usernameValue.value, passwordValue.value)
+}
 </script>
 
 <template>
@@ -22,11 +28,46 @@ authStore.authenticate("admin", "admin")
       <TheHeader />
       <main class="flex-1 overflow-y-auto bg-base-200 p-4">
         <router-view />
-        <div>Theme is {{ uiStore.theme }}.</div>
-        <div>Light theme is {{ uiStore.lightTheme }}.</div>
-        <div>Dark theme is {{ uiStore.darkTheme }}.</div>
-        <div>API Endpoint is {{ api }}</div>
-        <div>Server Health Response: {{ utilStore.serverHealth }}</div>
+        <fieldset
+          class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+        >
+          <legend class="fieldset-legend">Login</legend>
+
+          <label class="label">Username</label>
+          <input
+            type="text"
+            class="input"
+            placeholder="Username"
+            :value="usernameValue"
+            @input="updateUsernameValue"
+          />
+
+          <label class="label">Password</label>
+          <input
+            type="password"
+            class="input"
+            placeholder="Password"
+            :value="passwordValue"
+            @input="updatePasswordValue"
+          />
+          <div class="grid grid-cols-3 gap-2">
+            <button class="btn btn-primary mt-4" @click="authenticate()">
+              Login
+            </button>
+            <button
+              class="btn btn-secondary mt-4"
+              @click="authStore.deauthenticate()"
+            >
+              Logout
+            </button>
+            <button
+              class="btn btn-secondary mt-4"
+              @click="authStore.refreshToken()"
+            >
+              Refresh Token
+            </button>
+          </div>
+        </fieldset>
         <div>Authentication Response: {{ authStore.isLoggedIn }}</div>
       </main>
     </div>
