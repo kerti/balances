@@ -1,4 +1,4 @@
-import axiosInstance from "@/api/index";
+import axiosInstance from '@/api/index'
 
 export async function authenticateFromAPI(username, password) {
     try {
@@ -16,13 +16,9 @@ export async function authenticateFromAPI(username, password) {
     }
 }
 
-export async function refreshTokenFromAPI(currentToken) {
+export async function refreshTokenFromAPI() {
     try {
-        const { data } = await axiosInstance.get('auth/token', {
-            headers: {
-                Authorization: `Bearer ${currentToken}`,
-            },
-        })
+        const { data } = await axiosInstance.get('auth/token')
         return data
     } catch (error) {
         return {
