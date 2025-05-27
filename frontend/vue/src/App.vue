@@ -1,7 +1,7 @@
 <script setup>
 import TheHeader from "@/components/TheHeader.vue"
 import TheSidebar from "@/components/TheSidebar.vue"
-import { useAuthStore } from "./stores/authStore"
+import { useAuthStore } from "@/stores/authStore"
 import { ref } from "vue"
 
 const authStore = useAuthStore()
