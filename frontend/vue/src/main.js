@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import router from '@/configs/routes'
 import { createPinia } from 'pinia'
 import App from '@/App.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 import '@/style.css'
 
@@ -18,3 +19,6 @@ createApp(App)
     .use(router)
     .component('font-awesome-icon', FontAwesomeIcon)
     .mount('#app')
+
+const authStore = useAuthStore()
+authStore.hydrate()
