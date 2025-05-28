@@ -6,6 +6,7 @@ const {
     getAuthTokenFromCookie,
     removeAuthTokenFromCookie,
     setUserDataToCookie,
+    getUserDataFromCookie,
     removeUserDataFromCookie,
 } = useAuthCookie()
 
@@ -41,10 +42,15 @@ export function useAuthService() {
         return token !== undefined
     }
 
+    function getUserData() {
+        return getUserDataFromCookie()
+    }
+
     return {
         authenticate,
         refreshToken,
         deauthenticate,
         isLoggedIn,
+        getUserData,
     }
 }

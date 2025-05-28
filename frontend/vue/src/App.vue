@@ -1,14 +1,13 @@
 <script setup>
 import TheHeader from "@/components/TheHeader.vue"
 import TheSidebar from "@/components/TheSidebar.vue"
-import { useAuthService } from "@/services/authService"
+import { useAuthStore } from "@/stores/authStore"
 
-const authService = useAuthService()
-const isLoggedIn = authService.isLoggedIn()
+const authStore = useAuthStore()
 </script>
 
 <template>
-  <template v-if="isLoggedIn">
+  <template v-if="authStore.isLoggedIn">
     <div class="flex h-screen">
       <TheSidebar />
       <div class="flex flex-col flex-1">
@@ -19,7 +18,7 @@ const isLoggedIn = authService.isLoggedIn()
       </div>
     </div>
   </template>
-  <template v-if="!isLoggedIn">
+  <template v-else>
     <router-view />
   </template>
 </template>

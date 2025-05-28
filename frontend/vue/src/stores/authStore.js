@@ -1,6 +1,6 @@
-import { useAuthService } from '@/services/authService'
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import { useAuthService } from '@/services/authService'
 
 export const useAuthStore = defineStore('auth', () => {
     const authService = useAuthService()
@@ -10,6 +10,13 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref({})
 
     // actions
+    function hydrate() {
+        isLoggedIn.value = authService.isLoggedIn()
+        if (isLoggedIn.value) {
+            user.value = authService.getUserData()
+        }
+    }
+
     async function authenticate(uname, password) {
         const authenticationResult = await authService.authenticate(uname, password)
         if (!authenticationResult.errorMessage) {
@@ -33,6 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     return {
+        hydrate,
         isLoggedIn,
         user,
         authenticate,
