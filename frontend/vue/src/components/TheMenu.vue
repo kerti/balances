@@ -1,4 +1,15 @@
-<script setup></script>
+<script setup>
+import { useRouter } from "vue-router"
+import { useAuthStore } from "@/stores/authStore"
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+function handleLogout() {
+  authStore.deauthenticate()
+  router.push("/login")
+}
+</script>
 
 <template>
   <ul class="menu w-full px-4 py-0">
@@ -97,6 +108,10 @@
     </li>
     <li>
       <router-link :to="{ name: 'misc.docs' }">Documentation</router-link>
+    </li>
+    <li></li>
+    <li>
+      <a href="#" @click="handleLogout">Logout</a>
     </li>
   </ul>
 </template>
