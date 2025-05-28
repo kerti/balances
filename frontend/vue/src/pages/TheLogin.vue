@@ -6,25 +6,22 @@ import { useRouter } from "vue-router"
 const authStore = useAuthStore()
 const router = useRouter()
 
-const usernameValue = ref("")
-const passwordValue = ref("")
+const username = ref("")
+const password = ref("")
 const errorMessage = ref("")
 
-const updateUsernameValue = (event) => {
-  usernameValue.value = event.target.value
+const updateUsername = (event) => {
+  username.value = event.target.value
 }
 
-const updatePasswordValue = (event) => {
-  passwordValue.value = event.target.value
+const updatePassword = (event) => {
+  password.value = event.target.value
 }
 
 async function authenticate(event) {
   event.preventDefault()
 
-  const result = await authStore.authenticate(
-    usernameValue.value,
-    passwordValue.value
-  )
+  const result = await authStore.authenticate(username.value, password.value)
 
   const success = !result.errorMessage
 
@@ -32,7 +29,13 @@ async function authenticate(event) {
     errorMessage.value = ""
     router.push("/")
   } else {
-    errorMessage.value = "Login failed. Please check your credentials." // ✅ Show error on failed login
+    console.log("errorMessage: " + result.errorMessage)
+    if (result.errorMessage.includes("Network Error")) {
+      errorMessage.value =
+        "Our systems are experiencing disruptions, please try again later."
+    } else {
+      errorMessage.value = "Login failed. Please check your credentials."
+    }
   }
 }
 </script>
@@ -49,42 +52,26 @@ async function authenticate(event) {
         <input
           type="text"
           class="input"
-          placeholder="Username"
+          placeholder="username"
           autocomplete="username"
-          :value="usernameValue"
-          @input="updateUsernameValue"
+          :value="username"
+          @input="updateUsername"
         />
 
         <label class="label">Password</label>
         <input
           type="password"
           class="input"
-          placeholder="Password"
+          placeholder="password"
           autocomplete="current-password"
-          :value="passwordValue"
-          @input="updatePasswordValue"
+          :value="password"
+          @input="updatePassword"
         />
-        <div class="grid grid-cols-3 gap-2">
-          <button type="submit" class="btn btn-primary mt-4">Login</button>
-          <button
-            class="btn btn-secondary mt-4"
-            @click="authStore.deauthenticate()"
-          >
-            Logout
-          </button>
-          <button
-            class="btn btn-secondary mt-4"
-            @click="authStore.refreshToken()"
-          >
-            Refresh Token
-          </button>
-        </div>
+        <button type="submit" class="btn btn-primary mt-4">Login</button>
 
         <div v-if="errorMessage" class="text-error mt-2">
           {{ errorMessage }}
         </div>
-
-        <div>Authentication Response: {{ authStore.isLoggedIn }}</div>
       </fieldset>
     </form>
   </div>
