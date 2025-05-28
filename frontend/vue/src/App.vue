@@ -1,6 +1,7 @@
 <script setup>
 import TheHeader from "@/components/TheHeader.vue"
 import TheSidebar from "@/components/TheSidebar.vue"
+import TheFooter from "./components/TheFooter.vue"
 import { useAuthStore } from "@/stores/authStore"
 
 const authStore = useAuthStore()
@@ -8,13 +9,14 @@ const authStore = useAuthStore()
 
 <template>
   <template v-if="authStore.isLoggedIn">
-    <div class="flex h-screen">
+    <div class="flex h-screen border-2">
       <TheSidebar />
       <div class="flex flex-col flex-1">
         <TheHeader />
         <main class="flex-1 overflow-y-auto bg-base-200 p-4">
           <router-view />
         </main>
+        <TheFooter />
       </div>
     </div>
   </template>
