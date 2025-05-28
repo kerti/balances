@@ -9,7 +9,7 @@ const authStore = useAuthStore()
 
 <template>
   <template v-if="authStore.isLoggedIn">
-    <div class="flex h-screen border-2">
+    <div class="flex h-screen">
       <TheSidebar />
       <div class="flex flex-col flex-1">
         <TheHeader />
