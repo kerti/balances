@@ -3,6 +3,7 @@ import { useAuthCookie } from '@/composables/useAuthCookie'
 
 const {
     setAuthTokenToCookie,
+    getAuthTokenFromCookie,
     removeAuthTokenFromCookie,
     setUserDataToCookie,
     removeUserDataFromCookie,
@@ -35,9 +36,15 @@ export function useAuthService() {
         removeUserDataFromCookie()
     }
 
+    function isLoggedIn() {
+        const token = getAuthTokenFromCookie()
+        return token !== undefined
+    }
+
     return {
         authenticate,
         refreshToken,
         deauthenticate,
+        isLoggedIn,
     }
 }

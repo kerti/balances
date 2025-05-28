@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Dashboard from '@/pages/Dashboard.vue'
 
-import Login from '@/pages/Login.vue'
+import TheLogin from '@/pages/TheLogin.vue'
 
 const routes = [
     // dashboard
@@ -24,7 +24,7 @@ const routes = [
     { path: '/investments/stocks', name: 'investments.stocks', component: () => import('@/pages/investments/Stocks.vue') },
     { path: '/investments/p2p-lendings', name: 'investments.p2plendings', component: () => import('@/pages/investments/P2PLendings.vue') },
     // authentication and authorization
-    { path: '/login', name: 'login', component: Login },
+    { path: '/login', name: 'login', component: TheLogin },
     // miscellaneous
     { path: '/about', name: 'misc.about', component: () => import('@/pages/About.vue') },
     { path: '/docs', name: 'misc.docs', component: () => import('@/pages/Docs.vue') },
