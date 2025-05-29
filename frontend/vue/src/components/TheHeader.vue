@@ -1,13 +1,15 @@
 <script setup>
 import { useAuthStore } from "@/stores/authStore"
+import { useRoute } from "vue-router"
 
+const routes = useRoute()
 const authStore = useAuthStore()
 </script>
 
 <template>
   <div class="navbar bg-base-100 shadow-none">
     <div class="flex-1">
-      <div class="text-xl font-bold">[Page Title]</div>
+      <div class="text-xl font-bold">{{ routes.meta.pageTitle }}</div>
     </div>
     <div class="flex-none">
       <div class="dropdown dropdown-end pr-3">
