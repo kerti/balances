@@ -1,63 +1,8 @@
 <script setup>
 import LineChart from "@/components/assets/BankLineChart.vue"
+import { useDateUtils } from "@/composables/useDateUtils"
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 import { ref } from "vue"
-
-const bankAccounts = ref([
-  {
-    name: "John's Main Account",
-    holder: "John Fitzgerald Doe",
-    bank: "First Bank of John",
-    number: "1234567890",
-    lastDate: "2025-05-18",
-    balance: "Rp1,200,000.00",
-    status: "active",
-  },
-  {
-    name: "John's Savings",
-    holder: "John Fitzgerald Doe",
-    bank: "Second Bank of John",
-    number: "0987654321",
-    lastDate: "2025-05-18",
-    balance: "Rp30,000,000.00",
-    status: "active",
-  },
-  {
-    name: "Jane's Main Account",
-    holder: "Jane Montgomery Doe",
-    bank: "First Bank of Jane",
-    number: "1357924680",
-    lastDate: "2025-05-18",
-    balance: "Rp1,250,000.00",
-    status: "inactive",
-  },
-  {
-    name: "Jane's Savings",
-    holder: "Jane Montgomery Doe",
-    bank: "Second Bank of Jane",
-    number: "0864297531",
-    lastDate: "2025-05-18",
-    balance: "Rp27,500,000.00",
-    status: "active",
-  },
-  {
-    name: "Jack's Main Account",
-    holder: "Jack Reacher Doe",
-    bank: "First Bank of Jack",
-    number: "1470258369",
-    lastDate: "2025-05-18",
-    balance: "Rp799,000.00",
-    status: "active",
-  },
-  {
-    name: "Jack's Savings",
-    holder: "Jack Reacher Doe",
-    bank: "Second Bank of Jack",
-    number: "0741963852",
-    lastDate: "2025-05-18",
-    balance: "Rp14,764,000.00",
-    status: "inactive",
-  },
-])
 
 const chartData = ref({
   labels: ["Jan", "Feb", "Mar", "Apr", "May"],
@@ -88,6 +33,11 @@ const chartData = ref({
     },
   ],
 })
+
+// use actual backend
+const dateUtils = useDateUtils()
+const bankAccountsStore = useBankAccountsStore()
+bankAccountsStore.hydrate()
 </script>
 
 <template>
@@ -109,16 +59,16 @@ const chartData = ref({
             </thead>
             <tbody>
               <tr
-                v-for="(account, index) in bankAccounts"
+                v-for="(account, index) in bankAccountsStore.accounts"
                 :key="index"
                 class="hover:bg-base-300"
               >
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.name }}</div>
+                      <div class="font-bold">{{ account.accountName }}</div>
                       <div class="text-sm opacity-50">
-                        {{ account.holder }}
+                        {{ account.accountHolderName }}
                       </div>
                     </div>
                   </div>
@@ -126,9 +76,9 @@ const chartData = ref({
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.bank }}</div>
+                      <div class="font-bold">{{ account.bankName }}</div>
                       <div class="text-sm opacity-50">
-                        # {{ account.number }}
+                        # {{ account.accountNumber }}
                       </div>
                     </div>
                   </div>
@@ -136,9 +86,12 @@ const chartData = ref({
                 <td class="text-right">
                   <div class="items-end">
                     <div>
-                      <div class="font-bold">{{ account.balance }}</div>
+                      <div class="font-bold">{{ account.lastBalance }}</div>
                       <div class="text-sm opacity-50">
-                        at {{ account.lastDate }}
+                        at
+                        {{
+                          dateUtils.epochToLocalDate(account.lastBalanceDate)
+                        }}
                       </div>
                     </div>
                   </div>
