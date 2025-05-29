@@ -1,4 +1,8 @@
-<script setup></script>
+<script setup>
+import { useAuthStore } from "@/stores/authStore"
+
+const authStore = useAuthStore()
+</script>
 
 <template>
   <div class="navbar bg-base-100 shadow-none">
@@ -6,6 +10,9 @@
       <div class="text-xl font-bold">[Page Title]</div>
     </div>
     <div class="flex-none">
+      <div class="dropdown dropdown-end pr-3">
+        {{ authStore.user.name }}
+      </div>
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
           <div class="indicator">
