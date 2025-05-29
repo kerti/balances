@@ -5,7 +5,7 @@ import TheMenu from "@/components/TheMenu.vue"
 <template>
   <div class="w-58 h-full bg-base-100 p-4 shadow-md">
     <div class="flex-1">
-      <a class="btn btn-ghost text-xl"
+      <a class="btn btn-ghost text-xl" href="/"
         ><svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
