@@ -1,11 +1,13 @@
 import axios from 'axios'
 import { useAuthCookie } from '@/composables/useAuthCookie'
+import { useEnvUtils } from '@/composables/useEnvUtils'
 
 const { getAuthTokenFromCookie, removeAuthTokenFromCookie } = useAuthCookie()
+const ev = useEnvUtils()
 
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: ev.getAPIBaseURL(),
 })
 
 axiosInstance.interceptors.request.use((config) => {

@@ -1,11 +1,15 @@
+import { useEnvUtils } from './useEnvUtils'
+
+const ev = useEnvUtils()
+
 export function useNumUtils() {
 
     const numericToMoney = (num) => {
         return Intl.NumberFormat(
-            import.meta.env.VITE_DEFAULT_LOCALE,
+            ev.getDefaultLocale(),
             {
                 style: 'currency',
-                currency: import.meta.env.VITE_DEFAULT_CURRENCY
+                currency: ev.getDefaultCurrency()
             }
         ).format(num)
     }
