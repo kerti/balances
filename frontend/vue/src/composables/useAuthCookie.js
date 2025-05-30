@@ -4,6 +4,9 @@ import { useEnvUtils } from './useEnvUtils'
 const ev = useEnvUtils()
 
 export function useAuthCookie() {
+    const cookieToken = ev.getCookieToken()
+    const cookieUserData = ev.getCookieUserData()
+
     const setAuthTokenToCookie = (token) => {
         Cookies.set(ev.getCookieToken(), token, {
             expires: 7,
@@ -13,13 +16,13 @@ export function useAuthCookie() {
         })
     }
 
-    const getAuthTokenFromCookie = () => Cookies.get(ev.getCookieToken())
+    const getAuthTokenFromCookie = () => Cookies.get(cookieToken)
 
-    const removeAuthTokenFromCookie = () => Cookies.remove(ev.getCookieToken())
+    const removeAuthTokenFromCookie = () => Cookies.remove(cookieToken)
 
     const setUserDataToCookie = (userData) => {
         const encodedUserData = btoa(JSON.stringify(userData))
-        Cookies.set(ev.getCookieUserData(), encodedUserData, {
+        Cookies.set(cookieUserData, encodedUserData, {
             expires: 7,
             secure: true,
             sameSite: 'Strict',
@@ -28,11 +31,11 @@ export function useAuthCookie() {
     }
 
     const getUserDataFromCookie = () => {
-        const encodedUserData = Cookies.get(ev.getCookieUserData())
+        const encodedUserData = Cookies.get(cookieUserData)
         return JSON.parse(atob(encodedUserData))
     }
 
-    const removeUserDataFromCookie = () => Cookies.remove(ev.getCookieUserData())
+    const removeUserDataFromCookie = () => Cookies.remove(cookieUserData)
 
     return {
         setAuthTokenToCookie,
