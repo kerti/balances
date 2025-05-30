@@ -6,7 +6,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
 
     // reactive state
-    // TODO: fill in the search parameters based on URL parameter
     const filter = ref('')
     const pageSize = ref(10)
     const accounts = ref([])
