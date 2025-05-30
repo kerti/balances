@@ -1,10 +1,11 @@
 import axios from 'axios'
 import { useAuthCookie } from '@/composables/useAuthCookie'
 import { useEnvUtils } from '@/composables/useEnvUtils'
+import { useRouter } from 'vue-router'
 
-const { getAuthTokenFromCookie, removeAuthTokenFromCookie } = useAuthCookie()
+const { getAuthTokenFromCookie, removeAuthTokenFromCookie, removeUserDataFromCookie } = useAuthCookie()
 const ev = useEnvUtils()
-
+const router = useRouter()
 
 const axiosInstance = axios.create({
     baseURL: ev.getAPIBaseURL(),
@@ -26,7 +27,8 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401) {
             // handle logout or redirect to login
             removeAuthTokenFromCookie()
-            console.error('unauthorized, logging out...')
+            removeUserDataFromCookie()
+            router.push('/login')
         }
         // show error message
         return Promise.reject(error)
