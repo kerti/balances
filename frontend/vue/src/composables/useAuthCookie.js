@@ -8,7 +8,7 @@ export function useAuthCookie() {
     const cookieUserData = ev.getCookieUserData()
 
     const setAuthTokenToCookie = (token) => {
-        Cookies.set(ev.getCookieToken(), token, {
+        Cookies.set(cookieToken, token, {
             expires: 7,
             secure: true,
             sameSite: 'Strict',
