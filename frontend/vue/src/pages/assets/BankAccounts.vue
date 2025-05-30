@@ -1,6 +1,7 @@
 <script setup>
 import LineChart from "@/components/assets/BankLineChart.vue"
 import { useDateUtils } from "@/composables/useDateUtils"
+import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 import { ref } from "vue"
 
@@ -36,6 +37,7 @@ const chartData = ref({
 
 // use actual backend
 const dateUtils = useDateUtils()
+const numUtils = useNumUtils()
 const bankAccountsStore = useBankAccountsStore()
 bankAccountsStore.hydrate()
 </script>
@@ -86,7 +88,9 @@ bankAccountsStore.hydrate()
                 <td class="text-right">
                   <div class="items-end">
                     <div>
-                      <div class="font-bold">{{ account.lastBalance }}</div>
+                      <div class="font-bold">
+                        {{ numUtils.numericToMoney(account.lastBalance) }}
+                      </div>
                       <div class="text-sm opacity-50">
                         at
                         {{
