@@ -1,4 +1,5 @@
 export function useDateUtils() {
+    // TODO: use some kind of formatting string such as dd MMM yyyy
     const epochToLocalDate = (epoch) => {
         const d = new Date(epoch)
         return d.getDate() + ' '
