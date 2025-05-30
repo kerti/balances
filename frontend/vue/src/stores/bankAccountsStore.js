@@ -13,7 +13,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // actions
     async function hydrate() {
-        console.log('hydrating bank accounts store...')
         accounts.value = await search(filter.value, pageSize.value)
     }
 

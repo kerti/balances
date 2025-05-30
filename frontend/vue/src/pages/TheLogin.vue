@@ -29,7 +29,6 @@ async function authenticate(event) {
     errorMessage.value = ""
     router.push("/")
   } else {
-    console.log("errorMessage: " + result.errorMessage)
     if (result.errorMessage.includes("Network Error")) {
       errorMessage.value =
         "Our systems are experiencing disruptions, please try again later."
