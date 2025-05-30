@@ -3,7 +3,9 @@ import LineChart from "@/components/assets/BankLineChart.vue"
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import { ref } from "vue"
+import debounce from "lodash.debounce"
+import { ref, watch, onMounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
 const chartData = ref({
   labels: ["Jan", "Feb", "Mar", "Apr", "May"],
@@ -38,8 +40,49 @@ const chartData = ref({
 // use actual backend
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
+const route = useRoute()
+const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
-bankAccountsStore.hydrate()
+
+const debouncedSearch = debounce(() => {
+  bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
+}, 300)
+
+watch(
+  () => bankAccountsStore.filter,
+  () => {
+    debouncedSearch()
+  }
+)
+
+watch(
+  [() => bankAccountsStore.filter, () => bankAccountsStore.pageSize],
+  ([newFilter, newPageSize]) => {
+    const pageSizeParam =
+      Number.isInteger(newPageSize) && newPageSize !== 10
+        ? newPageSize
+        : undefined
+
+    router.replace({
+      query: {
+        ...route.query,
+        filter: newFilter || undefined,
+        pageSize: pageSizeParam,
+      },
+    })
+  }
+)
+
+onMounted(() => {
+  const query = route.query
+
+  bankAccountsStore.filter = query.filter?.toString() || ""
+
+  const parsedPageSize = numUtils.queryParamToInt(query.pageSize, 10)
+  bankAccountsStore.pageSize = parsedPageSize !== 10 ? parsedPageSize : 10
+
+  bankAccountsStore.hydrate(query.filter?.toString() || "", parsedPageSize)
+})
 </script>
 
 <template>
@@ -47,7 +90,17 @@ bankAccountsStore.hydrate()
     <!-- Top Half: List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
-        <h2 class="card-title">List of Accounts</h2>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title">List of Accounts</h2>
+          <div class="form-control">
+            <input
+              type="text"
+              v-model="bankAccountsStore.filter"
+              placeholder="Search accounts..."
+              class="input input-bordered w-64"
+            />
+          </div>
+        </div>
         <div class="overflow-x-auto h-96">
           <table class="table table-zebra w-full table-pin-rows">
             <thead>

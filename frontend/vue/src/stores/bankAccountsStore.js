@@ -12,13 +12,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const accounts = ref([])
 
     // actions
-    async function hydrate() {
-        accounts.value = await search(filter.value, pageSize.value)
+    async function hydrate(initFilter, initPageSize) {
+        filter.value = initFilter
+        pageSize.value = initPageSize
+        await search(filter.value, pageSize.value)
     }
 
     async function search(filter, pageSize) {
-        const res = await svc.searchBankAccounts(filter, pageSize)
-        return res
+        accounts.value = await svc.searchBankAccounts(filter, pageSize)
     }
 
     return {
