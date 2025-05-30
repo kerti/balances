@@ -1,63 +1,11 @@
 <script setup>
 import LineChart from "@/components/assets/BankLineChart.vue"
-import { ref } from "vue"
-
-const bankAccounts = ref([
-  {
-    name: "John's Main Account",
-    holder: "John Fitzgerald Doe",
-    bank: "First Bank of John",
-    number: "1234567890",
-    lastDate: "2025-05-18",
-    balance: "Rp1,200,000.00",
-    status: "active",
-  },
-  {
-    name: "John's Savings",
-    holder: "John Fitzgerald Doe",
-    bank: "Second Bank of John",
-    number: "0987654321",
-    lastDate: "2025-05-18",
-    balance: "Rp30,000,000.00",
-    status: "active",
-  },
-  {
-    name: "Jane's Main Account",
-    holder: "Jane Montgomery Doe",
-    bank: "First Bank of Jane",
-    number: "1357924680",
-    lastDate: "2025-05-18",
-    balance: "Rp1,250,000.00",
-    status: "inactive",
-  },
-  {
-    name: "Jane's Savings",
-    holder: "Jane Montgomery Doe",
-    bank: "Second Bank of Jane",
-    number: "0864297531",
-    lastDate: "2025-05-18",
-    balance: "Rp27,500,000.00",
-    status: "active",
-  },
-  {
-    name: "Jack's Main Account",
-    holder: "Jack Reacher Doe",
-    bank: "First Bank of Jack",
-    number: "1470258369",
-    lastDate: "2025-05-18",
-    balance: "Rp799,000.00",
-    status: "active",
-  },
-  {
-    name: "Jack's Savings",
-    holder: "Jack Reacher Doe",
-    bank: "Second Bank of Jack",
-    number: "0741963852",
-    lastDate: "2025-05-18",
-    balance: "Rp14,764,000.00",
-    status: "inactive",
-  },
-])
+import { useDateUtils } from "@/composables/useDateUtils"
+import { useNumUtils } from "@/composables/useNumUtils"
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+import debounce from "lodash.debounce"
+import { ref, watch, onMounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
 const chartData = ref({
   labels: ["Jan", "Feb", "Mar", "Apr", "May"],
@@ -88,6 +36,53 @@ const chartData = ref({
     },
   ],
 })
+
+// use actual backend
+const dateUtils = useDateUtils()
+const numUtils = useNumUtils()
+const route = useRoute()
+const router = useRouter()
+const bankAccountsStore = useBankAccountsStore()
+
+const debouncedSearch = debounce(() => {
+  bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
+}, 300)
+
+watch(
+  () => bankAccountsStore.filter,
+  () => {
+    debouncedSearch()
+  }
+)
+
+watch(
+  [() => bankAccountsStore.filter, () => bankAccountsStore.pageSize],
+  ([newFilter, newPageSize]) => {
+    const pageSizeParam =
+      Number.isInteger(newPageSize) && newPageSize !== 10
+        ? newPageSize
+        : undefined
+
+    router.replace({
+      query: {
+        ...route.query,
+        filter: newFilter || undefined,
+        pageSize: pageSizeParam,
+      },
+    })
+  }
+)
+
+onMounted(() => {
+  const query = route.query
+
+  bankAccountsStore.filter = query.filter?.toString() || ""
+
+  const parsedPageSize = numUtils.queryParamToInt(query.pageSize, 10)
+  bankAccountsStore.pageSize = parsedPageSize !== 10 ? parsedPageSize : 10
+
+  bankAccountsStore.hydrate(query.filter?.toString() || "", parsedPageSize)
+})
 </script>
 
 <template>
@@ -95,7 +90,17 @@ const chartData = ref({
     <!-- Top Half: List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
-        <h2 class="card-title">List of Accounts</h2>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title">List of Accounts</h2>
+          <div class="form-control">
+            <input
+              type="text"
+              v-model="bankAccountsStore.filter"
+              placeholder="Search accounts..."
+              class="input input-bordered w-64"
+            />
+          </div>
+        </div>
         <div class="overflow-x-auto h-96">
           <table class="table table-zebra w-full table-pin-rows">
             <thead>
@@ -109,16 +114,16 @@ const chartData = ref({
             </thead>
             <tbody>
               <tr
-                v-for="(account, index) in bankAccounts"
+                v-for="(account, index) in bankAccountsStore.accounts"
                 :key="index"
                 class="hover:bg-base-300"
               >
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.name }}</div>
+                      <div class="font-bold">{{ account.accountName }}</div>
                       <div class="text-sm opacity-50">
-                        {{ account.holder }}
+                        {{ account.accountHolderName }}
                       </div>
                     </div>
                   </div>
@@ -126,9 +131,9 @@ const chartData = ref({
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.bank }}</div>
+                      <div class="font-bold">{{ account.bankName }}</div>
                       <div class="text-sm opacity-50">
-                        # {{ account.number }}
+                        # {{ account.accountNumber }}
                       </div>
                     </div>
                   </div>
@@ -136,9 +141,14 @@ const chartData = ref({
                 <td class="text-right">
                   <div class="items-end">
                     <div>
-                      <div class="font-bold">{{ account.balance }}</div>
+                      <div class="font-bold">
+                        {{ numUtils.numericToMoney(account.lastBalance) }}
+                      </div>
                       <div class="text-sm opacity-50">
-                        at {{ account.lastDate }}
+                        at
+                        {{
+                          dateUtils.epochToLocalDate(account.lastBalanceDate)
+                        }}
                       </div>
                     </div>
                   </div>
