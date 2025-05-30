@@ -45,8 +45,8 @@ func (s *Server) Shutdown() {
 // InitMiddleware initializes all middlewares
 func (s *Server) InitMiddleware() {
 	s.router.Use(s.loggingMiddleware)
-	s.router.Use(s.jwtMiddleware)
 	s.router.Use(s.corsMiddleware)
+	s.router.Use(s.jwtMiddleware)
 }
 
 // Serve runs the server
