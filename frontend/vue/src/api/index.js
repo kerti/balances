@@ -25,10 +25,9 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // handle logout or redirect to login
             removeAuthTokenFromCookie()
             removeUserDataFromCookie()
-            router.push('/login')
+            router.push({ name: 'login' })
         }
         // show error message
         return Promise.reject(error)

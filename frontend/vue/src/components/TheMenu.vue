@@ -7,7 +7,7 @@ const router = useRouter()
 
 function handleLogout() {
   authStore.deauthenticate()
-  router.push("/login")
+  router.push({ name: "login" })
 }
 </script>
 
