@@ -1,6 +1,7 @@
 <script setup>
 import LineChart from "@/components/assets/BankLineChart.vue"
 import { useDateUtils } from "@/composables/useDateUtils"
+import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 import debounce from "lodash.debounce"
@@ -40,9 +41,12 @@ const chartData = ref({
 // use actual backend
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
+const ev = useEnvUtils()
 const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
+
+const defaultPageSize = ev.getDefaultPageSize()
 
 const debouncedSearch = debounce(() => {
   bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
@@ -59,7 +63,7 @@ watch(
   [() => bankAccountsStore.filter, () => bankAccountsStore.pageSize],
   ([newFilter, newPageSize]) => {
     const pageSizeParam =
-      Number.isInteger(newPageSize) && newPageSize !== 10
+      Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
         ? newPageSize
         : undefined
 
@@ -78,8 +82,12 @@ onMounted(() => {
 
   bankAccountsStore.filter = query.filter?.toString() || ""
 
-  const parsedPageSize = numUtils.queryParamToInt(query.pageSize, 10)
-  bankAccountsStore.pageSize = parsedPageSize !== 10 ? parsedPageSize : 10
+  const parsedPageSize = numUtils.queryParamToInt(
+    query.pageSize,
+    defaultPageSize
+  )
+  bankAccountsStore.pageSize =
+    parsedPageSize !== defaultPageSize ? parsedPageSize : defaultPageSize
 
   bankAccountsStore.hydrate(query.filter?.toString() || "", parsedPageSize)
 })

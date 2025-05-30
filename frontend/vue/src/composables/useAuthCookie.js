@@ -1,8 +1,14 @@
 import Cookies from 'js-cookie'
+import { useEnvUtils } from './useEnvUtils'
+
+const ev = useEnvUtils()
 
 export function useAuthCookie() {
+    const cookieToken = ev.getCookieToken()
+    const cookieUserData = ev.getCookieUserData()
+
     const setAuthTokenToCookie = (token) => {
-        Cookies.set(import.meta.env.VITE_COOKIE_TOKEN, token, {
+        Cookies.set(cookieToken, token, {
             expires: 7,
             secure: true,
             sameSite: 'Strict',
@@ -10,13 +16,13 @@ export function useAuthCookie() {
         })
     }
 
-    const getAuthTokenFromCookie = () => Cookies.get(import.meta.env.VITE_COOKIE_TOKEN)
+    const getAuthTokenFromCookie = () => Cookies.get(cookieToken)
 
-    const removeAuthTokenFromCookie = () => Cookies.remove(import.meta.env.VITE_COOKIE_TOKEN)
+    const removeAuthTokenFromCookie = () => Cookies.remove(cookieToken)
 
     const setUserDataToCookie = (userData) => {
         const encodedUserData = btoa(JSON.stringify(userData))
-        Cookies.set(import.meta.env.VITE_COOKIE_USERDATA, encodedUserData, {
+        Cookies.set(cookieUserData, encodedUserData, {
             expires: 7,
             secure: true,
             sameSite: 'Strict',
@@ -25,11 +31,11 @@ export function useAuthCookie() {
     }
 
     const getUserDataFromCookie = () => {
-        const encodedUserData = Cookies.get(import.meta.env.VITE_COOKIE_USERDATA)
+        const encodedUserData = Cookies.get(cookieUserData)
         return JSON.parse(atob(encodedUserData))
     }
 
-    const removeUserDataFromCookie = () => Cookies.remove(import.meta.env.VITE_COOKIE_USERDATA)
+    const removeUserDataFromCookie = () => Cookies.remove(cookieUserData)
 
     return {
         setAuthTokenToCookie,
