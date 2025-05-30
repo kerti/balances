@@ -1,11 +1,9 @@
 import axios from 'axios'
 import { useAuthCookie } from '@/composables/useAuthCookie'
 import { useEnvUtils } from '@/composables/useEnvUtils'
-import { useRouter } from 'vue-router'
 
 const { getAuthTokenFromCookie, removeAuthTokenFromCookie, removeUserDataFromCookie } = useAuthCookie()
 const ev = useEnvUtils()
-const router = useRouter()
 
 const axiosInstance = axios.create({
     baseURL: ev.getAPIBaseURL(),
@@ -27,7 +25,6 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401) {
             removeAuthTokenFromCookie()
             removeUserDataFromCookie()
-            router.push({ name: 'login' })
         }
         // show error message
         return Promise.reject(error)
