@@ -17,7 +17,12 @@ const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize()
 
 const debouncedSearch = debounce(() => {
-  bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
+  bankAccountsStore.search(
+    bankAccountsStore.filter,
+    bankAccountsStore.balancesStartDate,
+    bankAccountsStore.balancesEndDate,
+    bankAccountsStore.pageSize
+  )
 }, 300)
 
 watch(
