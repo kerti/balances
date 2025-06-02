@@ -29,8 +29,19 @@ export function useNumUtils() {
         }
     }
 
+    const queryParamToNullableInt = (queryParam) => {
+        const parsedQueryParam = parseInt(queryParam)
+
+        if (isNaN(parsedQueryParam)) {
+            return undefined
+        } else {
+            return parsedQueryParam
+        }
+    }
+
     return {
         numericToMoney,
-        queryParamToInt
+        queryParamToInt,
+        queryParamToNullableInt,
     }
 }

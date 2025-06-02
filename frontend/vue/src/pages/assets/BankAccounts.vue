@@ -8,60 +8,48 @@ import debounce from "lodash.debounce"
 import { ref, watch, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
-const chartData = ref({
-  labels: ["Jan", "Feb", "Mar", "Apr", "May"],
-  datasets: [
-    {
-      label: "John's Main Account",
-      data: [10000000, 11000000, 11500000, 12000000, 1200000],
-    },
-    {
-      label: "John's Savings",
-      data: [25000000, 26000000, 27500000, 29500000, 30000000],
-    },
-    {
-      label: "Jane's Main Account",
-      data: [10530000, 15000000, 7500000, 12780000, 1250000],
-    },
-    {
-      label: "Jane's Savings",
-      data: [25753200, 22000000, 22750000, 31477000, 27500000],
-    },
-    {
-      label: "Jack's Main Account",
-      data: [11530000, 10000000, 9500000, 8780000, 799000],
-    },
-    {
-      label: "Jack's Savings",
-      data: [22753200, 17000000, 14750000, 13477000, 14764000],
-    },
-  ],
-})
-
-// use actual backend
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
 const ev = useEnvUtils()
 const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
-
 const defaultPageSize = ev.getDefaultPageSize()
+
+const chartData = ref({
+  datasets: [
+    {
+      label: "Retirement Account",
+      data: [
+        {
+          x: 1746150578000,
+          y: 10000000,
+        },
+        {
+          x: 1745977778000,
+          y: 11000000,
+        },
+        {
+          x: 1743644978000,
+          y: 11500000,
+        },
+      ],
+    },
+  ],
+})
 
 const debouncedSearch = debounce(() => {
   bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
 }, 300)
 
 watch(
-  () => bankAccountsStore.filter,
-  () => {
-    debouncedSearch()
-  }
-)
-
-watch(
-  [() => bankAccountsStore.filter, () => bankAccountsStore.pageSize],
-  ([newFilter, newPageSize]) => {
+  [
+    () => bankAccountsStore.filter,
+    () => bankAccountsStore.balancesStartDate,
+    () => bankAccountsStore.balancesEndDate,
+    () => bankAccountsStore.pageSize,
+  ],
+  ([newFilter, newBalancesStartDate, newBalancesEndDate, newPageSize]) => {
     const pageSizeParam =
       Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
         ? newPageSize
@@ -71,9 +59,12 @@ watch(
       query: {
         ...route.query,
         filter: newFilter || undefined,
+        balancesStartDate: newBalancesStartDate || undefined,
+        balancesEndDate: newBalancesEndDate || undefined,
         pageSize: pageSizeParam,
       },
     })
+    debouncedSearch()
   }
 )
 
@@ -89,7 +80,22 @@ onMounted(() => {
   bankAccountsStore.pageSize =
     parsedPageSize !== defaultPageSize ? parsedPageSize : defaultPageSize
 
-  bankAccountsStore.hydrate(query.filter?.toString() || "", parsedPageSize)
+  const parsedBalancesStartDate = numUtils.queryParamToNullableInt(
+    query.balancesStartDate
+  )
+  bankAccountsStore.balancesStartDate = parsedBalancesStartDate
+
+  const parsedBalancesEndDate = numUtils.queryParamToNullableInt(
+    query.balancesEndDate
+  )
+  bankAccountsStore.balancesEndDate = parsedBalancesEndDate
+
+  bankAccountsStore.hydrate(
+    query.filter?.toString() || "",
+    parsedBalancesStartDate,
+    parsedBalancesEndDate,
+    parsedPageSize
+  )
 })
 </script>
 

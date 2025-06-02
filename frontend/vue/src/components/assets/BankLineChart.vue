@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from "vue"
 import { Chart, registerables } from "chart.js"
+import "chartjs-adapter-luxon"
 Chart.register(...registerables)
 
 const props = defineProps({ chartData: Object })
@@ -12,7 +13,22 @@ onMounted(() => {
     chartInstance = new Chart(canvas.value, {
       type: "line",
       data: props.chartData,
-      options: { responsive: true, maintainAspectRatio: false },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: "index",
+        },
+        scales: {
+          x: {
+            type: "time",
+            time: {
+              tooltipFormat: "dd LLL yy",
+            },
+          },
+        },
+      },
     })
   }
 })
