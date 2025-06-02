@@ -11,6 +11,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const balancesEndDate = ref(0)
     const pageSize = ref(10)
     const accounts = ref([])
+    const chartData = ref([])
 
     // actions
     async function hydrate(initFilter, initBalancesStartDate, initBalancesEndDate, initPageSize) {
@@ -22,6 +23,21 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function search(filter, balancesStartDate, balancesEndDate, pageSize) {
         accounts.value = await svc.searchBankAccounts(filter, balancesStartDate, balancesEndDate, pageSize)
+        extractChartData()
+    }
+
+    function extractChartData() {
+        chartData.value = accounts.value.map(account => {
+            return {
+                label: account.accountName,
+                data: account.balances.map(balance => {
+                    return {
+                        x: balance.date,
+                        y: balance.balance,
+                    }
+                })
+            }
+        })
     }
 
     return {
@@ -31,6 +47,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         balancesEndDate,
         pageSize,
         accounts,
+        chartData,
         // actions
         hydrate,
         search,

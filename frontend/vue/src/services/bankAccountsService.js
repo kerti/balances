@@ -14,7 +14,7 @@ export function useBankAccountsService() {
                 return accounts.data.items.map(account => {
                     account.balances = balances.data.items.filter(function (bal) {
                         return bal.bankAccountId == account.id
-                    })
+                    }).sort((a, b) => a.date - b.date)
                     return account
                 })
             } else {

@@ -1,12 +1,12 @@
 <script setup>
-import LineChart from "@/components/assets/BankLineChart.vue"
+import debounce from "lodash.debounce"
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import debounce from "lodash.debounce"
-import { ref, watch, onMounted } from "vue"
+import { watch, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import LineChart from "@/components/assets/BankLineChart.vue"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
@@ -15,28 +15,6 @@ const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize()
-
-const chartData = ref({
-  datasets: [
-    {
-      label: "Retirement Account",
-      data: [
-        {
-          x: 1746150578000,
-          y: 10000000,
-        },
-        {
-          x: 1745977778000,
-          y: 11000000,
-        },
-        {
-          x: 1743644978000,
-          y: 11500000,
-        },
-      ],
-    },
-  ],
-})
 
 const debouncedSearch = debounce(() => {
   bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
@@ -201,7 +179,7 @@ onMounted(() => {
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Balance Over Time</h2>
-        <line-chart :chart-data="chartData" />
+        <line-chart :chart-data="bankAccountsStore.chartData" />
       </div>
     </div>
   </div>

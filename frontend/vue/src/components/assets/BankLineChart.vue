@@ -1,10 +1,12 @@
 <script setup>
+import "chartjs-adapter-luxon"
 import { onMounted, ref, watch } from "vue"
 import { Chart, registerables } from "chart.js"
-import "chartjs-adapter-luxon"
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+
 Chart.register(...registerables)
 
-const props = defineProps({ chartData: Object })
+const bankAccountsStore = useBankAccountsStore()
 const canvas = ref(null)
 let chartInstance = null
 
@@ -12,13 +14,14 @@ onMounted(() => {
   if (canvas.value) {
     chartInstance = new Chart(canvas.value, {
       type: "line",
-      data: props.chartData,
+      data: bankAccountsStore.chartData,
       options: {
         responsive: true,
         maintainAspectRatio: false,
         interaction: {
           intersect: false,
-          mode: "index",
+          mode: "nearest",
+          axis: "xy",
         },
         scales: {
           x: {
@@ -34,10 +37,12 @@ onMounted(() => {
 })
 
 watch(
-  () => props.chartData,
+  () => bankAccountsStore.chartData,
   (newData) => {
     if (chartInstance) {
-      chartInstance.data = newData
+      chartInstance.data = {
+        datasets: newData,
+      }
       chartInstance.update()
     }
   },
