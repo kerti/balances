@@ -9,7 +9,18 @@ export function useDateUtils() {
             + ' ' + d.getFullYear()
     }
 
+    const getEpochOneYearAgo = () => {
+        const now = new Date();
+        const oneYearAgo = new Date(
+            now.getFullYear() - 1,
+            now.getMonth(),
+            now.getDate(),
+            23, 59, 59, 0);
+        return oneYearAgo.getTime();
+    }
+
     return {
         epochToLocalDate,
+        getEpochOneYearAgo,
     }
 }

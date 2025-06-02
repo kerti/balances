@@ -1,79 +1,60 @@
 <script setup>
-import LineChart from "@/components/assets/BankLineChart.vue"
+import debounce from "lodash.debounce"
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import debounce from "lodash.debounce"
-import { ref, watch, onMounted } from "vue"
+import { watch, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import LineChart from "@/components/assets/BankLineChart.vue"
 
-const chartData = ref({
-  labels: ["Jan", "Feb", "Mar", "Apr", "May"],
-  datasets: [
-    {
-      label: "John's Main Account",
-      data: [10000000, 11000000, 11500000, 12000000, 1200000],
-    },
-    {
-      label: "John's Savings",
-      data: [25000000, 26000000, 27500000, 29500000, 30000000],
-    },
-    {
-      label: "Jane's Main Account",
-      data: [10530000, 15000000, 7500000, 12780000, 1250000],
-    },
-    {
-      label: "Jane's Savings",
-      data: [25753200, 22000000, 22750000, 31477000, 27500000],
-    },
-    {
-      label: "Jack's Main Account",
-      data: [11530000, 10000000, 9500000, 8780000, 799000],
-    },
-    {
-      label: "Jack's Savings",
-      data: [22753200, 17000000, 14750000, 13477000, 14764000],
-    },
-  ],
-})
-
-// use actual backend
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
 const ev = useEnvUtils()
 const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
-
 const defaultPageSize = ev.getDefaultPageSize()
 
 const debouncedSearch = debounce(() => {
-  bankAccountsStore.search(bankAccountsStore.filter, bankAccountsStore.pageSize)
+  bankAccountsStore.search(
+    bankAccountsStore.filter,
+    bankAccountsStore.balancesStartDate,
+    bankAccountsStore.balancesEndDate,
+    bankAccountsStore.pageSize
+  )
 }, 300)
 
 watch(
-  () => bankAccountsStore.filter,
-  () => {
-    debouncedSearch()
-  }
-)
-
-watch(
-  [() => bankAccountsStore.filter, () => bankAccountsStore.pageSize],
-  ([newFilter, newPageSize]) => {
+  [
+    () => bankAccountsStore.filter,
+    () => bankAccountsStore.balancesStartDate,
+    () => bankAccountsStore.balancesEndDate,
+    () => bankAccountsStore.pageSize,
+  ],
+  ([newFilter, newBalancesStartDate, newBalancesEndDate, newPageSize]) => {
     const pageSizeParam =
       Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
         ? newPageSize
+        : undefined
+
+    const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
+    const balancesStartDateParam =
+      Number.isInteger(newBalancesStartDate) &&
+      newBalancesStartDate !== defaultBalancesStartDate
+        ? newBalancesStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
         filter: newFilter || undefined,
+        balancesStartDate: balancesStartDateParam,
+        balancesEndDate: newBalancesEndDate || undefined,
         pageSize: pageSizeParam,
       },
     })
+    debouncedSearch()
   }
 )
 
@@ -89,7 +70,26 @@ onMounted(() => {
   bankAccountsStore.pageSize =
     parsedPageSize !== defaultPageSize ? parsedPageSize : defaultPageSize
 
-  bankAccountsStore.hydrate(query.filter?.toString() || "", parsedPageSize)
+  const parsedBalancesStartDate = numUtils.queryParamToNullableInt(
+    query.balancesStartDate
+  )
+  bankAccountsStore.balancesStartDate = parsedBalancesStartDate
+
+  const parsedBalancesEndDate = numUtils.queryParamToNullableInt(
+    query.balancesEndDate
+  )
+  bankAccountsStore.balancesEndDate = parsedBalancesEndDate
+
+  const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
+  bankAccountsStore.hydrate(
+    query.filter?.toString() || "",
+    parsedBalancesStartDate &&
+      parsedBalancesStartDate !== defaultBalancesStartDate
+      ? parsedBalancesStartDate
+      : defaultBalancesStartDate,
+    parsedBalancesEndDate,
+    parsedPageSize
+  )
 })
 </script>
 
@@ -109,7 +109,7 @@ onMounted(() => {
             />
           </div>
         </div>
-        <div class="overflow-x-auto h-96">
+        <div class="overflow-x-auto h-88">
           <table class="table table-zebra w-full table-pin-rows">
             <thead>
               <tr>
@@ -195,7 +195,7 @@ onMounted(() => {
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Balance Over Time</h2>
-        <line-chart :chart-data="chartData" />
+        <line-chart :chart-data="bankAccountsStore.chartData" />
       </div>
     </div>
   </div>
