@@ -38,11 +38,18 @@ watch(
         ? newPageSize
         : undefined
 
+    const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
+    const balancesStartDateParam =
+      Number.isInteger(newBalancesStartDate) &&
+      newBalancesStartDate !== defaultBalancesStartDate
+        ? newBalancesStartDate
+        : undefined
+
     router.replace({
       query: {
         ...route.query,
         filter: newFilter || undefined,
-        balancesStartDate: newBalancesStartDate || undefined,
+        balancesStartDate: balancesStartDateParam,
         balancesEndDate: newBalancesEndDate || undefined,
         pageSize: pageSizeParam,
       },
@@ -73,9 +80,13 @@ onMounted(() => {
   )
   bankAccountsStore.balancesEndDate = parsedBalancesEndDate
 
+  const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.hydrate(
     query.filter?.toString() || "",
-    parsedBalancesStartDate,
+    parsedBalancesStartDate &&
+      parsedBalancesStartDate !== defaultBalancesStartDate
+      ? parsedBalancesStartDate
+      : defaultBalancesStartDate,
     parsedBalancesEndDate,
     parsedPageSize
   )
@@ -98,7 +109,7 @@ onMounted(() => {
             />
           </div>
         </div>
-        <div class="overflow-x-auto h-96">
+        <div class="overflow-x-auto h-88">
           <table class="table table-zebra w-full table-pin-rows">
             <thead>
               <tr>
