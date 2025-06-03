@@ -58,7 +58,7 @@ watch(
   }
 )
 
-onMounted(() => {
+function refetch() {
   const query = route.query
 
   bankAccountsStore.filter = query.filter?.toString() || ""
@@ -90,7 +90,9 @@ onMounted(() => {
     parsedBalancesEndDate,
     parsedPageSize
   )
-})
+}
+
+onMounted(() => refetch())
 </script>
 
 <template>
@@ -171,7 +173,14 @@ onMounted(() => {
                 <td>
                   <div class="flex items-center gap-3">
                     <button class="btn btn-primary tooltip" data-tip="Edit">
-                      <font-awesome-icon :icon="['fas', 'edit']" />
+                      <router-link
+                        :to="{
+                          name: 'assets.bankaccount.detail',
+                          params: { id: account.id },
+                        }"
+                      >
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </router-link>
                     </button>
                     <button class="btn btn-primary tooltip" data-tip="Activate">
                       <font-awesome-icon :icon="['fas', 'eye']" />
