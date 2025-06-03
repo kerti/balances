@@ -31,6 +31,8 @@ const (
 	OperatorOr Operator = "or"
 	// OperatorLike represents an SQL operator of the same name
 	OperatorLike Operator = "like"
+	// OperatorIn represents an SQL operator of the same name
+	OperatorIn Operator = "in"
 )
 
 // OperandMap is the map of operands to its query string equivalent
@@ -45,6 +47,7 @@ var OperandMap = map[Operator]string{
 	OperatorAnd:              " AND ",
 	OperatorOr:               " OR ",
 	OperatorLike:             " LIKE ",
+	OperatorIn:               " IN ",
 }
 
 // QueryPart represents part of a query
@@ -194,6 +197,9 @@ func (c *Clause) toStringFieldVsValue() (string, error) {
 	field, ok := c.Operand1.(Field)
 	if !ok {
 		return "", fmt.Errorf("failed processing field [%#v]", field)
+	}
+	if c.Operator == OperatorIn {
+		return fmt.Sprintf("(%s %s (?))", field, OperandMap[c.Operator]), nil
 	}
 	return fmt.Sprintf("(%s %s ?)", field, OperandMap[c.Operator]), nil
 }
