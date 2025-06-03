@@ -3,12 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/handler/response"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
+	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/ctxprops"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/logger"
@@ -71,17 +71,20 @@ func (h *BankAccountImpl) HandleGetBankAccountByID(w http.ResponseWriter, r *htt
 
 	r.ParseForm()
 	_, withBalances := r.Form["withBalances"]
-	balanceCountStr, withBalanceCount := r.Form["balanceCount"]
+	balanceStartDateStr, withBalanceStartDate := r.Form["balanceStartDate"]
+	balanceEndDateStr, withBalanceEndDate := r.Form["balanceEndDate"]
 
-	balanceCount := 0
-	if withBalanceCount {
-		balanceCount, err = strconv.Atoi(balanceCountStr[0])
-		if err != nil {
-			balanceCount = 10
-		}
+	var balanceStartDate cachetime.NCacheTime
+	if withBalanceStartDate {
+		balanceStartDate.Scan(balanceStartDateStr[0])
 	}
 
-	bankAccount, err := h.Service.GetByID(id, withBalances, balanceCount)
+	var balanceEndDate cachetime.NCacheTime
+	if withBalanceEndDate {
+		balanceEndDate.Scan(balanceEndDateStr[0])
+	}
+
+	bankAccount, err := h.Service.GetByID(id, withBalances, balanceStartDate, balanceEndDate)
 	if err != nil {
 		response.RespondWithError(w, err)
 		return
