@@ -12,6 +12,18 @@ import (
 
 func toCacheTime(value interface{}) (*CacheTime, error) {
 	switch x := value.(type) {
+	case string:
+		val, err := strconv.ParseInt(x, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		t := time.UnixMilli(val)
+		ct := CacheTime(t)
+		return &ct, nil
+	case int64:
+		t := time.UnixMilli(x)
+		ct := CacheTime(t)
+		return &ct, nil
 	case time.Time:
 		ct := CacheTime(x)
 		return &ct, nil

@@ -298,10 +298,16 @@ func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (ba
 
 	var count int
 	filterArgsNoPagination := filter.GetArgs(false)
-	err = r.DB.Get(
-		&count,
+	query, args, err = r.DB.In(
 		"SELECT COUNT(entity_id) FROM bank_account_balances "+filterQueryString,
-		filterArgsNoPagination...)
+		filterArgsNoPagination...,
+	)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return
+	}
+
+	err = r.DB.Get(&count, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
