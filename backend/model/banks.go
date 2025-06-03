@@ -371,11 +371,11 @@ func (f *BankAccountFilterInput) ToFilter() filter.Filter {
 // BankAccountBalanceFilterInput is the filter input object for Bank Account Balances
 type BankAccountBalanceFilterInput struct {
 	filter.BaseFilterInput
-	BankAccountID nuuid.NUUID          `json:"bankAccountId,omitempty"`
-	StartDate     cachetime.NCacheTime `json:"startDate,omitempty"`
-	EndDate       cachetime.NCacheTime `json:"endDate,omitempty"`
-	BalanceMin    *float64             `json:"balanceMin,omitempty"`
-	BalanceMax    *float64             `json:"balanceMax,omitempty"`
+	BankAccountIDs *[]uuid.UUID         `json:"bankAccountIds,omitempty"`
+	StartDate      cachetime.NCacheTime `json:"startDate,omitempty"`
+	EndDate        cachetime.NCacheTime `json:"endDate,omitempty"`
+	BalanceMin     *float64             `json:"balanceMin,omitempty"`
+	BalanceMax     *float64             `json:"balanceMax,omitempty"`
 }
 
 // ToFilter converts this entity-specific filter into a generic filter.Filter object
@@ -386,12 +386,14 @@ func (f *BankAccountBalanceFilterInput) ToFilter() filter.Filter {
 		Pagination:     f.BaseFilterInput.GetPagination(),
 	}
 
-	if f.BankAccountID.Valid {
-		theFilter.AddClause(filter.Clause{
-			Operand1: BankAccountBalanceColumnBankAccountID,
-			Operand2: f.BankAccountID.UUID,
-			Operator: filter.OperatorEqual,
-		}, filter.OperatorAnd)
+	if f.BankAccountIDs != nil {
+		if len(*f.BankAccountIDs) > 0 {
+			theFilter.AddClause(filter.Clause{
+				Operand1: BankAccountBalanceColumnBankAccountID,
+				Operand2: *f.BankAccountIDs,
+				Operator: filter.OperatorIn,
+			}, filter.OperatorAnd)
+		}
 	}
 
 	if f.StartDate.Valid {
