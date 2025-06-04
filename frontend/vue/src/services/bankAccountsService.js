@@ -2,6 +2,7 @@ import {
     searchBankAccountBalancesFromAPI,
     searchBankAccountsFromAPI,
     getBankAccountFromAPI,
+    updateAccountWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -47,8 +48,30 @@ export function useBankAccountsService() {
         }
     }
 
+    async function updateBankAccount(account) {
+        const payload = {
+            id: account.id,
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            status: account.status,
+        }
+
+        const result = await updateAccountWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
     return {
         searchBankAccounts,
         getBankAccount,
+        updateBankAccount,
     }
 }

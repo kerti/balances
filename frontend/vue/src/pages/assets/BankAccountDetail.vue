@@ -96,8 +96,7 @@ const resetForm = () => {
 }
 
 const saveAccount = () => {
-  console.log("Saved account:", bankAccountsStore.account)
-  // TODO: hook this to an API call or store logic
+  bankAccountsStore.update()
 }
 </script>
 

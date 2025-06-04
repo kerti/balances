@@ -110,6 +110,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
+    async function update() {
+        svc.updateBankAccount(account.value)
+    }
+
     return {
         //// reactive state
         // list view
@@ -135,5 +139,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         search,
         get,
         revertAccountToCache,
+        update,
     }
 })
