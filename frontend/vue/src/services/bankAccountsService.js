@@ -1,4 +1,8 @@
-import { searchBankAccountBalancesFromAPI, searchBankAccountsFromAPI } from '@/api/bankAccountsApi';
+import {
+    searchBankAccountBalancesFromAPI,
+    searchBankAccountsFromAPI,
+    getBankAccountFromAPI,
+} from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
     async function searchBankAccounts(filter, balancesStartDate, balancesEndDate, pageSize) {
@@ -14,7 +18,7 @@ export function useBankAccountsService() {
                 return accounts.data.items.map(account => {
                     account.balances = balances.data.items.filter(function (bal) {
                         return bal.bankAccountId == account.id
-                    }).sort((a, b) => a.date - b.date)
+                    })
                     return account
                 })
             } else {
@@ -30,7 +34,20 @@ export function useBankAccountsService() {
         }
     }
 
+    async function getBankAccount(id, balanceStartDate, balanceEndDate, pageSize) {
+        const account = await getBankAccountFromAPI(id, balanceStartDate, balanceEndDate, pageSize)
+
+        if (!account.errorMessage) {
+            return account.data
+        } else {
+            return {
+                errorMessage: account.errorMessage
+            }
+        }
+    }
+
     return {
         searchBankAccounts,
+        getBankAccount,
     }
 }
