@@ -175,13 +175,22 @@ const saveAccount = () => {
       <!-- Right: Balance Table -->
       <div class="card bg-base-100 shadow-md md:col-span-2">
         <div class="card-body">
-          <h2 class="card-title">Balances</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title">Balance History</h2>
+            <button
+              class="btn btn-neutral btn-circle tooltip"
+              data-tip="Add New Balance"
+            >
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </button>
+          </div>
           <div class="overflow-x-auto h-96">
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
                   <th>Date</th>
                   <th class="text-right">Balance</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -192,6 +201,13 @@ const saveAccount = () => {
                   <td>{{ dateUtils.epochToLocalDate(entry.date) }}</td>
                   <td class="text-right">
                     {{ numUtils.numericToMoney(entry.balance) }}
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <button class="btn btn-neutral tooltip" data-tip="Edit">
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
