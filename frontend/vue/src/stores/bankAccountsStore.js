@@ -19,6 +19,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailBalanceEndDate = ref(0)
     const detailPageSize = ref(10)
     const account = ref({})
+    const accountCache = ref({})
     const detailChartData = ref([])
 
     //// actions
@@ -51,6 +52,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailBalanceEndDate.value = 0
         detailPageSize.value = 10
         account.value = {}
+        accountCache.value = {}
         detailChartData.value = []
     }
 
@@ -64,11 +66,15 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function get() {
-        account.value = await svc.getBankAccount(
+        const fetchedAccount = await svc.getBankAccount(
             detailId.value,
             balancesStartDate.value,
             balancesEndDate.value,
             detailPageSize.value)
+
+        account.value = JSON.parse(JSON.stringify(fetchedAccount))
+        accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
+
         extractDetailChartData()
     }
 
@@ -98,6 +104,12 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }]
     }
 
+    function revertAccountToCache() {
+        if (accountCache.value) {
+            account.value = JSON.parse(JSON.stringify(accountCache.value))
+        }
+    }
+
     return {
         //// reactive state
         // list view
@@ -113,6 +125,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailBalanceEndDate,
         detailPageSize,
         account,
+        accountCache,
         detailChartData,
         //// actions
         hydrate,
@@ -121,5 +134,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dehydrateDetail,
         search,
         get,
+        revertAccountToCache,
     }
 })

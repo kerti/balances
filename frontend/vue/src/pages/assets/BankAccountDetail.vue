@@ -92,13 +92,7 @@ onMounted(() => {
 onUnmounted(() => bankAccountsStore.dehydrateDetail())
 
 const resetForm = () => {
-  // TODO: use actual data to reset the form
-  account.value = {
-    bank: "John's Main Account",
-    holder: "John Fitzgerald Doe",
-    number: "1234567890",
-    status: "Active",
-  }
+  bankAccountsStore.revertAccountToCache()
 }
 
 const saveAccount = () => {
