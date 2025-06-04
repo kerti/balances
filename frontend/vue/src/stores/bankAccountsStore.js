@@ -70,8 +70,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function get() {
         const fetchedAccount = await svc.getBankAccount(
             detailId.value,
-            balancesStartDate.value,
-            balancesEndDate.value,
+            detailBalanceStartDate.value,
+            detailBalanceEndDate.value,
             detailPageSize.value)
 
         account.value = JSON.parse(JSON.stringify(fetchedAccount))
