@@ -18,7 +18,7 @@ export function useBankAccountsService() {
                 return accounts.data.items.map(account => {
                     account.balances = balances.data.items.filter(function (bal) {
                         return bal.bankAccountId == account.id
-                    })
+                    }).sort((a, b) => a.date - b.date)
                     return account
                 })
             } else {
@@ -38,6 +38,7 @@ export function useBankAccountsService() {
         const account = await getBankAccountFromAPI(id, balanceStartDate, balanceEndDate, pageSize)
 
         if (!account.errorMessage) {
+            account.data.balances.sort((a, b) => a.date - b.date)
             return account.data
         } else {
             return {
