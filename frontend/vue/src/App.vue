@@ -8,6 +8,7 @@ const authStore = useAuthStore()
 </script>
 
 <template>
+  <div id="toast-container" class="toast toast-top toast-end fixed z-50"></div>
   <template v-if="authStore.isLoggedIn">
     <div class="flex h-screen">
       <TheSidebar />

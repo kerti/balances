@@ -1,9 +1,11 @@
+import { useToast } from '@/composables/useToast'
 import { useBankAccountsService } from '@/services/bankAccountsService'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
+    const toast = useToast()
 
     //// reactive state
     // list view
@@ -111,7 +113,12 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function update() {
-        svc.updateBankAccount(account.value)
+        const res = await svc.updateBankAccount(account.value)
+        if (!res.errorMessage) {
+            toast.showToast('Account updated!', 'success')
+        } else {
+            toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
+        }
     }
 
     return {
