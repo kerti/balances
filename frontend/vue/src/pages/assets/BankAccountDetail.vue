@@ -108,13 +108,21 @@ const saveAccount = () => {
 <template>
   <div class="space-y-6">
     <!-- Top Half: Form and Balances Table -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <!-- Left: Account Form -->
-      <div class="card bg-base-100 shadow-md">
+      <div class="card bg-base-100 shadow-md md:col-span-2">
         <div class="card-body">
           <!-- TODO: Use the account name instead -->
           <h2 class="card-title">Account Details</h2>
-          <form class="space-y-4">
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="label">Account Name</label>
+              <input
+                v-model="bankAccountsStore.account.accountName"
+                type="text"
+                class="input input-bordered w-full"
+              />
+            </div>
             <div>
               <label class="label">Bank Name</label>
               <input
