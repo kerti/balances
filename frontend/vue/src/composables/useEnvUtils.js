@@ -49,10 +49,12 @@ export function useEnvUtils() {
         const val = import.meta.env.VITE_DEFAULT_PAGE_SIZE
         if (val === undefined || val === '') {
             console.warn('Unset environment variable VITE_DEFAULT_PAGE_SIZE, reverting to defaults')
+            return 10
         }
         const parsedVal = parseInt(val)
         if (isNaN(parsedVal)) {
             console.warn('Incorrect type for environment variable VITE_DEFAULT_PAGE_SIZE, reverting to defaults')
+            return 10
         }
         return parsedVal
     }

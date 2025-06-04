@@ -37,3 +37,25 @@ export async function searchBankAccountBalancesFromAPI(bankAccountIds, startDate
         }
     }
 }
+
+export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, pageSize, page) {
+    try {
+        const params = new URLSearchParams()
+        params.append('withBalances', true)
+        if (startDate) {
+            params.append('balanceStartDate', startDate)
+        }
+        if (endDate) {
+            params.append('balanceEndDate', endDate)
+        }
+        if (pageSize) {
+            params.append('pageSize', pageSize)
+        }
+        const { data } = await axiosInstance.get('bankAccounts/' + bankAccountId + '?' + params.toString())
+        return data
+    } catch (errror) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

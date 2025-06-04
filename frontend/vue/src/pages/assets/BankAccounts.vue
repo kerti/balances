@@ -17,12 +17,7 @@ const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize()
 
 const debouncedSearch = debounce(() => {
-  bankAccountsStore.search(
-    bankAccountsStore.filter,
-    bankAccountsStore.balancesStartDate,
-    bankAccountsStore.balancesEndDate,
-    bankAccountsStore.pageSize
-  )
+  bankAccountsStore.search()
 }, 300)
 
 watch(
@@ -58,17 +53,13 @@ watch(
   }
 )
 
-onMounted(() => {
+function refetch() {
   const query = route.query
-
-  bankAccountsStore.filter = query.filter?.toString() || ""
 
   const parsedPageSize = numUtils.queryParamToInt(
     query.pageSize,
     defaultPageSize
   )
-  bankAccountsStore.pageSize =
-    parsedPageSize !== defaultPageSize ? parsedPageSize : defaultPageSize
 
   const parsedBalancesStartDate = numUtils.queryParamToNullableInt(
     query.balancesStartDate
@@ -90,7 +81,9 @@ onMounted(() => {
     parsedBalancesEndDate,
     parsedPageSize
   )
-})
+}
+
+onMounted(() => refetch())
 </script>
 
 <template>
@@ -171,7 +164,14 @@ onMounted(() => {
                 <td>
                   <div class="flex items-center gap-3">
                     <button class="btn btn-primary tooltip" data-tip="Edit">
-                      <font-awesome-icon :icon="['fas', 'edit']" />
+                      <router-link
+                        :to="{
+                          name: 'assets.bankaccount.detail',
+                          params: { id: account.id },
+                        }"
+                      >
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </router-link>
                     </button>
                     <button class="btn btn-primary tooltip" data-tip="Activate">
                       <font-awesome-icon :icon="['fas', 'eye']" />
@@ -195,7 +195,7 @@ onMounted(() => {
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Balance Over Time</h2>
-        <line-chart :chart-data="bankAccountsStore.chartData" />
+        <line-chart />
       </div>
     </div>
   </div>

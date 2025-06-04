@@ -1,41 +1,92 @@
 <script setup>
-import { ref } from "vue"
+import { onMounted, watch } from "vue"
 import LineChart from "@/components/assets/BankDetailLineChart.vue"
+import { useRoute, useRouter } from "vue-router"
+import { useNumUtils } from "@/composables/useNumUtils"
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+import { useDateUtils } from "@/composables/useDateUtils"
+import { useEnvUtils } from "@/composables/useEnvUtils"
+import debounce from "lodash.debounce"
 
-// TODO: fetch from real API
-const account = ref({
-  bank: "John's Main Account",
-  holder: "John Fitzgerald Doe",
-  number: "1234567890",
-  status: "Active",
-})
+const dateUtils = useDateUtils()
+const numUtils = useNumUtils()
+const ev = useEnvUtils()
+const route = useRoute()
+const router = useRouter()
+const bankAccountsStore = useBankAccountsStore()
+const defaultPageSize = ev.getDefaultPageSize() * 12 // assume about 10 balances per month
 
-const balances = ref([
-  { amount: "Rp21,000,000", date: "2024-05-01" },
-  { amount: "Rp17,000,000", date: "2024-06-01" },
-  { amount: "Rp14,000,000", date: "2024-07-01" },
-  { amount: "Rp18,000,000", date: "2024-08-01" },
-  { amount: "Rp12,000,000", date: "2024-09-01" },
-  { amount: "Rp9,000,000", date: "2024-10-01" },
-  { amount: "Rp14,000,000", date: "2024-11-01" },
-  { amount: "Rp7,000,000", date: "2024-12-01" },
-  { amount: "Rp10,000,000", date: "2025-01-01" },
-  { amount: "Rp11,500,000", date: "2025-02-01" },
-  { amount: "Rp12,000,000", date: "2025-03-01" },
-  { amount: "Rp12,000,000", date: "2025-04-01" },
-])
+const debouncedGet = debounce(() => {
+  bankAccountsStore.get()
+}, 300)
 
-const chartData = ref({
-  labels: balances.value.map((entry) => entry.date),
-  datasets: [
-    {
-      label: "Account Balance",
-      data: balances.value.map((entry) =>
-        parseInt(entry.amount.replace(/Rp|,|\./g, ""))
-      ),
-      fill: true,
-    },
+// TODO: add controls to leverage this
+watch(
+  [
+    () => bankAccountsStore.detailBalanceStartDate,
+    () => bankAccountsStore.detailBalanceEndDate,
+    () => bankAccountsStore.detailPageSize,
   ],
+  ([newBalanceStartDate, newBalanceEndDate, newPageSize]) => {
+    const pageSizeParam =
+      Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
+        ? newPageSize
+        : undefined
+
+    const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
+    const balanceStartDateParam =
+      Number.isInteger(newBalanceStartDate) &&
+      newBalanceStartDate !== defaultBalanceStartDate
+        ? newBalanceStartDate
+        : undefined
+
+    router.replace({
+      query: {
+        ...route.query,
+        balanceStartDate: balanceStartDateParam,
+        balanceEndDate: newBalanceEndDate || undefined,
+        pageSize: pageSizeParam,
+      },
+    })
+    // prevent double-fetching on initial component mount
+    if (bankAccountsStore.account.bankName !== undefined) {
+      debouncedGet()
+    }
+  }
+)
+
+function refetch() {
+  const query = route.query
+
+  const parsedPageSize = numUtils.queryParamToInt(
+    query.pageSize,
+    defaultPageSize
+  )
+
+  const parsedBalanceStartDate = numUtils.queryParamToNullableInt(
+    query.balanceStartDate
+  )
+  bankAccountsStore.balancesStartDate = parsedBalanceStartDate
+
+  const parsedBalanceEndDate = numUtils.queryParamToNullableInt(
+    query.balanceEndDate
+  )
+  bankAccountsStore.balancesEndDate = parsedBalanceEndDate
+
+  const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
+  bankAccountsStore.hydrateDetail(
+    route.params.id,
+    parsedBalanceStartDate && parsedBalanceStartDate !== defaultBalanceStartDate
+      ? parsedBalanceStartDate
+      : defaultBalanceStartDate,
+    parsedBalanceEndDate,
+    parsedPageSize
+  )
+}
+
+onMounted(() => {
+  refetch()
+  bankAccountsStore.get()
 })
 
 const resetForm = () => {
@@ -62,12 +113,12 @@ const saveAccount = () => {
       <div class="card bg-base-100 shadow-md">
         <div class="card-body">
           <!-- TODO: Use the account name instead -->
-          <h2 class="card-title">Account Details: {{ $route.params.id }}</h2>
+          <h2 class="card-title">Account Details</h2>
           <form class="space-y-4">
             <div>
               <label class="label">Bank Name</label>
               <input
-                v-model="account.bank"
+                v-model="bankAccountsStore.account.bankName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -75,7 +126,7 @@ const saveAccount = () => {
             <div>
               <label class="label">Account Holder Name</label>
               <input
-                v-model="account.holder"
+                v-model="bankAccountsStore.account.accountHolderName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -83,7 +134,7 @@ const saveAccount = () => {
             <div>
               <label class="label">Account Number</label>
               <input
-                v-model="account.number"
+                v-model="bankAccountsStore.account.accountNumber"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -91,11 +142,11 @@ const saveAccount = () => {
             <div>
               <label class="label">Status</label>
               <select
-                v-model="account.status"
+                v-model="bankAccountsStore.account.status"
                 class="select select-bordered w-full"
               >
-                <option>Active</option>
-                <option>Inactive</option>
+                <option>active</option>
+                <option>inactive</option>
               </select>
             </div>
             <div class="flex justify-end gap-2 pt-4">
@@ -126,14 +177,19 @@ const saveAccount = () => {
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
-                  <th>Balance</th>
                   <th>Date</th>
+                  <th class="text-right">Balance</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(entry, index) in balances" :key="index">
-                  <td>{{ entry.amount }}</td>
-                  <td>{{ entry.date }}</td>
+                <tr
+                  v-for="(entry, index) in bankAccountsStore.account.balances"
+                  :key="index"
+                >
+                  <td>{{ dateUtils.epochToLocalDate(entry.date) }}</td>
+                  <td class="text-right">
+                    {{ numUtils.numericToMoney(entry.balance) }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -146,7 +202,7 @@ const saveAccount = () => {
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <h2 class="card-title">Account Balance Over Time (last 12 months)</h2>
-        <line-chart :chart-data="chartData" />
+        <line-chart />
       </div>
     </div>
   </div>

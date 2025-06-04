@@ -1,6 +1,6 @@
 <script setup>
 import "chartjs-adapter-luxon"
-import { onMounted, ref, watch } from "vue"
+import { onActivated, onMounted, ref, watch } from "vue"
 import { Chart, registerables } from "chart.js"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 
@@ -10,11 +10,13 @@ const bankAccountsStore = useBankAccountsStore()
 const canvas = ref(null)
 let chartInstance = null
 
-onMounted(() => {
+function renderChart() {
   if (canvas.value) {
     chartInstance = new Chart(canvas.value, {
       type: "line",
-      data: bankAccountsStore.chartData,
+      data: {
+        datasets: bankAccountsStore.chartData,
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -34,6 +36,23 @@ onMounted(() => {
       },
     })
   }
+}
+
+function destroyChart() {
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
+}
+
+onMounted(() => {
+  destroyChart()
+  renderChart()
+})
+
+onActivated(() => {
+  destroyChart()
+  renderChart()
 })
 
 watch(
@@ -46,7 +65,7 @@ watch(
       chartInstance.update()
     }
   },
-  { deep: true }
+  { deep: true, immediate: true }
 )
 </script>
 
