@@ -283,7 +283,7 @@ func NewBankAccountBalanceFromInput(input BankAccountBalanceInput, bankAccountID
 }
 
 // Update performs an update on a Bank Account Balance
-func (bb BankAccountBalance) Update(input BankAccountBalanceInput, userID uuid.UUID) error {
+func (bb *BankAccountBalance) Update(input BankAccountBalanceInput, userID uuid.UUID) error {
 	now := time.Now()
 
 	bb.Date = input.Date.Time()
@@ -297,7 +297,7 @@ func (bb BankAccountBalance) Update(input BankAccountBalanceInput, userID uuid.U
 }
 
 // Delete performs a delete on a Bank Account Balance
-func (bb BankAccountBalance) Delete(userID uuid.UUID) error {
+func (bb *BankAccountBalance) Delete(userID uuid.UUID) error {
 	now := time.Now()
 
 	bb.Deleted = null.TimeFrom(now)

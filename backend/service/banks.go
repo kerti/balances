@@ -266,10 +266,10 @@ func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	lastBalance := lastBalances[0]
-	isNewerBalance := lastBalance.Date.Before(input.Date.Time())
+	isNewerOrLastBalance := lastBalance.Date.Before(input.Date.Time()) || input.ID == lastBalance.ID
 	var bankAccountToUpdate *model.BankAccount
 
-	if isNewerBalance {
+	if isNewerOrLastBalance {
 		bankAccount.SetNewBalance(input, userID)
 		bankAccountToUpdate = &bankAccount
 	}
