@@ -4,7 +4,7 @@ import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import { watch, onMounted } from "vue"
+import { watch, onMounted, onUnmounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import LineChart from "@/components/assets/BankLineChart.vue"
 
@@ -84,6 +84,7 @@ function refetch() {
 }
 
 onMounted(() => refetch())
+onUnmounted(() => bankAccountsStore.dehydrate())
 </script>
 
 <template>

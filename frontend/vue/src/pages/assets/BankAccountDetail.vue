@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from "vue"
+import { onMounted, onUnmounted, watch } from "vue"
 import LineChart from "@/components/assets/BankDetailLineChart.vue"
 import { useRoute, useRouter } from "vue-router"
 import { useNumUtils } from "@/composables/useNumUtils"
@@ -89,6 +89,8 @@ onMounted(() => {
   bankAccountsStore.get()
 })
 
+onUnmounted(() => bankAccountsStore.dehydrateDetail())
+
 const resetForm = () => {
   // TODO: use actual data to reset the form
   account.value = {
@@ -100,7 +102,7 @@ const resetForm = () => {
 }
 
 const saveAccount = () => {
-  console.log("Saved account:", account.value)
+  console.log("Saved account:", bankAccountsStore.account)
   // TODO: hook this to an API call or store logic
 }
 </script>
@@ -108,9 +110,9 @@ const saveAccount = () => {
 <template>
   <div class="space-y-6">
     <!-- Top Half: Form and Balances Table -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <!-- Left: Account Form -->
-      <div class="card bg-base-100 shadow-md md:col-span-2">
+      <div class="card bg-base-100 shadow-md md:col-span-3">
         <div class="card-body">
           <!-- TODO: Use the account name instead -->
           <h2 class="card-title">Account Details</h2>
@@ -178,7 +180,7 @@ const saveAccount = () => {
       </div>
 
       <!-- Right: Balance Table -->
-      <div class="card bg-base-100 shadow-md">
+      <div class="card bg-base-100 shadow-md md:col-span-2">
         <div class="card-body">
           <h2 class="card-title">Balances</h2>
           <div class="overflow-x-auto h-96">

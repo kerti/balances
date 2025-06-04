@@ -29,11 +29,29 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize.value = initPageSize
     }
 
+    function dehydrate() {
+        filter.value = ''
+        balancesStartDate.value = 0
+        balancesEndDate.value = 0
+        pageSize.value = 10
+        accounts.value = []
+        chartData.value = []
+    }
+
     async function hydrateDetail(initId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
         detailId.value = initId
         detailBalanceStartDate.value = initBalanceStartDate
         detailBalanceEndDate.value = initBalanceEndDate
         detailPageSize.value = initPageSize
+    }
+
+    function dehydrateDetail() {
+        detailId.value = ''
+        detailBalanceStartDate.value = 0
+        detailBalanceEndDate.value = 0
+        detailPageSize.value = 10
+        account.value = {}
+        detailChartData.value = []
     }
 
     async function search() {
@@ -98,7 +116,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailChartData,
         //// actions
         hydrate,
+        dehydrate,
         hydrateDetail,
+        dehydrateDetail,
         search,
         get,
     }
