@@ -103,11 +103,10 @@ const saveAccount = () => {
 <template>
   <div class="space-y-6">
     <!-- Top Half: Form and Balances Table -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left: Account Form -->
-      <div class="card bg-base-100 shadow-md md:col-span-3">
+      <div class="card bg-base-100 shadow-md md:col-span-1">
         <div class="card-body">
-          <!-- TODO: Use the account name instead -->
           <h2 class="card-title">Account Details</h2>
           <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -173,7 +172,7 @@ const saveAccount = () => {
       </div>
 
       <!-- Right: Balance Table -->
-      <div class="card bg-base-100 shadow-md md:col-span-2">
+      <div class="card bg-base-100 shadow-md md:col-span-1">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">Balance History</h2>
@@ -198,7 +197,7 @@ const saveAccount = () => {
                   v-for="(entry, index) in bankAccountsStore.account.balances"
                   :key="index"
                 >
-                  <td>{{ dateUtils.epochToLocalDate(entry.date) }}</td>
+                  <td>{{ dateUtils.epochToShortLocalDate(entry.date) }}</td>
                   <td class="text-right">
                     {{ numUtils.numericToMoney(entry.balance) }}
                   </td>
@@ -206,6 +205,9 @@ const saveAccount = () => {
                     <div class="flex items-center gap-3">
                       <button class="btn btn-neutral tooltip" data-tip="Edit">
                         <font-awesome-icon :icon="['fas', 'edit']" />
+                      </button>
+                      <button class="btn btn-neutral tooltip" data-tip="Delete">
+                        <font-awesome-icon :icon="['fas', 'trash']" />
                       </button>
                     </div>
                   </td>
