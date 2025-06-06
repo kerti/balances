@@ -3,6 +3,8 @@ import {
     searchBankAccountsFromAPI,
     getBankAccountFromAPI,
     updateAccountWithAPI,
+    getBankAccountBalanceFromAPI,
+    updateAccountBalanceWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -61,7 +63,38 @@ export function useBankAccountsService() {
         const result = await updateAccountWithAPI(payload)
 
         if (!result.errorMessage) {
-            return result
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    async function getBankAccountBalance(id) {
+        const accountBalance = await getBankAccountBalanceFromAPI(id)
+
+        if (!accountBalance.errorMessage) {
+            return accountBalance.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    async function updateBankAccountBalance(accountBalance) {
+        const payload = {
+            id: accountBalance.id,
+            bankAccountId: accountBalance.bankAccountId,
+            date: accountBalance.date,
+            balance: parseInt(accountBalance.balance),
+        }
+
+        const result = await updateAccountBalanceWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result.data
         } else {
             return {
                 errorMessage: result.errorMessage
@@ -73,5 +106,7 @@ export function useBankAccountsService() {
         searchBankAccounts,
         getBankAccount,
         updateBankAccount,
+        getBankAccountBalance,
+        updateBankAccountBalance,
     }
 }

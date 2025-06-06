@@ -99,8 +99,14 @@ onUnmounted(() => bankAccountsStore.dehydrate())
               type="text"
               v-model="bankAccountsStore.filter"
               placeholder="Search accounts..."
-              class="input input-bordered w-64"
+              class="input input-bordered w-64 mr-1"
             />
+            <button
+              class="btn btn-neutral btn-circle tooltip ml-1"
+              data-tip="Add New Bank Account"
+            >
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </button>
           </div>
         </div>
         <div class="overflow-x-auto h-88">

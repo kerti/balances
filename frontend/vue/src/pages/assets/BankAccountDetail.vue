@@ -1,12 +1,14 @@
 <script setup>
 import { onMounted, onUnmounted, watch } from "vue"
-import LineChart from "@/components/assets/BankDetailLineChart.vue"
 import { useRoute, useRouter } from "vue-router"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import debounce from "lodash.debounce"
+
+import LineChart from "@/components/assets/BankDetailLineChart.vue"
+import DatePicker from "@/components/common/DatePicker.vue"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
@@ -91,12 +93,28 @@ onMounted(() => {
 
 onUnmounted(() => bankAccountsStore.dehydrateDetail())
 
-const resetForm = () => {
+const resetAccountForm = () => {
   bankAccountsStore.revertAccountToCache()
 }
 
 const saveAccount = () => {
   bankAccountsStore.update()
+}
+
+const showEditor = (balanceId) => {
+  bankAccountsStore.getBalanceById(balanceId)
+  balanceEditor.showModal()
+}
+
+const resetBalanceForm = () => {
+  bankAccountsStore.revertBalanceToCache()
+}
+
+const saveBalance = async () => {
+  const res = await bankAccountsStore.updateBalance()
+  if (!res.errorMessage) {
+    balanceEditor.close()
+  }
 }
 </script>
 
@@ -161,7 +179,7 @@ const saveAccount = () => {
               </button>
               <button
                 type="button"
-                @click="resetForm"
+                @click="resetAccountForm"
                 class="btn btn-secondary"
               >
                 Reset
@@ -203,7 +221,11 @@ const saveAccount = () => {
                   </td>
                   <td>
                     <div class="flex items-center gap-3">
-                      <button class="btn btn-neutral tooltip" data-tip="Edit">
+                      <button
+                        class="btn btn-neutral tooltip"
+                        data-tip="Edit"
+                        v-on:click="showEditor(entry.id)"
+                      >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                       <button class="btn btn-neutral tooltip" data-tip="Delete">
@@ -227,4 +249,54 @@ const saveAccount = () => {
       </div>
     </div>
   </div>
+
+  <!-- Dialog Box: Balance Editor -->
+  <dialog id="balanceEditor" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold">Add/Edit Bank Account Balance</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="label">Balance</label>
+          <!-- <label class="input"> -->
+          Rp
+          <input
+            v-model="bankAccountsStore.beBalance.balance"
+            type="text"
+            class="input input-bordered w-full"
+          />
+          <!-- </label> -->
+        </div>
+        <div>
+          <label class="label">Date</label>
+          <!-- <div class="input input-bordered p-0"> -->
+          <DatePicker
+            v-model:date="bankAccountsStore.beBalance.date"
+            placeholder="pick a date"
+            required
+          />
+          <!-- </div> -->
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="saveBalance" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="resetBalanceForm"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </template>

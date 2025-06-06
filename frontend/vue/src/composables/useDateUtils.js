@@ -9,6 +9,8 @@ export function useDateUtils() {
             + ' ' + d.getFullYear()
     }
 
+    const dateToLocalDate = (date) => epochToLocalDate(date.getTime())
+
     const epochToShortLocalDate = (epoch) => {
         const d = new Date(epoch)
         return d.getDate() + ' '
@@ -17,6 +19,8 @@ export function useDateUtils() {
                 { month: 'short' })
             + ' ' + d.getFullYear()
     }
+
+    const dateToShortLocalDate = (date) => epochToShortLocalDate(date.getTime())
 
     const getEpochOneYearAgo = () => {
         const now = new Date();
@@ -30,7 +34,9 @@ export function useDateUtils() {
 
     return {
         epochToLocalDate,
+        dateToLocalDate,
         epochToShortLocalDate,
+        dateToShortLocalDate,
         getEpochOneYearAgo,
     }
 }
