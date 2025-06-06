@@ -25,9 +25,9 @@ var (
 
 var (
 	testNow       = time.Now()
-	testID1, _    = uuid.NewV4()
-	testID2, _    = uuid.NewV4()
-	testUserID, _ = uuid.NewV4()
+	testID1, _    = uuid.NewV7()
+	testID2, _    = uuid.NewV7()
+	testUserID, _ = uuid.NewV7()
 	testUserModel = model.User{
 		ID:        testID1,
 		Username:  "username",

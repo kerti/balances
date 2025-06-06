@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/model"
@@ -52,9 +51,8 @@ func (m *mockUserRepository) Update(user model.User) error {
 }
 
 var (
-	testNow       = time.Now()
-	testID1, _    = uuid.NewV4()
-	testUserID, _ = uuid.NewV4()
+	testID1, _    = uuid.NewV7()
+	testUserID, _ = uuid.NewV7()
 	testUserInput = model.UserInput{
 		ID:       testID1,
 		Username: "username",
