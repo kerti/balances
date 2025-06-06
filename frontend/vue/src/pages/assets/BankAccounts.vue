@@ -88,21 +88,21 @@ onUnmounted(() => bankAccountsStore.dehydrate())
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="flex flex-col h-full space-y-6">
     <!-- Top Half: List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h2 class="card-title">List of Accounts</h2>
-          <div class="form-control">
+          <div class="form-control flex gap-3">
             <input
               type="text"
               v-model="bankAccountsStore.filter"
               placeholder="Search accounts..."
-              class="input input-bordered w-64 mr-1"
+              class="input input-bordered w-64"
             />
             <button
-              class="btn btn-neutral btn-circle tooltip ml-1"
+              class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Bank Account"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
@@ -199,10 +199,10 @@ onUnmounted(() => bankAccountsStore.dehydrate())
     </div>
 
     <!-- Bottom Half: Line Chart of the Accounts' Balances -->
-    <div class="card bg-base-100 shadow-md">
-      <div class="card-body">
+    <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
+      <div class="card-body flex-1 min-h-0">
         <h2 class="card-title">Balance Over Time</h2>
-        <line-chart />
+        <line-chart class="flex-1 min-h-0" />
       </div>
     </div>
   </div>

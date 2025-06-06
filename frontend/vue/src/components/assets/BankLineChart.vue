@@ -70,12 +70,7 @@ watch(
 </script>
 
 <template>
-  <canvas ref="canvas"></canvas>
+  <div class="flex-1 h-full">
+    <canvas ref="canvas"></canvas>
+  </div>
 </template>
-
-<style scoped>
-canvas {
-  width: 100% !important;
-  height: 300px !important;
-}
-</style>

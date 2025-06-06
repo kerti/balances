@@ -119,7 +119,7 @@ const saveBalance = async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="flex flex-col h-full space-y-6">
     <!-- Top Half: Form and Balances Table -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left: Account Form -->
@@ -201,7 +201,7 @@ const saveBalance = async () => {
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
           </div>
-          <div class="overflow-x-auto h-96">
+          <div class="overflow-x-auto h-64">
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
@@ -242,7 +242,7 @@ const saveBalance = async () => {
     </div>
 
     <!-- Bottom Half: Line Chart -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
         <h2 class="card-title">Account Balance Over Time (last 12 months)</h2>
         <line-chart />
