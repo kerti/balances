@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/handler/response"
@@ -73,6 +74,7 @@ func (h *BankAccountImpl) HandleGetBankAccountByID(w http.ResponseWriter, r *htt
 	_, withBalances := r.Form["withBalances"]
 	balanceStartDateStr, withBalanceStartDate := r.Form["balanceStartDate"]
 	balanceEndDateStr, withBalanceEndDate := r.Form["balanceEndDate"]
+	pageSizeStr, withPageSize := r.Form["pageSize"]
 
 	var balanceStartDate cachetime.NCacheTime
 	if withBalanceStartDate {
@@ -84,7 +86,15 @@ func (h *BankAccountImpl) HandleGetBankAccountByID(w http.ResponseWriter, r *htt
 		balanceEndDate.Scan(balanceEndDateStr[0])
 	}
 
-	bankAccount, err := h.Service.GetByID(id, withBalances, balanceStartDate, balanceEndDate)
+	var pageSize *int = nil
+	if withPageSize {
+		parsedPageSize, err := strconv.Atoi(pageSizeStr[0])
+		if err == nil {
+			pageSize = &parsedPageSize
+		}
+	}
+
+	bankAccount, err := h.Service.GetByID(id, withBalances, balanceStartDate, balanceEndDate, pageSize)
 	if err != nil {
 		response.RespondWithError(w, err)
 		return
