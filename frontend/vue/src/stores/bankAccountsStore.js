@@ -1,9 +1,11 @@
+import { useToast } from '@/composables/useToast'
 import { useBankAccountsService } from '@/services/bankAccountsService'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
+    const toast = useToast()
 
     //// reactive state
     // list view
@@ -19,7 +21,11 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailBalanceEndDate = ref(0)
     const detailPageSize = ref(10)
     const account = ref({})
+    const accountCache = ref({})
     const detailChartData = ref([])
+    // balance editor
+    const beBalance = ref({})
+    const beBalanceCache = ref({})
 
     //// actions
     async function hydrate(initFilter, initBalancesStartDate, initBalancesEndDate, initPageSize) {
@@ -29,11 +35,30 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize.value = initPageSize
     }
 
+    function dehydrate() {
+        filter.value = ''
+        balancesStartDate.value = 0
+        balancesEndDate.value = 0
+        pageSize.value = 10
+        accounts.value = []
+        chartData.value = []
+    }
+
     async function hydrateDetail(initId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
         detailId.value = initId
         detailBalanceStartDate.value = initBalanceStartDate
         detailBalanceEndDate.value = initBalanceEndDate
         detailPageSize.value = initPageSize
+    }
+
+    function dehydrateDetail() {
+        detailId.value = ''
+        detailBalanceStartDate.value = 0
+        detailBalanceEndDate.value = 0
+        detailPageSize.value = 10
+        account.value = {}
+        accountCache.value = {}
+        detailChartData.value = []
     }
 
     async function search() {
@@ -46,11 +71,15 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function get() {
-        account.value = await svc.getBankAccount(
+        const fetchedAccount = await svc.getBankAccount(
             detailId.value,
-            balancesStartDate.value,
-            balancesEndDate.value,
+            detailBalanceStartDate.value,
+            detailBalanceEndDate.value,
             detailPageSize.value)
+
+        account.value = JSON.parse(JSON.stringify(fetchedAccount))
+        accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
+
         extractDetailChartData()
     }
 
@@ -80,6 +109,50 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }]
     }
 
+    function revertAccountToCache() {
+        if (accountCache.value) {
+            account.value = JSON.parse(JSON.stringify(accountCache.value))
+        }
+    }
+
+    function revertBalanceToCache() {
+        if (beBalanceCache.value) {
+            beBalance.value = JSON.parse(JSON.stringify(beBalanceCache.value))
+        }
+    }
+
+    async function update() {
+        const res = await svc.updateBankAccount(account.value)
+        if (!res.errorMessage) {
+            account.value = JSON.parse(JSON.stringify(res))
+            accountCache.value = JSON.parse(JSON.stringify(res))
+            toast.showToast('Account updated!', 'success')
+        } else {
+            toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
+        }
+    }
+
+    async function updateBalance() {
+        const res = await svc.updateBankAccountBalance(beBalance.value)
+        if (!res.errorMessage) {
+            get()
+            getBalanceById(res.id)
+            toast.showToast('Balance updated!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to save balance: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
+    async function getBalanceById(id) {
+        const fetchedBalance = await svc.getBankAccountBalance(id)
+        beBalance.value = JSON.parse(JSON.stringify(fetchedBalance))
+        beBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
+    }
+
     return {
         //// reactive state
         // list view
@@ -89,17 +162,27 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize,
         accounts,
         chartData,
+        beBalance,
+        beBalanceCache,
         // detail view
         detailId,
         detailBalanceStartDate,
         detailBalanceEndDate,
         detailPageSize,
         account,
+        accountCache,
         detailChartData,
         //// actions
         hydrate,
+        dehydrate,
         hydrateDetail,
+        dehydrateDetail,
         search,
         get,
+        revertAccountToCache,
+        revertBalanceToCache,
+        update,
+        updateBalance,
+        getBalanceById,
     }
 })

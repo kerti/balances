@@ -29,7 +29,7 @@ const routes = [
         path: '/assets/bank-accounts/:id',
         name: 'assets.bankaccount.detail',
         component: () => import('@/pages/assets/BankAccountDetail.vue'),
-        meta: { requiresAuth: true, pageTitle: 'BankAccounts' }
+        meta: { requiresAuth: true, pageTitle: 'Bank Account Details' }
     },
     {
         path: '/assets/vehicles',

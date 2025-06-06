@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted, watch } from "vue"
-import LineChart from "@/components/assets/BankDetailLineChart.vue"
+import { onMounted, onUnmounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import debounce from "lodash.debounce"
+
+import LineChart from "@/components/assets/BankDetailLineChart.vue"
+import DatePicker from "@/components/common/DatePicker.vue"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
@@ -89,19 +91,30 @@ onMounted(() => {
   bankAccountsStore.get()
 })
 
-const resetForm = () => {
-  // TODO: use actual data to reset the form
-  account.value = {
-    bank: "John's Main Account",
-    holder: "John Fitzgerald Doe",
-    number: "1234567890",
-    status: "Active",
-  }
+onUnmounted(() => bankAccountsStore.dehydrateDetail())
+
+const resetAccountForm = () => {
+  bankAccountsStore.revertAccountToCache()
 }
 
 const saveAccount = () => {
-  console.log("Saved account:", account.value)
-  // TODO: hook this to an API call or store logic
+  bankAccountsStore.update()
+}
+
+const showEditor = (balanceId) => {
+  bankAccountsStore.getBalanceById(balanceId)
+  balanceEditor.showModal()
+}
+
+const resetBalanceForm = () => {
+  bankAccountsStore.revertBalanceToCache()
+}
+
+const saveBalance = async () => {
+  const res = await bankAccountsStore.updateBalance()
+  if (!res.errorMessage) {
+    balanceEditor.close()
+  }
 }
 </script>
 
@@ -110,11 +123,18 @@ const saveAccount = () => {
     <!-- Top Half: Form and Balances Table -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left: Account Form -->
-      <div class="card bg-base-100 shadow-md">
+      <div class="card bg-base-100 shadow-md md:col-span-1">
         <div class="card-body">
-          <!-- TODO: Use the account name instead -->
           <h2 class="card-title">Account Details</h2>
-          <form class="space-y-4">
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="label">Account Name</label>
+              <input
+                v-model="bankAccountsStore.account.accountName"
+                type="text"
+                class="input input-bordered w-full"
+              />
+            </div>
             <div>
               <label class="label">Bank Name</label>
               <input
@@ -159,7 +179,7 @@ const saveAccount = () => {
               </button>
               <button
                 type="button"
-                @click="resetForm"
+                @click="resetAccountForm"
                 class="btn btn-secondary"
               >
                 Reset
@@ -170,15 +190,24 @@ const saveAccount = () => {
       </div>
 
       <!-- Right: Balance Table -->
-      <div class="card bg-base-100 shadow-md">
+      <div class="card bg-base-100 shadow-md md:col-span-1">
         <div class="card-body">
-          <h2 class="card-title">Balances</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title">Balance History</h2>
+            <button
+              class="btn btn-neutral btn-circle tooltip"
+              data-tip="Add New Balance"
+            >
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </button>
+          </div>
           <div class="overflow-x-auto h-96">
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
                   <th>Date</th>
                   <th class="text-right">Balance</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -186,9 +215,23 @@ const saveAccount = () => {
                   v-for="(entry, index) in bankAccountsStore.account.balances"
                   :key="index"
                 >
-                  <td>{{ dateUtils.epochToLocalDate(entry.date) }}</td>
+                  <td>{{ dateUtils.epochToShortLocalDate(entry.date) }}</td>
                   <td class="text-right">
                     {{ numUtils.numericToMoney(entry.balance) }}
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <button
+                        class="btn btn-neutral tooltip"
+                        data-tip="Edit"
+                        v-on:click="showEditor(entry.id)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </button>
+                      <button class="btn btn-neutral tooltip" data-tip="Delete">
+                        <font-awesome-icon :icon="['fas', 'trash']" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -206,4 +249,54 @@ const saveAccount = () => {
       </div>
     </div>
   </div>
+
+  <!-- Dialog Box: Balance Editor -->
+  <dialog id="balanceEditor" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold">Add/Edit Bank Account Balance</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="label">Balance</label>
+          <!-- <label class="input"> -->
+          Rp
+          <input
+            v-model="bankAccountsStore.beBalance.balance"
+            type="text"
+            class="input input-bordered w-full"
+          />
+          <!-- </label> -->
+        </div>
+        <div>
+          <label class="label">Date</label>
+          <!-- <div class="input input-bordered p-0"> -->
+          <DatePicker
+            v-model:date="bankAccountsStore.beBalance.date"
+            placeholder="pick a date"
+            required
+          />
+          <!-- </div> -->
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="saveBalance" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="resetBalanceForm"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </template>

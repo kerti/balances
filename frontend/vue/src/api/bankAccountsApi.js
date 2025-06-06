@@ -59,3 +59,36 @@ export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, p
         }
     }
 }
+
+export async function updateAccountWithAPI(account) {
+    try {
+        const { data } = await axiosInstance.patch('bankAccounts/' + account.id, account)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+export async function getBankAccountBalanceFromAPI(id) {
+    try {
+        const { data } = await axiosInstance.get('bankAccounts/balances/' + id)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+export async function updateAccountBalanceWithAPI(accountBalance) {
+    try {
+        const { data } = await axiosInstance.patch('bankAccounts/balances/' + accountBalance.id, accountBalance)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

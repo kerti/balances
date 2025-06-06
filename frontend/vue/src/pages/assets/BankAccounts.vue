@@ -4,7 +4,7 @@ import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import { watch, onMounted } from "vue"
+import { watch, onMounted, onUnmounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import LineChart from "@/components/assets/BankLineChart.vue"
 
@@ -84,6 +84,7 @@ function refetch() {
 }
 
 onMounted(() => refetch())
+onUnmounted(() => bankAccountsStore.dehydrate())
 </script>
 
 <template>
@@ -98,8 +99,14 @@ onMounted(() => refetch())
               type="text"
               v-model="bankAccountsStore.filter"
               placeholder="Search accounts..."
-              class="input input-bordered w-64"
+              class="input input-bordered w-64 mr-1"
             />
+            <button
+              class="btn btn-neutral btn-circle tooltip ml-1"
+              data-tip="Add New Bank Account"
+            >
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </button>
           </div>
         </div>
         <div class="overflow-x-auto h-88">
@@ -163,7 +170,7 @@ onMounted(() => refetch())
                 </td>
                 <td>
                   <div class="flex items-center gap-3">
-                    <button class="btn btn-primary tooltip" data-tip="Edit">
+                    <button class="btn btn-neutral tooltip" data-tip="Edit">
                       <router-link
                         :to="{
                           name: 'assets.bankaccount.detail',
@@ -173,11 +180,11 @@ onMounted(() => refetch())
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </router-link>
                     </button>
-                    <button class="btn btn-primary tooltip" data-tip="Activate">
+                    <button class="btn btn-neutral tooltip" data-tip="Activate">
                       <font-awesome-icon :icon="['fas', 'eye']" />
                     </button>
                     <button
-                      class="btn btn-primary tooltip"
+                      class="btn btn-neutral tooltip"
                       data-tip="Deactivate"
                     >
                       <font-awesome-icon :icon="['fas', 'eye-slash']" />

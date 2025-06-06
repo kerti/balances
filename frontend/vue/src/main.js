@@ -8,9 +8,20 @@ import '@/style.css'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import {
+    faEdit,
+    faEye,
+    faEyeSlash,
+    faPlus,
+    faTrash
+} from '@fortawesome/free-solid-svg-icons'
 
-library.add(faEdit, faEye, faEyeSlash)
+library.add(
+    faEdit,
+    faEye,
+    faEyeSlash,
+    faPlus,
+    faTrash)
 
 const pinia = createPinia()
 
