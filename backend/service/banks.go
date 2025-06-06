@@ -14,7 +14,7 @@ type BankAccount interface {
 	Startup()
 	Shutdown()
 	Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error)
-	GetByID(id uuid.UUID, withBalances bool, balanceStartDate cachetime.NCacheTime, balanceEndDate cachetime.NCacheTime) (*model.BankAccount, error)
+	GetByID(id uuid.UUID, withBalances bool, balanceStartDate, balanceEndDate cachetime.NCacheTime, pageSize *int) (*model.BankAccount, error)
 	GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error)
 	Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
 	Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error)
@@ -48,7 +48,7 @@ func (s *BankAccountImpl) Create(input model.BankAccountInput, userID uuid.UUID)
 }
 
 // GetByID fetches a Bank Account by its ID
-func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceStartDate cachetime.NCacheTime, balanceEndDate cachetime.NCacheTime) (*model.BankAccount, error) {
+func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceStartDate, balanceEndDate cachetime.NCacheTime, pageSize *int) (*model.BankAccount, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
 	if err != nil {
 		return nil, err
@@ -71,6 +71,10 @@ func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceStartD
 
 		if balanceEndDate.Valid {
 			filter.EndDate = balanceEndDate
+		}
+
+		if pageSize != nil {
+			filter.PageSize = pageSize
 		}
 
 		balances, _, err := s.Repository.ResolveBalancesByFilter(filter.ToFilter())
