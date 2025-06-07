@@ -126,13 +126,7 @@ const saveBalance = async () => {
     const res = await bankAccountsStore.createBalance()
     if (!res.errorMessage) {
       balanceEditor.close()
-    } else {
-      console.warn(res.errorMessage)
     }
-  } else {
-    console.error(
-      "unsupported balance editor mode: " + bankAccountsStore.balanceEditorMode
-    )
   }
 }
 </script>
