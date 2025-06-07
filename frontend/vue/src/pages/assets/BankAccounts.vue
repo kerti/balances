@@ -1,12 +1,17 @@
 <script setup>
+import { watch, onMounted, onUnmounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+
 import debounce from "lodash.debounce"
+
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
-import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import { watch, onMounted, onUnmounted } from "vue"
-import { useRoute, useRouter } from "vue-router"
+
 import LineChart from "@/components/assets/BankLineChart.vue"
+import DatePicker from "@/components/common/DatePicker.vue"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
@@ -52,6 +57,10 @@ watch(
     debouncedSearch()
   }
 )
+
+const showAdder = () => {
+  accountAdder.showModal()
+}
 
 function refetch() {
   const query = route.query
@@ -104,6 +113,7 @@ onUnmounted(() => bankAccountsStore.dehydrate())
             <button
               class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Bank Account"
+              v-on:click="showAdder()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
@@ -206,4 +216,78 @@ onUnmounted(() => bankAccountsStore.dehydrate())
       </div>
     </div>
   </div>
+
+  <!-- Dialog Box: Account Adder -->
+  <dialog id="accountAdder" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Add New Bank Account</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="label">Account Name</label>
+          <input
+            v-model="bankAccountsStore.account.accountName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Bank Name</label>
+          <input
+            v-model="bankAccountsStore.account.bankName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Account Holder Name</label>
+          <input
+            v-model="bankAccountsStore.account.accountHolderName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Account Number</label>
+          <input
+            v-model="bankAccountsStore.account.accountNumber"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Initial Balance</label>
+          <input
+            v-model="bankAccountsStore.account.initialBalance"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Initial Balance Date</label>
+          <DatePicker
+            v-model:date="bankAccountsStore.account.initialBalanceDate"
+            placeholder="pick a date"
+            required
+          />
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="saveBalance" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="resetBalanceForm"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 </template>

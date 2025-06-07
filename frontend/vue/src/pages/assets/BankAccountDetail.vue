@@ -1,11 +1,14 @@
 <script setup>
 import { onMounted, onUnmounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { useNumUtils } from "@/composables/useNumUtils"
+
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+
+import debounce from "lodash.debounce"
+
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
-import debounce from "lodash.debounce"
+import { useNumUtils } from "@/composables/useNumUtils"
 
 import LineChart from "@/components/assets/BankDetailLineChart.vue"
 import DatePicker from "@/components/common/DatePicker.vue"
@@ -272,29 +275,25 @@ const saveBalance = async () => {
           ✕
         </button>
       </form>
-      <h3 class="text-lg font-bold">
+      <h3 class="text-lg font-bold pb-5">
         {{ bankAccountsStore.balanceEditorMode }} Bank Account Balance
       </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
           <label class="label">Balance</label>
-          <!-- <label class="input"> -->
           <input
             v-model="bankAccountsStore.beBalance.balance"
             type="text"
             class="input input-bordered w-full"
           />
-          <!-- </label> -->
         </div>
         <div>
           <label class="label">Date</label>
-          <!-- <div class="input input-bordered p-0"> -->
           <DatePicker
             v-model:date="bankAccountsStore.beBalance.date"
             placeholder="pick a date"
             required
           />
-          <!-- </div> -->
         </div>
         <div class="flex justify-end gap-2 pt-4">
           <button type="button" @click="saveBalance" class="btn btn-primary">
