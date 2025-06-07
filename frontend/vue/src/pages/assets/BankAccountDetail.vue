@@ -102,7 +102,13 @@ const saveAccount = () => {
 }
 
 const showEditor = (balanceId) => {
-  bankAccountsStore.getBalanceById(balanceId)
+  if (balanceId) {
+    bankAccountsStore.balanceEditorMode = "Edit"
+    bankAccountsStore.getBalanceById(balanceId)
+  } else {
+    bankAccountsStore.balanceEditorMode = "Add"
+    bankAccountsStore.prepBlankBalance()
+  }
   balanceEditor.showModal()
 }
 
@@ -197,6 +203,7 @@ const saveBalance = async () => {
             <button
               class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Balance"
+              v-on:click="showEditor()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
@@ -258,12 +265,13 @@ const saveBalance = async () => {
           ✕
         </button>
       </form>
-      <h3 class="text-lg font-bold">Add/Edit Bank Account Balance</h3>
+      <h3 class="text-lg font-bold">
+        {{ bankAccountsStore.balanceEditorMode }} Bank Account Balance
+      </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
           <label class="label">Balance</label>
           <!-- <label class="input"> -->
-          Rp
           <input
             v-model="bankAccountsStore.beBalance.balance"
             type="text"

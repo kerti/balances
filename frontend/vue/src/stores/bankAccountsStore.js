@@ -24,6 +24,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const accountCache = ref({})
     const detailChartData = ref([])
     // balance editor
+    const balanceEditorMode = ref('Add')
     const beBalance = ref({})
     const beBalanceCache = ref({})
 
@@ -153,6 +154,16 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         beBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
     }
 
+    function prepBlankBalance() {
+        const blankBalance = {
+            bankAccountId: account.id,
+            date: (new Date()).getTime(),
+            balance: 0,
+        }
+        beBalance.value = JSON.parse(JSON.stringify(blankBalance))
+        beBalanceCache.value = JSON.parse(JSON.stringify(blankBalance))
+    }
+
     return {
         //// reactive state
         // list view
@@ -162,8 +173,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize,
         accounts,
         chartData,
-        beBalance,
-        beBalanceCache,
         // detail view
         detailId,
         detailBalanceStartDate,
@@ -172,6 +181,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         account,
         accountCache,
         detailChartData,
+        // balance editor
+        balanceEditorMode,
+        beBalance,
+        beBalanceCache,
         //// actions
         hydrate,
         dehydrate,
@@ -184,5 +197,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         update,
         updateBalance,
         getBalanceById,
+        prepBlankBalance,
     }
 })
