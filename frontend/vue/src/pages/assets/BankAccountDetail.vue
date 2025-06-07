@@ -117,9 +117,22 @@ const resetBalanceForm = () => {
 }
 
 const saveBalance = async () => {
-  const res = await bankAccountsStore.updateBalance()
-  if (!res.errorMessage) {
-    balanceEditor.close()
+  if (bankAccountsStore.balanceEditorMode == "Edit") {
+    const res = await bankAccountsStore.updateBalance()
+    if (!res.errorMessage) {
+      balanceEditor.close()
+    }
+  } else if (bankAccountsStore.balanceEditorMode == "Add") {
+    const res = await bankAccountsStore.createBalance()
+    if (!res.errorMessage) {
+      balanceEditor.close()
+    } else {
+      console.warn(res.errorMessage)
+    }
+  } else {
+    console.error(
+      "unsupported balance editor mode: " + bankAccountsStore.balanceEditorMode
+    )
   }
 }
 </script>

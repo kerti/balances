@@ -156,12 +156,30 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     function prepBlankBalance() {
         const blankBalance = {
-            bankAccountId: account.id,
+            bankAccountId: account.value.id,
             date: (new Date()).getTime(),
             balance: 0,
         }
         beBalance.value = JSON.parse(JSON.stringify(blankBalance))
         beBalanceCache.value = JSON.parse(JSON.stringify(blankBalance))
+    }
+
+    async function createBalance() {
+        const res = await svc.createBankAccountBalance({
+            bankAccountId: beBalance.value.bankAccountId,
+            date: beBalance.value.date,
+            balance: beBalance.value.balance
+        })
+        if (!res.errorMessage) {
+            get()
+            toast.showToast('Balance created!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to create balance: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
     }
 
     return {
@@ -198,5 +216,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         updateBalance,
         getBalanceById,
         prepBlankBalance,
+        createBalance,
     }
 })

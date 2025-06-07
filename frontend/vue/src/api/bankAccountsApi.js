@@ -92,3 +92,18 @@ export async function updateAccountBalanceWithAPI(accountBalance) {
         }
     }
 }
+
+export async function createAccountBalanceWithAPI(accountBalance) {
+    try {
+        const { data } = await axiosInstance.post('bankAccounts/balances', {
+            bankAccountId: accountBalance.bankAccountId,
+            date: accountBalance.date,
+            balance: accountBalance.balance,
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
