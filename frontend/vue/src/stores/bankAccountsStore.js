@@ -24,6 +24,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const accountCache = ref({})
     const detailChartData = ref([])
     // balance editor
+    const balanceEditorMode = ref('Add')
     const beBalance = ref({})
     const beBalanceCache = ref({})
 
@@ -153,6 +154,70 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         beBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
     }
 
+    function prepBlankBalance() {
+        const blankBalance = {
+            bankAccountId: account.value.id,
+            date: (new Date()).getTime(),
+            balance: 0,
+        }
+        beBalance.value = JSON.parse(JSON.stringify(blankBalance))
+        beBalanceCache.value = JSON.parse(JSON.stringify(blankBalance))
+    }
+
+    async function createBalance() {
+        const res = await svc.createBankAccountBalance({
+            bankAccountId: beBalance.value.bankAccountId,
+            date: beBalance.value.date,
+            balance: beBalance.value.balance
+        })
+        if (!res.errorMessage) {
+            get()
+            toast.showToast('Balance created!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to create balance: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
+    function prepBlankAccount() {
+        const blankAccount = {
+            accountName: '',
+            bankName: '',
+            accountHolderName: '',
+            accountNumber: '',
+            lastBalance: 0,
+            lastBalanceDate: (new Date()).getTime(),
+            status: 'active',
+        }
+        account.value = JSON.parse(JSON.stringify(blankAccount))
+        accountCache.value = JSON.parse(JSON.stringify(blankAccount))
+    }
+
+    async function createAccount() {
+        const res = await svc.createBankAccount({
+            accountName: account.value.accountName,
+            bankName: account.value.bankName,
+            accountHolderName: account.value.accountHolderName,
+            accountNumber: account.value.accountNumber,
+            lastBalance: account.value.lastBalance,
+            lastBalanceDate: account.value.lastBalanceDate,
+            status: account.value.status,
+        })
+        if (!res.errorMessage) {
+            search()
+            toast.showToast('Account created!', 'success')
+            return res
+        } else {
+            toast.showToasst('Failed to create account: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
     return {
         //// reactive state
         // list view
@@ -162,8 +227,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize,
         accounts,
         chartData,
-        beBalance,
-        beBalanceCache,
         // detail view
         detailId,
         detailBalanceStartDate,
@@ -172,6 +235,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         account,
         accountCache,
         detailChartData,
+        // balance editor
+        balanceEditorMode,
+        beBalance,
+        beBalanceCache,
         //// actions
         hydrate,
         dehydrate,
@@ -184,5 +251,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         update,
         updateBalance,
         getBalanceById,
+        prepBlankBalance,
+        createBalance,
+        prepBlankAccount,
+        createAccount,
     }
 })

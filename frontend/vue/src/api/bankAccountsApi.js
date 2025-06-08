@@ -92,3 +92,37 @@ export async function updateAccountBalanceWithAPI(accountBalance) {
         }
     }
 }
+
+export async function createAccountBalanceWithAPI(accountBalance) {
+    try {
+        const { data } = await axiosInstance.post('bankAccounts/balances', {
+            bankAccountId: accountBalance.bankAccountId,
+            date: accountBalance.date,
+            balance: accountBalance.balance,
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+export async function createAccountWithAPI(account) {
+    try {
+        const { data } = await axiosInstance.post('bankAccounts', {
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            lastBalance: account.lastBalance,
+            lastBalanceDate: account.lastBalanceDate,
+            status: account.status,
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

@@ -1,11 +1,14 @@
 <script setup>
 import { onMounted, onUnmounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { useNumUtils } from "@/composables/useNumUtils"
+
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+
+import debounce from "lodash.debounce"
+
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
-import debounce from "lodash.debounce"
+import { useNumUtils } from "@/composables/useNumUtils"
 
 import LineChart from "@/components/assets/BankDetailLineChart.vue"
 import DatePicker from "@/components/common/DatePicker.vue"
@@ -102,7 +105,13 @@ const saveAccount = () => {
 }
 
 const showEditor = (balanceId) => {
-  bankAccountsStore.getBalanceById(balanceId)
+  if (balanceId) {
+    bankAccountsStore.balanceEditorMode = "Edit"
+    bankAccountsStore.getBalanceById(balanceId)
+  } else {
+    bankAccountsStore.balanceEditorMode = "Add"
+    bankAccountsStore.prepBlankBalance()
+  }
   balanceEditor.showModal()
 }
 
@@ -111,15 +120,22 @@ const resetBalanceForm = () => {
 }
 
 const saveBalance = async () => {
-  const res = await bankAccountsStore.updateBalance()
-  if (!res.errorMessage) {
-    balanceEditor.close()
+  if (bankAccountsStore.balanceEditorMode == "Edit") {
+    const res = await bankAccountsStore.updateBalance()
+    if (!res.errorMessage) {
+      balanceEditor.close()
+    }
+  } else if (bankAccountsStore.balanceEditorMode == "Add") {
+    const res = await bankAccountsStore.createBalance()
+    if (!res.errorMessage) {
+      balanceEditor.close()
+    }
   }
 }
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="flex flex-col h-full space-y-6">
     <!-- Top Half: Form and Balances Table -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left: Account Form -->
@@ -197,11 +213,12 @@ const saveBalance = async () => {
             <button
               class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Balance"
+              v-on:click="showEditor()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
           </div>
-          <div class="overflow-x-auto h-96">
+          <div class="overflow-x-auto h-64">
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
@@ -242,7 +259,7 @@ const saveBalance = async () => {
     </div>
 
     <!-- Bottom Half: Line Chart -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
         <h2 class="card-title">Account Balance Over Time (last 12 months)</h2>
         <line-chart />
@@ -258,28 +275,25 @@ const saveBalance = async () => {
           ✕
         </button>
       </form>
-      <h3 class="text-lg font-bold">Add/Edit Bank Account Balance</h3>
+      <h3 class="text-lg font-bold pb-5">
+        {{ bankAccountsStore.balanceEditorMode }} Bank Account Balance
+      </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
           <label class="label">Balance</label>
-          <!-- <label class="input"> -->
-          Rp
           <input
             v-model="bankAccountsStore.beBalance.balance"
             type="text"
             class="input input-bordered w-full"
           />
-          <!-- </label> -->
         </div>
         <div>
           <label class="label">Date</label>
-          <!-- <div class="input input-bordered p-0"> -->
           <DatePicker
             v-model:date="bankAccountsStore.beBalance.date"
             placeholder="pick a date"
             required
           />
-          <!-- </div> -->
         </div>
         <div class="flex justify-end gap-2 pt-4">
           <button type="button" @click="saveBalance" class="btn btn-primary">

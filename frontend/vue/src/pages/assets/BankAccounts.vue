@@ -1,12 +1,17 @@
 <script setup>
+import { watch, onMounted, onUnmounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import { useBankAccountsStore } from "@/stores/bankAccountsStore"
+
 import debounce from "lodash.debounce"
+
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
-import { useBankAccountsStore } from "@/stores/bankAccountsStore"
-import { watch, onMounted, onUnmounted } from "vue"
-import { useRoute, useRouter } from "vue-router"
+
 import LineChart from "@/components/assets/BankLineChart.vue"
+import DatePicker from "@/components/common/DatePicker.vue"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
@@ -53,6 +58,11 @@ watch(
   }
 )
 
+const showAdder = () => {
+  bankAccountsStore.prepBlankAccount()
+  accountAdder.showModal()
+}
+
 function refetch() {
   const query = route.query
 
@@ -85,25 +95,33 @@ function refetch() {
 
 onMounted(() => refetch())
 onUnmounted(() => bankAccountsStore.dehydrate())
+
+const saveAccount = async () => {
+  const res = await bankAccountsStore.createAccount()
+  if (!res.errorMessage) {
+    accountAdder.close()
+  }
+}
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="flex flex-col h-full space-y-6">
     <!-- Top Half: List of Accounts -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h2 class="card-title">List of Accounts</h2>
-          <div class="form-control">
+          <div class="form-control flex gap-3">
             <input
               type="text"
               v-model="bankAccountsStore.filter"
               placeholder="Search accounts..."
-              class="input input-bordered w-64 mr-1"
+              class="input input-bordered w-64"
             />
             <button
-              class="btn btn-neutral btn-circle tooltip ml-1"
+              class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Bank Account"
+              v-on:click="showAdder()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
@@ -199,11 +217,85 @@ onUnmounted(() => bankAccountsStore.dehydrate())
     </div>
 
     <!-- Bottom Half: Line Chart of the Accounts' Balances -->
-    <div class="card bg-base-100 shadow-md">
-      <div class="card-body">
+    <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
+      <div class="card-body flex-1 min-h-0">
         <h2 class="card-title">Balance Over Time</h2>
-        <line-chart />
+        <line-chart class="flex-1 min-h-0" />
       </div>
     </div>
   </div>
+
+  <!-- Dialog Box: Account Adder -->
+  <dialog id="accountAdder" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Add New Bank Account</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div>
+          <label class="label">Account Name</label>
+          <input
+            v-model="bankAccountsStore.account.accountName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Bank Name</label>
+          <input
+            v-model="bankAccountsStore.account.bankName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Account Holder Name</label>
+          <input
+            v-model="bankAccountsStore.account.accountHolderName"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Account Number</label>
+          <input
+            v-model="bankAccountsStore.account.accountNumber"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Initial Balance</label>
+          <input
+            v-model="bankAccountsStore.account.lastBalance"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Initial Balance Date</label>
+          <DatePicker
+            v-model:date="bankAccountsStore.account.lastBalanceDate"
+            placeholder="pick a date"
+            required
+          />
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="saveAccount" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="resetBalanceForm"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 </template>

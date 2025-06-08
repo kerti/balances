@@ -5,6 +5,8 @@ import {
     updateAccountWithAPI,
     getBankAccountBalanceFromAPI,
     updateAccountBalanceWithAPI,
+    createAccountBalanceWithAPI,
+    createAccountWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -102,11 +104,53 @@ export function useBankAccountsService() {
         }
     }
 
+    async function createBankAccountBalance(accountBalance) {
+        const payload = {
+            bankAccountId: accountBalance.bankAccountId,
+            date: accountBalance.date,
+            balance: parseInt(accountBalance.balance)
+        }
+
+        const result = await createAccountBalanceWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    async function createBankAccount(account) {
+        const payload = {
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            lastBalance: parseInt(account.lastBalance),
+            lastBalanceDate: account.lastBalanceDate,
+            status: account.status,
+        }
+
+        const result = await createAccountWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
     return {
         searchBankAccounts,
         getBankAccount,
         updateBankAccount,
         getBankAccountBalance,
         updateBankAccountBalance,
+        createBankAccountBalance,
+        createBankAccount,
     }
 }

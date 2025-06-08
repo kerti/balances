@@ -14,7 +14,7 @@ const authStore = useAuthStore()
       <TheSidebar />
       <div class="flex flex-col flex-1">
         <TheHeader />
-        <main class="flex-1 overflow-y-auto bg-base-200 p-4">
+        <main class="flex-1 overflow-y-auto overflow-x-hidden bg-base-200 p-4">
           <router-view />
         </main>
         <TheFooter />

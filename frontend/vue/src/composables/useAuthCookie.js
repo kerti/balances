@@ -10,7 +10,7 @@ export function useAuthCookie() {
     const setAuthTokenToCookie = (token) => {
         Cookies.set(cookieToken, token, {
             expires: 7,
-            secure: true,
+            secure: false,
             sameSite: 'Strict',
             path: '/',
         })
@@ -24,7 +24,7 @@ export function useAuthCookie() {
         const encodedUserData = btoa(JSON.stringify(userData))
         Cookies.set(cookieUserData, encodedUserData, {
             expires: 7,
-            secure: true,
+            secure: false,
             sameSite: 'Strict',
             path: '/',
         })
