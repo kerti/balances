@@ -112,9 +112,10 @@ func NewBankAccountFromInput(input BankAccountInput, userID uuid.UUID) (b BankAc
 	}
 
 	balances := make([]BankAccountBalance, 0)
-	for _, bbInput := range input.Balances {
-		balances = append(balances, NewBankAccountBalanceFromInput(bbInput, b.ID, userID))
-	}
+	balances = append(balances, NewBankAccountBalanceFromInput(BankAccountBalanceInput{
+		Date:    input.LastBalanceDate,
+		Balance: input.LastBalance,
+	}, b.ID, userID))
 
 	b.Balances = balances
 
