@@ -198,14 +198,8 @@ const saveAccount = async () => {
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </router-link>
                     </button>
-                    <button class="btn btn-neutral tooltip" data-tip="Activate">
-                      <font-awesome-icon :icon="['fas', 'eye']" />
-                    </button>
-                    <button
-                      class="btn btn-neutral tooltip"
-                      data-tip="Deactivate"
-                    >
-                      <font-awesome-icon :icon="['fas', 'eye-slash']" />
+                    <button class="btn btn-neutral tooltip" data-tip="Delete">
+                      <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
                 </td>
@@ -219,7 +213,7 @@ const saveAccount = async () => {
     <!-- Bottom Half: Line Chart of the Accounts' Balances -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body flex-1 min-h-0">
-        <h2 class="card-title">Balance Over Time</h2>
+        <h2 class="card-title">Balance History Chart</h2>
         <line-chart class="flex-1 min-h-0" />
       </div>
     </div>

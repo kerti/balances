@@ -7,6 +7,8 @@ import {
     updateAccountBalanceWithAPI,
     createAccountBalanceWithAPI,
     createAccountWithAPI,
+    deleteAccountBalanceWithAPI,
+    deleteAccountWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -144,6 +146,30 @@ export function useBankAccountsService() {
         }
     }
 
+    async function deleteBankAccountBalance(id) {
+        const result = await deleteAccountBalanceWithAPI(id)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    async function deleteBankAccount(id) {
+        const result = await deleteAccountWithAPI(id)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
     return {
         searchBankAccounts,
         getBankAccount,
@@ -152,5 +178,7 @@ export function useBankAccountsService() {
         updateBankAccountBalance,
         createBankAccountBalance,
         createBankAccount,
+        deleteBankAccountBalance,
+        deleteBankAccount,
     }
 }

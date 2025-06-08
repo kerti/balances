@@ -2,6 +2,7 @@ import { useToast } from '@/composables/useToast'
 import { useBankAccountsService } from '@/services/bankAccountsService'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { errorMessages } from 'vue/compiler-sfc'
 
 export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
@@ -211,9 +212,23 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account created!', 'success')
             return res
         } else {
-            toast.showToasst('Failed to create account: ' + res.errorMessage)
+            toast.showToast('Failed to create account: ' + res.errorMessage)
             return {
                 errorMessage: res.errorMessage
+            }
+        }
+    }
+
+    async function deleteAccountBalance() {
+        const res = await svc.deleteBankAccountBalance(beBalance.value.id)
+        if (!res.errorMessage) {
+            get()
+            toast.showToast('Balance deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete balance: ' + res.errorMessage)
+            return {
+                errorMessages: res.errorMessage
             }
         }
     }
@@ -255,5 +270,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         createBalance,
         prepBlankAccount,
         createAccount,
+        deleteAccountBalance,
     }
 })
