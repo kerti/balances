@@ -107,3 +107,22 @@ export async function createAccountBalanceWithAPI(accountBalance) {
         }
     }
 }
+
+export async function createAccountWithAPI(account) {
+    try {
+        const { data } = await axiosInstance.post('bankAccounts', {
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            lastBalance: account.lastBalance,
+            lastBalanceDate: account.lastBalanceDate,
+            status: account.status,
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

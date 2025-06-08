@@ -59,6 +59,7 @@ watch(
 )
 
 const showAdder = () => {
+  bankAccountsStore.prepBlankAccount()
   accountAdder.showModal()
 }
 
@@ -94,6 +95,13 @@ function refetch() {
 
 onMounted(() => refetch())
 onUnmounted(() => bankAccountsStore.dehydrate())
+
+const saveAccount = async () => {
+  const res = await bankAccountsStore.createAccount()
+  if (!res.errorMessage) {
+    accountAdder.close()
+  }
+}
 </script>
 
 <template>
@@ -262,7 +270,7 @@ onUnmounted(() => bankAccountsStore.dehydrate())
         <div>
           <label class="label">Initial Balance</label>
           <input
-            v-model="bankAccountsStore.account.initialBalance"
+            v-model="bankAccountsStore.account.lastBalance"
             type="text"
             class="input input-bordered w-full"
           />
@@ -270,13 +278,13 @@ onUnmounted(() => bankAccountsStore.dehydrate())
         <div>
           <label class="label">Initial Balance Date</label>
           <DatePicker
-            v-model:date="bankAccountsStore.account.initialBalanceDate"
+            v-model:date="bankAccountsStore.account.lastBalanceDate"
             placeholder="pick a date"
             required
           />
         </div>
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" @click="saveBalance" class="btn btn-primary">
+          <button type="button" @click="saveAccount" class="btn btn-primary">
             Save
           </button>
           <button

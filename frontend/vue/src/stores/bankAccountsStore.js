@@ -182,6 +182,42 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
+    function prepBlankAccount() {
+        const blankAccount = {
+            accountName: '',
+            bankName: '',
+            accountHolderName: '',
+            accountNumber: '',
+            lastBalance: 0,
+            lastBalanceDate: (new Date()).getTime(),
+            status: 'active',
+        }
+        account.value = JSON.parse(JSON.stringify(blankAccount))
+        accountCache.value = JSON.parse(JSON.stringify(blankAccount))
+    }
+
+    async function createAccount() {
+        const res = await svc.createBankAccount({
+            accountName: account.value.accountName,
+            bankName: account.value.bankName,
+            accountHolderName: account.value.accountHolderName,
+            accountNumber: account.value.accountNumber,
+            lastBalance: account.value.lastBalance,
+            lastBalanceDate: account.value.lastBalanceDate,
+            status: account.value.status,
+        })
+        if (!res.errorMessage) {
+            search()
+            toast.showToast('Account created!', 'success')
+            return res
+        } else {
+            toast.showToasst('Failed to create account: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
     return {
         //// reactive state
         // list view
@@ -217,5 +253,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         getBalanceById,
         prepBlankBalance,
         createBalance,
+        prepBlankAccount,
+        createAccount,
     }
 })
