@@ -28,14 +28,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     ////// reactive state
 
     //// list view
+    // main page
     const listViewFilter = ref('')
     const listViewBalancesStartDate = ref(0)
     const listViewBalancesEndDate = ref(0)
     const listViewPageSize = ref(10)
     const listViewBankAccounts = ref([])
     const listViewChartData = ref([])
+    // add bank account dialog box
+    const listViewAddBankAccount = ref({})
+    // delete bank account dialog box
+    const listViewDeleteBankAccount = ref({})
 
     //// detail view
+    // main page
     const detailViewBankAccountId = ref('')
     const detailViewBalancesStartDate = ref(0)
     const detailViewBalancesEndDate = ref(0)
@@ -43,20 +49,11 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailViewAccount = ref({})
     const detailViewAccountCache = ref({})
     const detailViewChartData = ref([])
-
-    //// account adder
-    const aaBankAccount = ref({})
-    const aaBankAccountCache = ref({})
-
-    //// account deleter
-    const adAccount = ref({})
-
-    //// balance editor
+    // balance editor dialog box
     const balanceEditorMode = ref('Add')
     const beBalance = ref({})
     const beBalanceCache = ref({})
-
-    //// balance deleter
+    // balance delete confirmation dialog box
     const bdBalance = ref({})
 
     ////// actions
@@ -77,22 +74,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         listViewPageSize.value = 10
         listViewBankAccounts.value = []
         listViewChartData.value = []
-        aaBankAccount.value = {}
-        aaBankAccountCache.value = {}
-        adAccount.value = {}
+        listViewAddBankAccount.value = {}
     }
 
     // CRUD
 
     async function createBankAccount() {
         const res = await svc.createBankAccount({
-            accountName: detailViewAccount.value.accountName,
-            bankName: detailViewAccount.value.bankName,
-            accountHolderName: detailViewAccount.value.accountHolderName,
-            accountNumber: detailViewAccount.value.accountNumber,
-            lastBalance: detailViewAccount.value.lastBalance,
-            lastBalanceDate: detailViewAccount.value.lastBalanceDate,
-            status: detailViewAccount.value.status,
+            accountName: listViewAddBankAccount.value.accountName,
+            bankName: listViewAddBankAccount.value.bankName,
+            accountHolderName: listViewAddBankAccount.value.accountHolderName,
+            accountNumber: listViewAddBankAccount.value.accountNumber,
+            lastBalance: listViewAddBankAccount.value.lastBalance,
+            lastBalanceDate: listViewAddBankAccount.value.lastBalanceDate,
+            status: listViewAddBankAccount.value.status,
         })
         if (!res.errorMessage) {
             filterBankAccounts()
@@ -115,8 +110,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         extractListViewChartData()
     }
 
-    async function getById(id) {
-        detailViewAccount.value = await svc.getBankAccount(id, null, null, 0)
+    async function getAccountToDeleteById(id) {
+        listViewDeleteBankAccount.value = await svc.getBankAccount(id, null, null, 0)
     }
 
     async function update() {
@@ -130,8 +125,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    async function deleteAccount() {
-        const res = await svc.deleteBankAccount(detailViewAccount.value.id)
+    async function deleteBankAccount() {
+        const res = await svc.deleteBankAccount(listViewDeleteBankAccount.value.id)
         if (!res.errorMessage) {
             filterBankAccounts()
             toast.showToast('Account deleted!', 'success')
@@ -144,7 +139,15 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    // cache and prep
+    // cache prep, and reset
+
+    function resetListViewAddBankAccountDialog() {
+        listViewAddBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+    }
+
+    function resetListViewDeleteBankAccountDialog() {
+        listViewDeleteBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+    }
 
     function revertAccountToCache() {
         if (detailViewAccountCache.value) {
@@ -266,6 +269,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
+    // cache prep and reset
+
     function revertBalanceToCache() {
         if (beBalanceCache.value) {
             beBalance.value = JSON.parse(JSON.stringify(beBalanceCache.value))
@@ -295,14 +300,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         ////// reactive state
 
         //// list view
+        // main page
         listViewFilter,
         listViewBalancesStartDate,
         listViewBalancesEndDate,
         listViewPageSize,
         listViewBankAccounts,
         listViewChartData,
+        // add bank account dialog box
+        listViewAddBankAccount,
+        // delete bank account dialog box
+        listViewDeleteBankAccount,
 
         //// detail view
+        // main page
         detailViewBankAccountId,
         detailViewBalancesStartDate,
         detailViewBalancesEndDate,
@@ -310,20 +321,11 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewAccount,
         detailViewAccountCache,
         detailViewChartData,
-
-        //// account adder
-        aaBankAccount,
-        aaBankAccountCache,
-
-        //// account deleter
-        adAccount,
-
-        //// balance editor
+        // balance editor dialog box
         balanceEditorMode,
         beBalance,
         beBalanceCache,
-
-        //// balance deleter
+        //// balance delete confirmation dialog box
         bdBalance,
 
         ////// actions
@@ -335,10 +337,12 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         // CRUD
         createBankAccount,
         filterBankAccounts,
-        getById,
+        getAccountToDeleteById,
         update,
-        deleteAccount,
+        deleteBankAccount,
         // cache and prep
+        resetListViewAddBankAccountDialog,
+        resetListViewDeleteBankAccountDialog,
         revertAccountToCache,
         prepBlankAccount,
 

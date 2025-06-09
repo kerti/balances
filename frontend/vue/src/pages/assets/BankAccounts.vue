@@ -36,11 +36,12 @@ watch(
     newListViewFilter,
     newListViewBalancesStartDate,
     newListViewBalancesEndDate,
-    newPageSize,
+    newListViewPageSize,
   ]) => {
     const listViewPageSizeParam =
-      Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
-        ? newPageSize
+      Number.isInteger(newListViewPageSize) &&
+      newListViewPageSize !== defaultPageSize
+        ? newListViewPageSize
         : undefined
 
     const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
@@ -53,7 +54,7 @@ watch(
     router.replace({
       query: {
         ...route.query,
-        filter: newListViewFilter || undefined,
+        listViewFilter: newListViewFilter || undefined,
         listViewBalancesStartDate: listViewBalancesStartDateParam,
         listViewBalancesEndDate: newListViewBalancesEndDate || undefined,
         listViewPageSize: listViewPageSizeParam,
@@ -63,15 +64,15 @@ watch(
   }
 )
 
-const showAdder = () => {
-  bankAccountsStore.prepBlankAccount()
-  accountAdder.showModal()
+const showAddBankAccountDialog = () => {
+  bankAccountsStore.resetListViewAddBankAccountDialog()
+  listViewAddBankAccountDialog.showModal()
 }
 
 function refetch() {
   const query = route.query
 
-  const parsedPageSize = numUtils.queryParamToInt(
+  const parsedListViewPageSize = numUtils.queryParamToInt(
     query.listViewPageSize,
     defaultPageSize
   )
@@ -81,46 +82,51 @@ function refetch() {
   )
   bankAccountsStore.listViewBalancesStartDate = parsedListViewBalancesStartDate
 
-  const parsedBalancesEndDate = numUtils.queryParamToNullableInt(
+  const parsedListViewBalancesEndDate = numUtils.queryParamToNullableInt(
     query.listViewBalancesEndDate
   )
-  bankAccountsStore.listViewBalancesEndDate = parsedBalancesEndDate
+  bankAccountsStore.listViewBalancesEndDate = parsedListViewBalancesEndDate
 
   const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.hydrate(
-    query.filter?.toString() || "",
+    query.listViewFilter?.toString() || "",
     parsedListViewBalancesStartDate &&
       parsedListViewBalancesStartDate !== defaultListViewBalancesStartDate
       ? parsedListViewBalancesStartDate
       : defaultListViewBalancesStartDate,
-    parsedBalancesEndDate,
-    parsedPageSize
+    parsedListViewBalancesEndDate,
+    parsedListViewPageSize
   )
+
+  debouncedFilterBankAccounts()
 }
 
 onMounted(() => refetch())
 onUnmounted(() => bankAccountsStore.dehydrate())
 
-const saveAccount = async () => {
+const createBankAccount = async () => {
   const res = await bankAccountsStore.createBankAccount()
   if (!res.errorMessage) {
-    accountAdder.close()
+    listViewAddBankAccountDialog.close()
+    bankAccountsStore.resetListViewAddBankAccountDialog()
   }
 }
 
-const showAccountDeleteConfirmation = (accountId) => {
-  bankAccountsStore.getById(accountId)
-  adConfirm.showModal()
+const showDeleteBankAccountConfirmation = (accountId) => {
+  bankAccountsStore.getAccountToDeleteById(accountId)
+  listViewDeleteBankAccountDialog.showModal()
 }
 
-const cancelAccountDelete = () => {
-  adConfirm.close()
+const cancelDeleteBankAccount = () => {
+  listViewDeleteBankAccountDialog.close()
+  bankAccountsStore.resetListViewDeleteBankAccountDialog()
 }
 
-const deleteAccount = async () => {
-  const res = await bankAccountsStore.deleteAccount()
+const deleteBankAccount = async () => {
+  const res = await bankAccountsStore.deleteBankAccount()
   if (!res.errorMessage) {
-    adConfirm.close()
+    listViewDeleteBankAccountDialog.close()
+    bankAccountsStore.resetListViewDeleteBankAccountDialog()
   }
 }
 </script>
@@ -142,7 +148,7 @@ const deleteAccount = async () => {
             <button
               class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Bank Account"
-              v-on:click="showAdder()"
+              v-on:click="showAddBankAccountDialog()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
@@ -224,7 +230,7 @@ const deleteAccount = async () => {
                     <button
                       class="btn btn-neutral tooltip"
                       data-tip="Delete"
-                      v-on:click="showAccountDeleteConfirmation(account.id)"
+                      v-on:click="showDeleteBankAccountConfirmation(account.id)"
                     >
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
@@ -247,7 +253,7 @@ const deleteAccount = async () => {
   </div>
 
   <!-- Dialog Box: Account Adder -->
-  <dialog id="accountAdder" class="modal">
+  <dialog id="listViewAddBankAccountDialog" class="modal">
     <div class="modal-box overflow-visible relative z-50">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
@@ -259,7 +265,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Name</label>
           <input
-            v-model="bankAccountsStore.account.accountName"
+            v-model="bankAccountsStore.listViewAddBankAccount.accountName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -267,7 +273,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Bank Name</label>
           <input
-            v-model="bankAccountsStore.account.bankName"
+            v-model="bankAccountsStore.listViewAddBankAccount.bankName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -275,7 +281,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Holder Name</label>
           <input
-            v-model="bankAccountsStore.account.accountHolderName"
+            v-model="bankAccountsStore.listViewAddBankAccount.accountHolderName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -283,7 +289,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Number</label>
           <input
-            v-model="bankAccountsStore.account.accountNumber"
+            v-model="bankAccountsStore.listViewAddBankAccount.accountNumber"
             type="text"
             class="input input-bordered w-full"
           />
@@ -291,7 +297,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Initial Balance</label>
           <input
-            v-model="bankAccountsStore.account.lastBalance"
+            v-model="bankAccountsStore.listViewAddBankAccount.lastBalance"
             type="text"
             class="input input-bordered w-full"
           />
@@ -299,18 +305,24 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Initial Balance Date</label>
           <DatePicker
-            v-model:date="bankAccountsStore.account.lastBalanceDate"
+            v-model:date="
+              bankAccountsStore.listViewAddBankAccount.lastBalanceDate
+            "
             placeholder="pick a date"
             required
           />
         </div>
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" @click="saveAccount" class="btn btn-primary">
+          <button
+            type="button"
+            @click="createBankAccount"
+            class="btn btn-primary"
+          >
             Save
           </button>
           <button
             type="button"
-            @click="resetBalanceForm"
+            @click="bankAccountsStore.resetListViewAddBankAccountDialog()"
             class="btn btn-secondary"
           >
             Reset
@@ -321,7 +333,7 @@ const deleteAccount = async () => {
   </dialog>
 
   <!-- Dialog Box: Confirm Account Delete -->
-  <dialog id="adConfirm" class="modal">
+  <dialog id="listViewDeleteBankAccountDialog" class="modal">
     <div class="modal-box overflow-visible relative z-50">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
@@ -332,24 +344,34 @@ const deleteAccount = async () => {
       <form class="grid grid-cols-1 gap-4">
         <div class="grid grid-cols-2 grid-rows-7 gap-4">
           <div>Account Name</div>
-          <div>{{ bankAccountsStore.account.accountName }}</div>
+          <div>
+            {{ bankAccountsStore.listViewDeleteBankAccount.accountName }}
+          </div>
           <div>Bank Name</div>
-          <div>{{ bankAccountsStore.account.bankName }}</div>
+          <div>{{ bankAccountsStore.listViewDeleteBankAccount.bankName }}</div>
           <div>Account Holder Name</div>
-          <div>{{ bankAccountsStore.account.accountHolderName }}</div>
+          <div>
+            {{ bankAccountsStore.listViewDeleteBankAccount.accountHolderName }}
+          </div>
           <div>Account Number</div>
-          <div>{{ bankAccountsStore.account.accountNumber }}</div>
+          <div>
+            {{ bankAccountsStore.listViewDeleteBankAccount.accountNumber }}
+          </div>
           <div>Status</div>
-          <div>{{ bankAccountsStore.account.status }}</div>
+          <div>{{ bankAccountsStore.listViewDeleteBankAccount.status }}</div>
           <div>Last Balance</div>
           <div>
-            {{ numUtils.numericToMoney(bankAccountsStore.account.lastBalance) }}
+            {{
+              numUtils.numericToMoney(
+                bankAccountsStore.listViewDeleteBankAccount.lastBalance
+              )
+            }}
           </div>
           <div>Last Balance Date</div>
           <div>
             {{
               dateUtils.epochToLocalDate(
-                bankAccountsStore.account.lastBalanceDate
+                bankAccountsStore.listViewDeleteBankAccount.lastBalanceDate
               )
             }}
           </div>
@@ -357,14 +379,14 @@ const deleteAccount = async () => {
         <div class="flex justify-end gap-2 pt-4">
           <button
             type="button"
-            @click="deleteAccount()"
+            @click="deleteBankAccount()"
             class="btn btn-primary"
           >
             Confirm
           </button>
           <button
             type="button"
-            @click="cancelAccountDelete()"
+            @click="cancelDeleteBankAccount()"
             class="btn btn-secondary"
           >
             Cancel
