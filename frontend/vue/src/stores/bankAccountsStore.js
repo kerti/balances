@@ -36,7 +36,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const listViewChartData = ref([])
 
     //// detail view
-    const detailId = ref('')
+    const detailViewBankAccountId = ref('')
     const detailBalanceStartDate = ref(0)
     const detailBalanceEndDate = ref(0)
     const detailPageSize = ref(10)
@@ -177,15 +177,15 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // hydration
 
-    async function hydrateDetail(initId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
-        detailId.value = initId
+    async function hydrateDetail(initDetailViewBankAccountId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
+        detailViewBankAccountId.value = initDetailViewBankAccountId
         detailBalanceStartDate.value = initBalanceStartDate
         detailBalanceEndDate.value = initBalanceEndDate
         detailPageSize.value = initPageSize
     }
 
     function dehydrateDetail() {
-        detailId.value = ''
+        detailViewBankAccountId.value = ''
         detailBalanceStartDate.value = 0
         detailBalanceEndDate.value = 0
         detailPageSize.value = 10
@@ -220,7 +220,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function get() {
         const fetchedAccount = await svc.getBankAccount(
-            detailId.value,
+            detailViewBankAccountId.value,
             detailBalanceStartDate.value,
             detailBalanceEndDate.value,
             detailPageSize.value)
@@ -303,7 +303,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         listViewChartData,
 
         //// detail view
-        detailId,
+        detailViewBankAccountId,
         detailBalanceStartDate,
         detailBalanceEndDate,
         detailPageSize,
