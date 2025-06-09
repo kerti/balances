@@ -85,6 +85,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         extractDetailChartData()
     }
 
+    async function getById(id) {
+        account.value = await svc.getBankAccount(id, null, null, 0)
+    }
+
     function extractChartData() {
         chartData.value = accounts.value.map(acc => {
             return {
@@ -233,6 +237,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
+    async function deleteAccount() {
+        const res = await svc.deleteBankAccount(account.value.id)
+        if (!res.errorMessage) {
+            search()
+            toast.showToast('Account deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete account: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
     return {
         //// reactive state
         // list view
@@ -261,6 +279,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dehydrateDetail,
         search,
         get,
+        getById,
         revertAccountToCache,
         revertBalanceToCache,
         update,
@@ -271,5 +290,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         prepBlankAccount,
         createAccount,
         deleteAccountBalance,
+        deleteAccount,
     }
 })

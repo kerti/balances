@@ -245,26 +245,26 @@ const deleteBalance = async () => {
               </thead>
               <tbody>
                 <tr
-                  v-for="(entry, index) in bankAccountsStore.account.balances"
+                  v-for="(balance, index) in bankAccountsStore.account.balances"
                   :key="index"
                 >
-                  <td>{{ dateUtils.epochToShortLocalDate(entry.date) }}</td>
+                  <td>{{ dateUtils.epochToShortLocalDate(balance.date) }}</td>
                   <td class="text-right">
-                    {{ numUtils.numericToMoney(entry.balance) }}
+                    {{ numUtils.numericToMoney(balance.balance) }}
                   </td>
                   <td>
                     <div class="flex items-center gap-3">
                       <button
                         class="btn btn-neutral tooltip"
                         data-tip="Edit"
-                        v-on:click="showEditor(entry.id)"
+                        v-on:click="showEditor(balance.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                       <button
                         class="btn btn-neutral tooltip"
                         data-tip="Delete"
-                        v-on:click="showBalanceDeleteConfirmaton(entry.id)"
+                        v-on:click="showBalanceDeleteConfirmaton(balance.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'trash']" />
                       </button>
