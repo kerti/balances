@@ -1,17 +1,46 @@
 import {
-    searchBankAccountBalancesFromAPI,
+    // bank accounts
+    createBankAccountWithAPI,
     searchBankAccountsFromAPI,
     getBankAccountFromAPI,
-    updateAccountWithAPI,
+    updateBankAccountWithAPI,
+    deleteBankAccountWithAPI,
+    // bank account balances
+    createBankAccountBalanceWithAPI,
+    searchBankAccountBalancesFromAPI,
     getBankAccountBalanceFromAPI,
     updateAccountBalanceWithAPI,
-    createAccountBalanceWithAPI,
-    createAccountWithAPI,
     deleteAccountBalanceWithAPI,
-    deleteAccountWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
+
+    //// bank accounts CRUD
+
+    // create
+    async function createBankAccount(account) {
+        const payload = {
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            lastBalance: parseInt(account.lastBalance),
+            lastBalanceDate: account.lastBalanceDate,
+            status: account.status,
+        }
+
+        const result = await createBankAccountWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    // read
     async function searchBankAccounts(filter, balancesStartDate, balancesEndDate, pageSize) {
         // get the account data
         const accounts = await searchBankAccountsFromAPI(filter, pageSize)
@@ -41,6 +70,7 @@ export function useBankAccountsService() {
         }
     }
 
+    // read
     async function getBankAccount(id, balanceStartDate, balanceEndDate, pageSize) {
         const account = await getBankAccountFromAPI(id, balanceStartDate, balanceEndDate, pageSize)
 
@@ -54,6 +84,7 @@ export function useBankAccountsService() {
         }
     }
 
+    // update
     async function updateBankAccount(account) {
         const payload = {
             id: account.id,
@@ -64,7 +95,7 @@ export function useBankAccountsService() {
             status: account.status,
         }
 
-        const result = await updateAccountWithAPI(payload)
+        const result = await updateBankAccountWithAPI(payload)
 
         if (!result.errorMessage) {
             return result.data
@@ -75,6 +106,41 @@ export function useBankAccountsService() {
         }
     }
 
+    // delete
+    async function deleteBankAccount(id) {
+        const result = await deleteBankAccountWithAPI(id)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    //// bank account balances CRUD
+
+    // create
+    async function createBankAccountBalance(accountBalance) {
+        const payload = {
+            bankAccountId: accountBalance.bankAccountId,
+            date: accountBalance.date,
+            balance: parseInt(accountBalance.balance)
+        }
+
+        const result = await createBankAccountBalanceWithAPI(payload)
+
+        if (!result.errorMessage) {
+            return result.data
+        } else {
+            return {
+                errorMessage: result.errorMessage
+            }
+        }
+    }
+
+    // read
     async function getBankAccountBalance(id) {
         const accountBalance = await getBankAccountBalanceFromAPI(id)
 
@@ -87,6 +153,7 @@ export function useBankAccountsService() {
         }
     }
 
+    // update
     async function updateBankAccountBalance(accountBalance) {
         const payload = {
             id: accountBalance.id,
@@ -106,46 +173,7 @@ export function useBankAccountsService() {
         }
     }
 
-    async function createBankAccountBalance(accountBalance) {
-        const payload = {
-            bankAccountId: accountBalance.bankAccountId,
-            date: accountBalance.date,
-            balance: parseInt(accountBalance.balance)
-        }
-
-        const result = await createAccountBalanceWithAPI(payload)
-
-        if (!result.errorMessage) {
-            return result.data
-        } else {
-            return {
-                errorMessage: result.errorMessage
-            }
-        }
-    }
-
-    async function createBankAccount(account) {
-        const payload = {
-            accountName: account.accountName,
-            bankName: account.bankName,
-            accountHolderName: account.accountHolderName,
-            accountNumber: account.accountNumber,
-            lastBalance: parseInt(account.lastBalance),
-            lastBalanceDate: account.lastBalanceDate,
-            status: account.status,
-        }
-
-        const result = await createAccountWithAPI(payload)
-
-        if (!result.errorMessage) {
-            return result.data
-        } else {
-            return {
-                errorMessage: result.errorMessage
-            }
-        }
-    }
-
+    // delete
     async function deleteBankAccountBalance(id) {
         const result = await deleteAccountBalanceWithAPI(id)
 
@@ -158,27 +186,17 @@ export function useBankAccountsService() {
         }
     }
 
-    async function deleteBankAccount(id) {
-        const result = await deleteAccountWithAPI(id)
-
-        if (!result.errorMessage) {
-            return result.data
-        } else {
-            return {
-                errorMessage: result.errorMessage
-            }
-        }
-    }
-
     return {
+        // bank accounts
+        createBankAccount,
         searchBankAccounts,
         getBankAccount,
         updateBankAccount,
+        deleteBankAccount,
+        // bank account balances
+        createBankAccountBalance,
         getBankAccountBalance,
         updateBankAccountBalance,
-        createBankAccountBalance,
-        createBankAccount,
         deleteBankAccountBalance,
-        deleteBankAccount,
     }
 }

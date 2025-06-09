@@ -1,14 +1,31 @@
 import axiosInstance from '@/api/index'
 import { useEnvUtils } from '@/composables/useEnvUtils'
 
-function getPageSize(pageSize) {
-    const ev = useEnvUtils()
-    return pageSize ? pageSize : ev.getDefaultPageSize()
+//// bank accounts CRUD
+
+// create
+export async function createBankAccountWithAPI(account) {
+    try {
+        const { data } = await axiosInstance.post('bankAccounts', {
+            accountName: account.accountName,
+            bankName: account.bankName,
+            accountHolderName: account.accountHolderName,
+            accountNumber: account.accountNumber,
+            lastBalance: account.lastBalance,
+            lastBalanceDate: account.lastBalanceDate,
+            status: account.status,
+        })
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
 }
 
+// read
 export async function searchBankAccountsFromAPI(filter, pageSize) {
     try {
-        const ev = useEnvUtils()
         const { data } = await axiosInstance.post('bankAccounts/search', {
             keyword: filter ? filter : '',
             pageSize: getPageSize(pageSize)
@@ -21,23 +38,7 @@ export async function searchBankAccountsFromAPI(filter, pageSize) {
     }
 }
 
-export async function searchBankAccountBalancesFromAPI(bankAccountIds, startDate, endDate, pageSize, page) {
-    try {
-        const { data } = await axiosInstance.post('bankAccounts/balances/search', {
-            bankAccountIds: bankAccountIds,
-            startDate: startDate ? startDate : null,
-            endDate: endDate ? endDate : null,
-            pageSize: getPageSize(pageSize),
-            page: page ? page : 1,
-        })
-        return data
-    } catch (error) {
-        return {
-            errorMessage: 'API - ' + error.message
-        }
-    }
-}
-
+// read
 export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, pageSize, page) {
     try {
         const params = new URLSearchParams()
@@ -60,7 +61,8 @@ export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, p
     }
 }
 
-export async function updateAccountWithAPI(account) {
+// update
+export async function updateBankAccountWithAPI(account) {
     try {
         const { data } = await axiosInstance.patch('bankAccounts/' + account.id, account)
         return data
@@ -71,9 +73,10 @@ export async function updateAccountWithAPI(account) {
     }
 }
 
-export async function getBankAccountBalanceFromAPI(id) {
+// delete
+export async function deleteBankAccountWithAPI(id) {
     try {
-        const { data } = await axiosInstance.get('bankAccounts/balances/' + id)
+        const { data } = await axiosInstance.delete('bankAccounts/' + id)
         return data
     } catch (error) {
         return {
@@ -82,18 +85,10 @@ export async function getBankAccountBalanceFromAPI(id) {
     }
 }
 
-export async function updateAccountBalanceWithAPI(accountBalance) {
-    try {
-        const { data } = await axiosInstance.patch('bankAccounts/balances/' + accountBalance.id, accountBalance)
-        return data
-    } catch (error) {
-        return {
-            errorMessage: 'API - ' + error.message
-        }
-    }
-}
+//// bank account balances CRUD
 
-export async function createAccountBalanceWithAPI(accountBalance) {
+// create
+export async function createBankAccountBalanceWithAPI(accountBalance) {
     try {
         const { data } = await axiosInstance.post('bankAccounts/balances', {
             bankAccountId: accountBalance.bankAccountId,
@@ -108,16 +103,15 @@ export async function createAccountBalanceWithAPI(accountBalance) {
     }
 }
 
-export async function createAccountWithAPI(account) {
+// read
+export async function searchBankAccountBalancesFromAPI(bankAccountIds, startDate, endDate, pageSize, page) {
     try {
-        const { data } = await axiosInstance.post('bankAccounts', {
-            accountName: account.accountName,
-            bankName: account.bankName,
-            accountHolderName: account.accountHolderName,
-            accountNumber: account.accountNumber,
-            lastBalance: account.lastBalance,
-            lastBalanceDate: account.lastBalanceDate,
-            status: account.status,
+        const { data } = await axiosInstance.post('bankAccounts/balances/search', {
+            bankAccountIds: bankAccountIds,
+            startDate: startDate ? startDate : null,
+            endDate: endDate ? endDate : null,
+            pageSize: getPageSize(pageSize),
+            page: page ? page : 1,
         })
         return data
     } catch (error) {
@@ -127,6 +121,31 @@ export async function createAccountWithAPI(account) {
     }
 }
 
+// read
+export async function getBankAccountBalanceFromAPI(id) {
+    try {
+        const { data } = await axiosInstance.get('bankAccounts/balances/' + id)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+// update
+export async function updateAccountBalanceWithAPI(accountBalance) {
+    try {
+        const { data } = await axiosInstance.patch('bankAccounts/balances/' + accountBalance.id, accountBalance)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+// delete
 export async function deleteAccountBalanceWithAPI(id) {
     try {
         const { data } = await axiosInstance.delete('bankAccounts/balances/' + id)
@@ -138,13 +157,9 @@ export async function deleteAccountBalanceWithAPI(id) {
     }
 }
 
-export async function deleteAccountWithAPI(id) {
-    try {
-        const { data } = await axiosInstance.delete('bankAccounts/' + id)
-        return data
-    } catch (error) {
-        return {
-            errorMessage: 'API - ' + error.message
-        }
-    }
+//// utilities
+
+function getPageSize(pageSize) {
+    const ev = useEnvUtils()
+    return pageSize ? pageSize : ev.getDefaultPageSize()
 }
