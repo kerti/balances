@@ -1,14 +1,16 @@
 import {
-    searchBankAccountBalancesFromAPI,
+    // bank accounts
+    createBankAccountWithAPI,
     searchBankAccountsFromAPI,
     getBankAccountFromAPI,
-    updateAccountWithAPI,
+    updateBankAccountWithAPI,
+    deleteBankAccountWithAPI,
+    // bank account balances
+    createBankAccountBalanceWithAPI,
+    searchBankAccountBalancesFromAPI,
     getBankAccountBalanceFromAPI,
     updateAccountBalanceWithAPI,
-    createAccountBalanceWithAPI,
-    createAccountWithAPI,
     deleteAccountBalanceWithAPI,
-    deleteAccountWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -64,7 +66,7 @@ export function useBankAccountsService() {
             status: account.status,
         }
 
-        const result = await updateAccountWithAPI(payload)
+        const result = await updateBankAccountWithAPI(payload)
 
         if (!result.errorMessage) {
             return result.data
@@ -113,7 +115,7 @@ export function useBankAccountsService() {
             balance: parseInt(accountBalance.balance)
         }
 
-        const result = await createAccountBalanceWithAPI(payload)
+        const result = await createBankAccountBalanceWithAPI(payload)
 
         if (!result.errorMessage) {
             return result.data
@@ -135,7 +137,7 @@ export function useBankAccountsService() {
             status: account.status,
         }
 
-        const result = await createAccountWithAPI(payload)
+        const result = await createBankAccountWithAPI(payload)
 
         if (!result.errorMessage) {
             return result.data
@@ -159,7 +161,7 @@ export function useBankAccountsService() {
     }
 
     async function deleteBankAccount(id) {
-        const result = await deleteAccountWithAPI(id)
+        const result = await deleteBankAccountWithAPI(id)
 
         if (!result.errorMessage) {
             return result.data
