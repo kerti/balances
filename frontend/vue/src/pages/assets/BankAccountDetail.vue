@@ -54,7 +54,7 @@ watch(
       },
     })
     // prevent double-fetching on initial component mount
-    if (bankAccountsStore.account.bankName !== undefined) {
+    if (bankAccountsStore.detailViewAccount.bankName !== undefined) {
       debouncedGet()
     }
   }
@@ -164,7 +164,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Name</label>
               <input
-                v-model="bankAccountsStore.account.accountName"
+                v-model="bankAccountsStore.detailViewAccount.accountName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -172,7 +172,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Bank Name</label>
               <input
-                v-model="bankAccountsStore.account.bankName"
+                v-model="bankAccountsStore.detailViewAccount.bankName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -180,7 +180,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Holder Name</label>
               <input
-                v-model="bankAccountsStore.account.accountHolderName"
+                v-model="bankAccountsStore.detailViewAccount.accountHolderName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -188,7 +188,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Number</label>
               <input
-                v-model="bankAccountsStore.account.accountNumber"
+                v-model="bankAccountsStore.detailViewAccount.accountNumber"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -196,7 +196,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Status</label>
               <select
-                v-model="bankAccountsStore.account.status"
+                v-model="bankAccountsStore.detailViewAccount.status"
                 class="select select-bordered w-full"
               >
                 <option>active</option>
@@ -247,7 +247,8 @@ const deleteBalance = async () => {
               </thead>
               <tbody>
                 <tr
-                  v-for="(balance, index) in bankAccountsStore.account.balances"
+                  v-for="(balance, index) in bankAccountsStore.detailViewAccount
+                    .balances"
                   :key="index"
                 >
                   <td>{{ dateUtils.epochToShortLocalDate(balance.date) }}</td>

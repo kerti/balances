@@ -40,8 +40,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailViewBalancesStartDate = ref(0)
     const detailViewBalancesEndDate = ref(0)
     const detailViewPageSize = ref(10)
-    const account = ref({})
-    const accountCache = ref({})
+    const detailViewAccount = ref({})
+    const detailViewAccountCache = ref({})
     const detailViewChartData = ref([])
 
     //// account adder
@@ -86,13 +86,13 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function createBankAccount() {
         const res = await svc.createBankAccount({
-            accountName: account.value.accountName,
-            bankName: account.value.bankName,
-            accountHolderName: account.value.accountHolderName,
-            accountNumber: account.value.accountNumber,
-            lastBalance: account.value.lastBalance,
-            lastBalanceDate: account.value.lastBalanceDate,
-            status: account.value.status,
+            accountName: detailViewAccount.value.accountName,
+            bankName: detailViewAccount.value.bankName,
+            accountHolderName: detailViewAccount.value.accountHolderName,
+            accountNumber: detailViewAccount.value.accountNumber,
+            lastBalance: detailViewAccount.value.lastBalance,
+            lastBalanceDate: detailViewAccount.value.lastBalanceDate,
+            status: detailViewAccount.value.status,
         })
         if (!res.errorMessage) {
             filterBankAccounts()
@@ -116,14 +116,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function getById(id) {
-        account.value = await svc.getBankAccount(id, null, null, 0)
+        detailViewAccount.value = await svc.getBankAccount(id, null, null, 0)
     }
 
     async function update() {
-        const res = await svc.updateBankAccount(account.value)
+        const res = await svc.updateBankAccount(detailViewAccount.value)
         if (!res.errorMessage) {
-            account.value = JSON.parse(JSON.stringify(res))
-            accountCache.value = JSON.parse(JSON.stringify(res))
+            detailViewAccount.value = JSON.parse(JSON.stringify(res))
+            detailViewAccountCache.value = JSON.parse(JSON.stringify(res))
             toast.showToast('Account updated!', 'success')
         } else {
             toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
@@ -131,7 +131,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function deleteAccount() {
-        const res = await svc.deleteBankAccount(account.value.id)
+        const res = await svc.deleteBankAccount(detailViewAccount.value.id)
         if (!res.errorMessage) {
             filterBankAccounts()
             toast.showToast('Account deleted!', 'success')
@@ -147,14 +147,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // cache and prep
 
     function revertAccountToCache() {
-        if (accountCache.value) {
-            account.value = JSON.parse(JSON.stringify(accountCache.value))
+        if (detailViewAccountCache.value) {
+            detailViewAccount.value = JSON.parse(JSON.stringify(detailViewAccountCache.value))
         }
     }
 
     function prepBlankAccount() {
-        account.value = JSON.parse(JSON.stringify(blankBankAccount))
-        accountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
+        detailViewAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+        detailViewAccountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     // chart utils
@@ -177,11 +177,11 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // hydration
 
-    async function hydrateDetail(initDetailViewBankAccountId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
+    async function hydrateDetail(initDetailViewBankAccountId, initDetailViewBalanceStartDate, initDetailViewBalanceEndDate, initDetailViewPageSize) {
         detailViewBankAccountId.value = initDetailViewBankAccountId
-        detailViewBalancesStartDate.value = initBalanceStartDate
-        detailViewBalancesEndDate.value = initBalanceEndDate
-        detailViewPageSize.value = initPageSize
+        detailViewBalancesStartDate.value = initDetailViewBalanceStartDate
+        detailViewBalancesEndDate.value = initDetailViewBalanceEndDate
+        detailViewPageSize.value = initDetailViewPageSize
     }
 
     function dehydrateDetail() {
@@ -189,8 +189,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewBalancesStartDate.value = 0
         detailViewBalancesEndDate.value = 0
         detailViewPageSize.value = 10
-        account.value = {}
-        accountCache.value = {}
+        detailViewAccount.value = {}
+        detailViewAccountCache.value = {}
         detailViewChartData.value = []
         balanceEditorMode.value = 'Add'
         beBalance.value = {}
@@ -225,8 +225,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             detailViewBalancesEndDate.value,
             detailViewPageSize.value)
 
-        account.value = JSON.parse(JSON.stringify(fetchedAccount))
-        accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
+        detailViewAccount.value = JSON.parse(JSON.stringify(fetchedAccount))
+        detailViewAccountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
 
         extractDetailViewChartData()
     }
@@ -281,8 +281,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     function extractDetailViewChartData() {
         detailViewChartData.value = [{
-            label: account.value.accountName,
-            data: account.value.balances.map(balance => {
+            label: detailViewAccount.value.accountName,
+            data: detailViewAccount.value.balances.map(balance => {
                 return {
                     x: balance.date,
                     y: balance.balance,
@@ -307,8 +307,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewBalancesStartDate,
         detailViewBalancesEndDate,
         detailViewPageSize,
-        account,
-        accountCache,
+        detailViewAccount,
+        detailViewAccountCache,
         detailViewChartData,
 
         //// account adder
