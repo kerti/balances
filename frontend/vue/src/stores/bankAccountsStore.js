@@ -42,7 +42,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailViewPageSize = ref(10)
     const account = ref({})
     const accountCache = ref({})
-    const detailChartData = ref([])
+    const detailViewChartData = ref([])
 
     //// account adder
     const aaBankAccount = ref({})
@@ -191,7 +191,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewPageSize.value = 10
         account.value = {}
         accountCache.value = {}
-        detailChartData.value = []
+        detailViewChartData.value = []
         balanceEditorMode.value = 'Add'
         beBalance.value = {}
         beBalanceCache.value = {}
@@ -280,7 +280,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // chart utils
 
     function extractDetailViewChartData() {
-        detailChartData.value = [{
+        detailViewChartData.value = [{
             label: account.value.accountName,
             data: account.value.balances.map(balance => {
                 return {
@@ -309,7 +309,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewPageSize,
         account,
         accountCache,
-        detailChartData,
+        detailViewChartData,
 
         //// account adder
         aaBankAccount,
