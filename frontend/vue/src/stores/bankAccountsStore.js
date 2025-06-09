@@ -37,9 +37,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// detail view
     const detailViewBankAccountId = ref('')
-    const detailBalanceStartDate = ref(0)
-    const detailBalanceEndDate = ref(0)
-    const detailPageSize = ref(10)
+    const detailViewBalancesStartDate = ref(0)
+    const detailViewBalancesEndDate = ref(0)
+    const detailViewPageSize = ref(10)
     const account = ref({})
     const accountCache = ref({})
     const detailChartData = ref([])
@@ -179,16 +179,16 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function hydrateDetail(initDetailViewBankAccountId, initBalanceStartDate, initBalanceEndDate, initPageSize) {
         detailViewBankAccountId.value = initDetailViewBankAccountId
-        detailBalanceStartDate.value = initBalanceStartDate
-        detailBalanceEndDate.value = initBalanceEndDate
-        detailPageSize.value = initPageSize
+        detailViewBalancesStartDate.value = initBalanceStartDate
+        detailViewBalancesEndDate.value = initBalanceEndDate
+        detailViewPageSize.value = initPageSize
     }
 
     function dehydrateDetail() {
         detailViewBankAccountId.value = ''
-        detailBalanceStartDate.value = 0
-        detailBalanceEndDate.value = 0
-        detailPageSize.value = 10
+        detailViewBalancesStartDate.value = 0
+        detailViewBalancesEndDate.value = 0
+        detailViewPageSize.value = 10
         account.value = {}
         accountCache.value = {}
         detailChartData.value = []
@@ -221,9 +221,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function get() {
         const fetchedAccount = await svc.getBankAccount(
             detailViewBankAccountId.value,
-            detailBalanceStartDate.value,
-            detailBalanceEndDate.value,
-            detailPageSize.value)
+            detailViewBalancesStartDate.value,
+            detailViewBalancesEndDate.value,
+            detailViewPageSize.value)
 
         account.value = JSON.parse(JSON.stringify(fetchedAccount))
         accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
@@ -304,9 +304,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
         //// detail view
         detailViewBankAccountId,
-        detailBalanceStartDate,
-        detailBalanceEndDate,
-        detailPageSize,
+        detailViewBalancesStartDate,
+        detailViewBalancesEndDate,
+        detailViewPageSize,
         account,
         accountCache,
         detailChartData,

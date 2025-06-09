@@ -19,7 +19,7 @@ const ev = useEnvUtils()
 const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
-const defaultPageSize = ev.getDefaultPageSize() * 12 // assume about 10 balances per month
+const defaultPageSize = ev.getDefaultPageSize() * 31 // assume maximum of 31 balances per month
 
 const debouncedGet = debounce(() => {
   bankAccountsStore.get()
@@ -28,9 +28,9 @@ const debouncedGet = debounce(() => {
 // TODO: add controls to leverage this
 watch(
   [
-    () => bankAccountsStore.detailBalanceStartDate,
-    () => bankAccountsStore.detailBalanceEndDate,
-    () => bankAccountsStore.detailPageSize,
+    () => bankAccountsStore.detailViewBalancesStartDate,
+    () => bankAccountsStore.detailViewBalancesEndDate,
+    () => bankAccountsStore.detailViewPageSize,
   ],
   ([newBalanceStartDate, newBalanceEndDate, newPageSize]) => {
     const pageSizeParam =
@@ -38,18 +38,18 @@ watch(
         ? newPageSize
         : undefined
 
-    const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
-    const balanceStartDateParam =
+    const defaultDetailViewBalanceStartDate = dateUtils.getEpochOneYearAgo()
+    const detailViewBalancesStartDateParam =
       Number.isInteger(newBalanceStartDate) &&
-      newBalanceStartDate !== defaultBalanceStartDate
+      newBalanceStartDate !== defaultDetailViewBalanceStartDate
         ? newBalanceStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
-        balanceStartDate: balanceStartDateParam,
-        balanceEndDate: newBalanceEndDate || undefined,
+        detailViewBalancesStartDate: detailViewBalancesStartDateParam,
+        detailViewBalancesEndDate: newBalanceEndDate || undefined,
         pageSize: pageSizeParam,
       },
     })
@@ -63,29 +63,31 @@ watch(
 function refetch() {
   const query = route.query
 
-  const parsedPageSize = numUtils.queryParamToInt(
+  const parsedDetailViewPageSize = numUtils.queryParamToInt(
     query.pageSize,
     defaultPageSize
   )
 
-  const parsedBalanceStartDate = numUtils.queryParamToNullableInt(
-    query.balanceStartDate
+  const parsedDetailViewBalanceStartDate = numUtils.queryParamToNullableInt(
+    query.detailViewBalancesStartDate
   )
-  bankAccountsStore.balancesStartDate = parsedBalanceStartDate
+  bankAccountsStore.detailViewBalancesStartDate =
+    parsedDetailViewBalanceStartDate
 
-  const parsedBalanceEndDate = numUtils.queryParamToNullableInt(
-    query.balanceEndDate
+  const parsedDetailViewBalanceEndDate = numUtils.queryParamToNullableInt(
+    query.detailViewBalancesEndDate
   )
-  bankAccountsStore.balancesEndDate = parsedBalanceEndDate
+  bankAccountsStore.detailViewBalancesEndDate = parsedDetailViewBalanceEndDate
 
-  const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
+  const defaultDetailViewBalanceStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.hydrateDetail(
     route.params.id,
-    parsedBalanceStartDate && parsedBalanceStartDate !== defaultBalanceStartDate
-      ? parsedBalanceStartDate
-      : defaultBalanceStartDate,
-    parsedBalanceEndDate,
-    parsedPageSize
+    parsedDetailViewBalanceStartDate &&
+      parsedDetailViewBalanceStartDate !== defaultDetailViewBalanceStartDate
+      ? parsedDetailViewBalanceStartDate
+      : defaultDetailViewBalanceStartDate,
+    parsedDetailViewBalanceEndDate,
+    parsedDetailViewPageSize
   )
 }
 
