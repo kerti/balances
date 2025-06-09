@@ -2,7 +2,6 @@ import { useToast } from '@/composables/useToast'
 import { useBankAccountsService } from '@/services/bankAccountsService'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { errorMessages } from 'vue/compiler-sfc'
 
 export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
@@ -30,10 +29,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     const listViewFilter = ref('')
-    const balancesStartDate = ref(0)
-    const balancesEndDate = ref(0)
+    const listViewBalancesStartDate = ref(0)
+    const listViewBalancesEndDate = ref(0)
     const pageSize = ref(10)
-    const accounts = ref([])
+    const listViewBankAccounts = ref([])
     const chartData = ref([])
 
     //// detail view
@@ -64,19 +63,19 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     // hydration
-    async function hydrate(initListViewFilter, initBalancesStartDate, initBalancesEndDate, initPageSize) {
+    async function hydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initPageSize) {
         listViewFilter.value = initListViewFilter
-        balancesStartDate.value = initBalancesStartDate
-        balancesEndDate.value = initBalancesEndDate
+        listViewBalancesStartDate.value = initListViewBalancesStartDate
+        listViewBalancesEndDate.value = initListViewBalancesEndDate
         pageSize.value = initPageSize
     }
 
     function dehydrate() {
         listViewFilter.value = ''
-        balancesStartDate.value = 0
-        balancesEndDate.value = 0
+        listViewBalancesStartDate.value = 0
+        listViewBalancesEndDate.value = 0
         pageSize.value = 10
-        accounts.value = []
+        listViewBankAccounts.value = []
         chartData.value = []
         aaBankAccount.value = {}
         aaBankAccountCache.value = {}
@@ -108,10 +107,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function filterBankAccounts() {
-        accounts.value = await svc.searchBankAccounts(
+        listViewBankAccounts.value = await svc.searchBankAccounts(
             listViewFilter.value,
-            balancesStartDate.value,
-            balancesEndDate.value,
+            listViewBalancesStartDate.value,
+            listViewBalancesEndDate.value,
             pageSize.value)
         extractListViewChartData()
     }
@@ -161,7 +160,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // chart utils
 
     function extractListViewChartData() {
-        chartData.value = accounts.value.map(acc => {
+        chartData.value = listViewBankAccounts.value.map(acc => {
             return {
                 label: acc.accountName,
                 data: acc.balances.map(balance => {
@@ -297,10 +296,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
         //// list view
         listViewFilter,
-        balancesStartDate,
-        balancesEndDate,
+        listViewBalancesStartDate,
+        listViewBalancesEndDate,
         pageSize,
-        accounts,
+        listViewBankAccounts,
         chartData,
 
         //// detail view

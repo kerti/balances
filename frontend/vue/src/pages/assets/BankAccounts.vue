@@ -28,29 +28,34 @@ const debouncedFilterBankAccounts = debounce(() => {
 watch(
   [
     () => bankAccountsStore.listViewFilter,
-    () => bankAccountsStore.balancesStartDate,
-    () => bankAccountsStore.balancesEndDate,
+    () => bankAccountsStore.listViewBalancesStartDate,
+    () => bankAccountsStore.listViewBalancesEndDate,
     () => bankAccountsStore.pageSize,
   ],
-  ([newFilter, newBalancesStartDate, newBalancesEndDate, newPageSize]) => {
+  ([
+    newListViewFilter,
+    newListViewBalancesStartDate,
+    newListViewBalancesEndDate,
+    newPageSize,
+  ]) => {
     const pageSizeParam =
       Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
         ? newPageSize
         : undefined
 
-    const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
-    const balancesStartDateParam =
-      Number.isInteger(newBalancesStartDate) &&
-      newBalancesStartDate !== defaultBalancesStartDate
-        ? newBalancesStartDate
+    const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
+    const listViewBalancesStartDateParam =
+      Number.isInteger(newListViewBalancesStartDate) &&
+      newListViewBalancesStartDate !== defaultListViewBalancesStartDate
+        ? newListViewBalancesStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
-        filter: newFilter || undefined,
-        balancesStartDate: balancesStartDateParam,
-        balancesEndDate: newBalancesEndDate || undefined,
+        filter: newListViewFilter || undefined,
+        listViewBalancesStartDate: listViewBalancesStartDateParam,
+        listViewBalancesEndDate: newListViewBalancesEndDate || undefined,
         pageSize: pageSizeParam,
       },
     })
@@ -71,23 +76,23 @@ function refetch() {
     defaultPageSize
   )
 
-  const parsedBalancesStartDate = numUtils.queryParamToNullableInt(
-    query.balancesStartDate
+  const parsedListViewBalancesStartDate = numUtils.queryParamToNullableInt(
+    query.listViewBalancesStartDate
   )
-  bankAccountsStore.balancesStartDate = parsedBalancesStartDate
+  bankAccountsStore.listViewBalancesStartDate = parsedListViewBalancesStartDate
 
   const parsedBalancesEndDate = numUtils.queryParamToNullableInt(
-    query.balancesEndDate
+    query.listViewBalancesEndDate
   )
-  bankAccountsStore.balancesEndDate = parsedBalancesEndDate
+  bankAccountsStore.listViewBalancesEndDate = parsedBalancesEndDate
 
-  const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
+  const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.hydrate(
     query.filter?.toString() || "",
-    parsedBalancesStartDate &&
-      parsedBalancesStartDate !== defaultBalancesStartDate
-      ? parsedBalancesStartDate
-      : defaultBalancesStartDate,
+    parsedListViewBalancesStartDate &&
+      parsedListViewBalancesStartDate !== defaultListViewBalancesStartDate
+      ? parsedListViewBalancesStartDate
+      : defaultListViewBalancesStartDate,
     parsedBalancesEndDate,
     parsedPageSize
   )
@@ -156,7 +161,9 @@ const deleteAccount = async () => {
             </thead>
             <tbody>
               <tr
-                v-for="(account, index) in bankAccountsStore.accounts"
+                v-for="(
+                  account, index
+                ) in bankAccountsStore.listViewBankAccounts"
                 :key="index"
                 class="hover:bg-base-300"
               >
