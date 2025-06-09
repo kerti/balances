@@ -21,8 +21,8 @@ const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize()
 
-const debouncedSearch = debounce(() => {
-  bankAccountsStore.search()
+const debouncedFilterBankAccounts = debounce(() => {
+  bankAccountsStore.filterBankAccounts()
 }, 300)
 
 watch(
@@ -54,7 +54,7 @@ watch(
         pageSize: pageSizeParam,
       },
     })
-    debouncedSearch()
+    debouncedFilterBankAccounts()
   }
 )
 
@@ -97,7 +97,7 @@ onMounted(() => refetch())
 onUnmounted(() => bankAccountsStore.dehydrate())
 
 const saveAccount = async () => {
-  const res = await bankAccountsStore.createAccount()
+  const res = await bankAccountsStore.createBankAccount()
   if (!res.errorMessage) {
     accountAdder.close()
   }

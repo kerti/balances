@@ -9,8 +9,22 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const toast = useToast()
 
     ////// templates
-    const blankAccount = {}
-    const blankAccountBalance = {}
+    const blankBankAccount = {
+        id: '',
+        accountName: '',
+        bankName: '',
+        accountHolderName: '',
+        accountNumber: '',
+        lastBalance: 0,
+        lastBalanceDate: 0,
+        status: '',
+    }
+    const blankBankAccountBalance = {
+        id: '',
+        bankAccountId: '',
+        date: 0,
+        balance: 0,
+    }
 
     ////// reactive state
     //// list view
@@ -56,7 +70,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // CRUD
 
-    async function createAccount() {
+    async function createBankAccount() {
         const res = await svc.createBankAccount({
             accountName: account.value.accountName,
             bankName: account.value.bankName,
@@ -67,7 +81,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             status: account.value.status,
         })
         if (!res.errorMessage) {
-            search()
+            filterBankAccounts()
             toast.showToast('Account created!', 'success')
             return res
         } else {
@@ -78,13 +92,13 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    async function search() {
+    async function filterBankAccounts() {
         accounts.value = await svc.searchBankAccounts(
             filter.value,
             balancesStartDate.value,
             balancesEndDate.value,
             pageSize.value)
-        extractChartData()
+        extractListViewChartData()
     }
 
     async function getById(id) {
@@ -105,7 +119,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function deleteAccount() {
         const res = await svc.deleteBankAccount(account.value.id)
         if (!res.errorMessage) {
-            search()
+            filterBankAccounts()
             toast.showToast('Account deleted!', 'success')
             return res
         } else {
@@ -140,7 +154,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // chart utils
 
-    function extractChartData() {
+    function extractListViewChartData() {
         chartData.value = accounts.value.map(acc => {
             return {
                 label: acc.accountName,
@@ -205,7 +219,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         account.value = JSON.parse(JSON.stringify(fetchedAccount))
         accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
 
-        extractDetailChartData()
+        extractDetailViewChartData()
     }
 
     async function getBalanceById(id) {
@@ -261,7 +275,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // chart utils
 
-    function extractDetailChartData() {
+    function extractDetailViewChartData() {
         detailChartData.value = [{
             label: account.value.accountName,
             data: account.value.balances.map(balance => {
@@ -307,8 +321,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         hydrate,
         dehydrate,
         // CRUD
-        createAccount,
-        search,
+        createBankAccount,
+        filterBankAccounts,
         getById,
         update,
         deleteAccount,
