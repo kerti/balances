@@ -29,7 +29,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     ////// reactive state
 
     //// list view
-    const filter = ref('')
+    const listViewFilter = ref('')
     const balancesStartDate = ref(0)
     const balancesEndDate = ref(0)
     const pageSize = ref(10)
@@ -64,15 +64,15 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     // hydration
-    async function hydrate(initFilter, initBalancesStartDate, initBalancesEndDate, initPageSize) {
-        filter.value = initFilter
+    async function hydrate(initListViewFilter, initBalancesStartDate, initBalancesEndDate, initPageSize) {
+        listViewFilter.value = initListViewFilter
         balancesStartDate.value = initBalancesStartDate
         balancesEndDate.value = initBalancesEndDate
         pageSize.value = initPageSize
     }
 
     function dehydrate() {
-        filter.value = ''
+        listViewFilter.value = ''
         balancesStartDate.value = 0
         balancesEndDate.value = 0
         pageSize.value = 10
@@ -109,7 +109,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function filterBankAccounts() {
         accounts.value = await svc.searchBankAccounts(
-            filter.value,
+            listViewFilter.value,
             balancesStartDate.value,
             balancesEndDate.value,
             pageSize.value)
@@ -296,7 +296,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         ////// reactive state
 
         //// list view
-        filter,
+        listViewFilter,
         balancesStartDate,
         balancesEndDate,
         pageSize,

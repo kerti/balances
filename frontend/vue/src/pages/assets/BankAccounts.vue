@@ -27,7 +27,7 @@ const debouncedFilterBankAccounts = debounce(() => {
 
 watch(
   [
-    () => bankAccountsStore.filter,
+    () => bankAccountsStore.listViewFilter,
     () => bankAccountsStore.balancesStartDate,
     () => bankAccountsStore.balancesEndDate,
     () => bankAccountsStore.pageSize,
@@ -130,7 +130,7 @@ const deleteAccount = async () => {
           <div class="form-control flex gap-3">
             <input
               type="text"
-              v-model="bankAccountsStore.filter"
+              v-model="bankAccountsStore.listViewFilter"
               placeholder="Search accounts..."
               class="input input-bordered w-64"
             />
