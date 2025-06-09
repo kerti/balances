@@ -102,6 +102,22 @@ const saveAccount = async () => {
     accountAdder.close()
   }
 }
+
+const showAccountDeleteConfirmation = (accountId) => {
+  bankAccountsStore.getById(accountId)
+  adConfirm.showModal()
+}
+
+const cancelAccountDelete = () => {
+  adConfirm.close()
+}
+
+const deleteAccount = async () => {
+  const res = await bankAccountsStore.deleteAccount()
+  if (!res.errorMessage) {
+    adConfirm.close()
+  }
+}
 </script>
 
 <template>
@@ -198,14 +214,12 @@ const saveAccount = async () => {
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </router-link>
                     </button>
-                    <button class="btn btn-neutral tooltip" data-tip="Activate">
-                      <font-awesome-icon :icon="['fas', 'eye']" />
-                    </button>
                     <button
                       class="btn btn-neutral tooltip"
-                      data-tip="Deactivate"
+                      data-tip="Delete"
+                      v-on:click="showAccountDeleteConfirmation(account.id)"
                     >
-                      <font-awesome-icon :icon="['fas', 'eye-slash']" />
+                      <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
                 </td>
@@ -219,7 +233,7 @@ const saveAccount = async () => {
     <!-- Bottom Half: Line Chart of the Accounts' Balances -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body flex-1 min-h-0">
-        <h2 class="card-title">Balance Over Time</h2>
+        <h2 class="card-title">Balance History Chart</h2>
         <line-chart class="flex-1 min-h-0" />
       </div>
     </div>
@@ -293,6 +307,60 @@ const saveAccount = async () => {
             class="btn btn-secondary"
           >
             Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Dialog Box: Confirm Account Delete -->
+  <dialog id="adConfirm" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Confirm Account Delete</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-2 grid-rows-7 gap-4">
+          <div>Account Name</div>
+          <div>{{ bankAccountsStore.account.accountName }}</div>
+          <div>Bank Name</div>
+          <div>{{ bankAccountsStore.account.bankName }}</div>
+          <div>Account Holder Name</div>
+          <div>{{ bankAccountsStore.account.accountHolderName }}</div>
+          <div>Account Number</div>
+          <div>{{ bankAccountsStore.account.accountNumber }}</div>
+          <div>Status</div>
+          <div>{{ bankAccountsStore.account.status }}</div>
+          <div>Last Balance</div>
+          <div>
+            {{ numUtils.numericToMoney(bankAccountsStore.account.lastBalance) }}
+          </div>
+          <div>Last Balance Date</div>
+          <div>
+            {{
+              dateUtils.epochToLocalDate(
+                bankAccountsStore.account.lastBalanceDate
+              )
+            }}
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button
+            type="button"
+            @click="deleteAccount()"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            @click="cancelAccountDelete()"
+            class="btn btn-secondary"
+          >
+            Cancel
           </button>
         </div>
       </form>

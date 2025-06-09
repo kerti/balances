@@ -2,6 +2,7 @@ import { useToast } from '@/composables/useToast'
 import { useBankAccountsService } from '@/services/bankAccountsService'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { errorMessages } from 'vue/compiler-sfc'
 
 export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const svc = useBankAccountsService()
@@ -82,6 +83,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         accountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
 
         extractDetailChartData()
+    }
+
+    async function getById(id) {
+        account.value = await svc.getBankAccount(id, null, null, 0)
     }
 
     function extractChartData() {
@@ -211,7 +216,35 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account created!', 'success')
             return res
         } else {
-            toast.showToasst('Failed to create account: ' + res.errorMessage)
+            toast.showToast('Failed to create account: ' + res.errorMessage)
+            return {
+                errorMessage: res.errorMessage
+            }
+        }
+    }
+
+    async function deleteAccountBalance() {
+        const res = await svc.deleteBankAccountBalance(beBalance.value.id)
+        if (!res.errorMessage) {
+            get()
+            toast.showToast('Balance deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete balance: ' + res.errorMessage)
+            return {
+                errorMessages: res.errorMessage
+            }
+        }
+    }
+
+    async function deleteAccount() {
+        const res = await svc.deleteBankAccount(account.value.id)
+        if (!res.errorMessage) {
+            search()
+            toast.showToast('Account deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete account: ' + res.errorMessage)
             return {
                 errorMessage: res.errorMessage
             }
@@ -246,6 +279,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dehydrateDetail,
         search,
         get,
+        getById,
         revertAccountToCache,
         revertBalanceToCache,
         update,
@@ -255,5 +289,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         createBalance,
         prepBlankAccount,
         createAccount,
+        deleteAccountBalance,
+        deleteAccount,
     }
 })

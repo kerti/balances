@@ -126,3 +126,25 @@ export async function createAccountWithAPI(account) {
         }
     }
 }
+
+export async function deleteAccountBalanceWithAPI(id) {
+    try {
+        const { data } = await axiosInstance.delete('bankAccounts/balances/' + id)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}
+
+export async function deleteAccountWithAPI(id) {
+    try {
+        const { data } = await axiosInstance.delete('bankAccounts/' + id)
+        return data
+    } catch (error) {
+        return {
+            errorMessage: 'API - ' + error.message
+        }
+    }
+}

@@ -132,6 +132,22 @@ const saveBalance = async () => {
     }
   }
 }
+
+const showBalanceDeleteConfirmaton = (balanceId) => {
+  bankAccountsStore.getBalanceById(balanceId)
+  bdConfirm.showModal()
+}
+
+const cancelBalanceDelete = () => {
+  bdConfirm.close()
+}
+
+const deleteBalance = async () => {
+  const res = await bankAccountsStore.deleteAccountBalance()
+  if (!res.errorMessage) {
+    bdConfirm.close()
+  }
+}
 </script>
 
 <template>
@@ -229,23 +245,27 @@ const saveBalance = async () => {
               </thead>
               <tbody>
                 <tr
-                  v-for="(entry, index) in bankAccountsStore.account.balances"
+                  v-for="(balance, index) in bankAccountsStore.account.balances"
                   :key="index"
                 >
-                  <td>{{ dateUtils.epochToShortLocalDate(entry.date) }}</td>
+                  <td>{{ dateUtils.epochToShortLocalDate(balance.date) }}</td>
                   <td class="text-right">
-                    {{ numUtils.numericToMoney(entry.balance) }}
+                    {{ numUtils.numericToMoney(balance.balance) }}
                   </td>
                   <td>
                     <div class="flex items-center gap-3">
                       <button
                         class="btn btn-neutral tooltip"
                         data-tip="Edit"
-                        v-on:click="showEditor(entry.id)"
+                        v-on:click="showEditor(balance.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
-                      <button class="btn btn-neutral tooltip" data-tip="Delete">
+                      <button
+                        class="btn btn-neutral tooltip"
+                        data-tip="Delete"
+                        v-on:click="showBalanceDeleteConfirmaton(balance.id)"
+                      >
                         <font-awesome-icon :icon="['fas', 'trash']" />
                       </button>
                     </div>
@@ -261,7 +281,7 @@ const saveBalance = async () => {
     <!-- Bottom Half: Line Chart -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
-        <h2 class="card-title">Account Balance Over Time (last 12 months)</h2>
+        <h2 class="card-title">Balance History Chart</h2>
         <line-chart />
       </div>
     </div>
@@ -312,5 +332,45 @@ const saveBalance = async () => {
     <form method="dialog" class="modal-backdrop">
       <button>close</button>
     </form>
+  </dialog>
+
+  <!-- Dialog Box: Confirm Balance Delete -->
+  <dialog id="bdConfirm" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Confirm Balance Delete</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-2 grid-rows-2 gap-4">
+          <div>Balance</div>
+          <div>
+            {{ numUtils.numericToMoney(bankAccountsStore.beBalance.balance) }}
+          </div>
+          <div>Date</div>
+          <div>
+            {{ dateUtils.epochToLocalDate(bankAccountsStore.beBalance.date) }}
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button
+            type="button"
+            @click="deleteBalance()"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            @click="cancelBalanceDelete()"
+            class="btn btn-secondary"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   </dialog>
 </template>
