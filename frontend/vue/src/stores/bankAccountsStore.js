@@ -31,7 +31,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const listViewFilter = ref('')
     const listViewBalancesStartDate = ref(0)
     const listViewBalancesEndDate = ref(0)
-    const pageSize = ref(10)
+    const listViewPageSize = ref(10)
     const listViewBankAccounts = ref([])
     const chartData = ref([])
 
@@ -63,18 +63,18 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     // hydration
-    async function hydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initPageSize) {
+    async function hydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initListViewPageSize) {
         listViewFilter.value = initListViewFilter
         listViewBalancesStartDate.value = initListViewBalancesStartDate
         listViewBalancesEndDate.value = initListViewBalancesEndDate
-        pageSize.value = initPageSize
+        listViewPageSize.value = initListViewPageSize
     }
 
     function dehydrate() {
         listViewFilter.value = ''
         listViewBalancesStartDate.value = 0
         listViewBalancesEndDate.value = 0
-        pageSize.value = 10
+        listViewPageSize.value = 10
         listViewBankAccounts.value = []
         chartData.value = []
         aaBankAccount.value = {}
@@ -111,7 +111,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             listViewFilter.value,
             listViewBalancesStartDate.value,
             listViewBalancesEndDate.value,
-            pageSize.value)
+            listViewPageSize.value)
         extractListViewChartData()
     }
 
@@ -298,7 +298,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         listViewFilter,
         listViewBalancesStartDate,
         listViewBalancesEndDate,
-        pageSize,
+        listViewPageSize,
         listViewBankAccounts,
         chartData,
 

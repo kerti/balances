@@ -30,7 +30,7 @@ watch(
     () => bankAccountsStore.listViewFilter,
     () => bankAccountsStore.listViewBalancesStartDate,
     () => bankAccountsStore.listViewBalancesEndDate,
-    () => bankAccountsStore.pageSize,
+    () => bankAccountsStore.listViewPageSize,
   ],
   ([
     newListViewFilter,
@@ -38,7 +38,7 @@ watch(
     newListViewBalancesEndDate,
     newPageSize,
   ]) => {
-    const pageSizeParam =
+    const listViewPageSizeParam =
       Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
         ? newPageSize
         : undefined
@@ -56,7 +56,7 @@ watch(
         filter: newListViewFilter || undefined,
         listViewBalancesStartDate: listViewBalancesStartDateParam,
         listViewBalancesEndDate: newListViewBalancesEndDate || undefined,
-        pageSize: pageSizeParam,
+        listViewPageSize: listViewPageSizeParam,
       },
     })
     debouncedFilterBankAccounts()
@@ -72,7 +72,7 @@ function refetch() {
   const query = route.query
 
   const parsedPageSize = numUtils.queryParamToInt(
-    query.pageSize,
+    query.listViewPageSize,
     defaultPageSize
   )
 
