@@ -33,7 +33,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const listViewBalancesEndDate = ref(0)
     const listViewPageSize = ref(10)
     const listViewBankAccounts = ref([])
-    const chartData = ref([])
+    const listViewChartData = ref([])
 
     //// detail view
     const detailId = ref('')
@@ -76,7 +76,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         listViewBalancesEndDate.value = 0
         listViewPageSize.value = 10
         listViewBankAccounts.value = []
-        chartData.value = []
+        listViewChartData.value = []
         aaBankAccount.value = {}
         aaBankAccountCache.value = {}
         adAccount.value = {}
@@ -160,7 +160,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // chart utils
 
     function extractListViewChartData() {
-        chartData.value = listViewBankAccounts.value.map(acc => {
+        listViewChartData.value = listViewBankAccounts.value.map(acc => {
             return {
                 label: acc.accountName,
                 data: acc.balances.map(balance => {
@@ -300,7 +300,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         listViewBalancesEndDate,
         listViewPageSize,
         listViewBankAccounts,
-        chartData,
+        listViewChartData,
 
         //// detail view
         detailId,
