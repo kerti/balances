@@ -16,17 +16,18 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         accountHolderName: '',
         accountNumber: '',
         lastBalance: 0,
-        lastBalanceDate: 0,
-        status: '',
+        lastBalanceDate: (new Date()).getTime(),
+        status: 'active',
     }
     const blankBankAccountBalance = {
         id: '',
         bankAccountId: '',
-        date: 0,
+        date: (new Date()).getTime(),
         balance: 0,
     }
 
     ////// reactive state
+
     //// list view
     const filter = ref('')
     const balancesStartDate = ref(0)
@@ -34,6 +35,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const pageSize = ref(10)
     const accounts = ref([])
     const chartData = ref([])
+
     //// detail view
     const detailId = ref('')
     const detailBalanceStartDate = ref(0)
@@ -42,11 +44,21 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const account = ref({})
     const accountCache = ref({})
     const detailChartData = ref([])
+
+    //// account adder
+    const aaBankAccount = ref({})
+    const aaBankAccountCache = ref({})
+
+    //// account deleter
+    const adAccount = ref({})
+
     //// balance editor
     const balanceEditorMode = ref('Add')
     const beBalance = ref({})
     const beBalanceCache = ref({})
-    //// account adder
+
+    //// balance deleter
+    const bdBalance = ref({})
 
     ////// actions
 
@@ -66,6 +78,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         pageSize.value = 10
         accounts.value = []
         chartData.value = []
+        aaBankAccount.value = {}
+        aaBankAccountCache.value = {}
+        adAccount.value = {}
     }
 
     // CRUD
@@ -139,17 +154,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     function prepBlankAccount() {
-        const blankAccount = {
-            accountName: '',
-            bankName: '',
-            accountHolderName: '',
-            accountNumber: '',
-            lastBalance: 0,
-            lastBalanceDate: (new Date()).getTime(),
-            status: 'active',
-        }
-        account.value = JSON.parse(JSON.stringify(blankAccount))
-        accountCache.value = JSON.parse(JSON.stringify(blankAccount))
+        account.value = JSON.parse(JSON.stringify(blankBankAccount))
+        accountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     // chart utils
@@ -187,6 +193,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         account.value = {}
         accountCache.value = {}
         detailChartData.value = []
+        balanceEditorMode.value = 'Add'
+        beBalance.value = {}
+        beBalanceCache.value = {}
+        bdBalance.value = {}
     }
 
     // CRUD
@@ -264,13 +274,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     function prepBlankBalance() {
-        const blankBalance = {
-            bankAccountId: account.value.id,
-            date: (new Date()).getTime(),
-            balance: 0,
-        }
-        beBalance.value = JSON.parse(JSON.stringify(blankBalance))
-        beBalanceCache.value = JSON.parse(JSON.stringify(blankBalance))
+        beBalance.value = JSON.parse(JSON.stringify(blankBankAccountBalance))
+        beBalanceCache.value = JSON.parse(JSON.stringify(blankBankAccountBalance))
     }
 
     // chart utils
@@ -307,12 +312,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         accountCache,
         detailChartData,
 
+        //// account adder
+        aaBankAccount,
+        aaBankAccountCache,
+
+        //// account deleter
+        adAccount,
+
         //// balance editor
         balanceEditorMode,
         beBalance,
         beBalanceCache,
 
-        //// account adder
+        //// balance deleter
+        bdBalance,
 
         ////// actions
 
