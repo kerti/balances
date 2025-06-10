@@ -15,7 +15,7 @@ function renderChart() {
     chartInstance = new Chart(canvas.value, {
       type: "line",
       data: {
-        datasets: bankAccountsStore.listViewChartData,
+        datasets: bankAccountsStore.lvChartData,
       },
       options: {
         responsive: true,
@@ -56,7 +56,7 @@ onActivated(() => {
 })
 
 watch(
-  () => bankAccountsStore.listViewChartData,
+  () => bankAccountsStore.lvChartData,
   (newData) => {
     if (chartInstance) {
       chartInstance.data = {

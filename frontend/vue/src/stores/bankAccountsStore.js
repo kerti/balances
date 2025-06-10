@@ -29,30 +29,30 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     // main page
-    const listViewFilter = ref('')
-    const listViewBalancesStartDate = ref(0)
-    const listViewBalancesEndDate = ref(0)
-    const listViewPageSize = ref(10)
-    const listViewBankAccounts = ref([])
-    const listViewChartData = ref([])
+    const lvFilter = ref('')
+    const lvBalancesStartDate = ref(0)
+    const lvBalancesEndDate = ref(0)
+    const lvPageSize = ref(10)
+    const lvBankAccounts = ref([])
+    const lvChartData = ref([])
     // add bank account dialog box
-    const listViewAddBankAccount = ref({})
+    const lvAddBankAccount = ref({})
     // delete bank account dialog box
-    const listViewDeleteBankAccount = ref({})
+    const lvDeleteBankAccount = ref({})
 
     //// detail view
     // main page
-    const detailViewBankAccountId = ref('')
-    const detailViewBalancesStartDate = ref(0)
-    const detailViewBalancesEndDate = ref(0)
-    const detailViewPageSize = ref(10)
-    const detailViewAccount = ref({})
-    const detailViewAccountCache = ref({})
-    const detailViewChartData = ref([])
+    const dvBankAccountId = ref('')
+    const dvBalancesStartDate = ref(0)
+    const dvBalancesEndDate = ref(0)
+    const dvPageSize = ref(10)
+    const dvAccount = ref({})
+    const dvAccountCache = ref({})
+    const dvChartData = ref([])
     // balance editor dialog box
-    const detailViewBalanceEditorMode = ref('Add')
-    const detailViewEditBankAccountBalance = ref({})
-    const detailViewEditBankAccountBalanceCache = ref({})
+    const dvBalanceEditorMode = ref('Add')
+    const dvEditBankAccountBalance = ref({})
+    const dvEditBankAccountBalanceCache = ref({})
     // balance delete confirmation dialog box
     const bdBalance = ref({})
 
@@ -61,33 +61,33 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     //// list view
     // hydration
     async function lvHydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initListViewPageSize) {
-        listViewFilter.value = initListViewFilter
-        listViewBalancesStartDate.value = initListViewBalancesStartDate
-        listViewBalancesEndDate.value = initListViewBalancesEndDate
-        listViewPageSize.value = initListViewPageSize
+        lvFilter.value = initListViewFilter
+        lvBalancesStartDate.value = initListViewBalancesStartDate
+        lvBalancesEndDate.value = initListViewBalancesEndDate
+        lvPageSize.value = initListViewPageSize
     }
 
     function lvDehydrate() {
-        listViewFilter.value = ''
-        listViewBalancesStartDate.value = 0
-        listViewBalancesEndDate.value = 0
-        listViewPageSize.value = 10
-        listViewBankAccounts.value = []
-        listViewChartData.value = []
-        listViewAddBankAccount.value = {}
+        lvFilter.value = ''
+        lvBalancesStartDate.value = 0
+        lvBalancesEndDate.value = 0
+        lvPageSize.value = 10
+        lvBankAccounts.value = []
+        lvChartData.value = []
+        lvAddBankAccount.value = {}
     }
 
     // CRUD
 
     async function createBankAccount() {
         const res = await svc.createBankAccount({
-            accountName: listViewAddBankAccount.value.accountName,
-            bankName: listViewAddBankAccount.value.bankName,
-            accountHolderName: listViewAddBankAccount.value.accountHolderName,
-            accountNumber: listViewAddBankAccount.value.accountNumber,
-            lastBalance: listViewAddBankAccount.value.lastBalance,
-            lastBalanceDate: listViewAddBankAccount.value.lastBalanceDate,
-            status: listViewAddBankAccount.value.status,
+            accountName: lvAddBankAccount.value.accountName,
+            bankName: lvAddBankAccount.value.bankName,
+            accountHolderName: lvAddBankAccount.value.accountHolderName,
+            accountNumber: lvAddBankAccount.value.accountNumber,
+            lastBalance: lvAddBankAccount.value.lastBalance,
+            lastBalanceDate: lvAddBankAccount.value.lastBalanceDate,
+            status: lvAddBankAccount.value.status,
         })
         if (!res.errorMessage) {
             filterBankAccounts()
@@ -102,20 +102,20 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function filterBankAccounts() {
-        listViewBankAccounts.value = await svc.searchBankAccounts(
-            listViewFilter.value,
-            listViewBalancesStartDate.value,
-            listViewBalancesEndDate.value,
-            listViewPageSize.value)
+        lvBankAccounts.value = await svc.searchBankAccounts(
+            lvFilter.value,
+            lvBalancesStartDate.value,
+            lvBalancesEndDate.value,
+            lvPageSize.value)
         extractListViewChartData()
     }
 
     async function getAccountToDeleteById(id) {
-        listViewDeleteBankAccount.value = await svc.getBankAccount(id, null, null, 0)
+        lvDeleteBankAccount.value = await svc.getBankAccount(id, null, null, 0)
     }
 
     async function deleteBankAccount() {
-        const res = await svc.deleteBankAccount(listViewDeleteBankAccount.value.id)
+        const res = await svc.deleteBankAccount(lvDeleteBankAccount.value.id)
         if (!res.errorMessage) {
             filterBankAccounts()
             toast.showToast('Account deleted!', 'success')
@@ -131,28 +131,28 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // cache prep, and reset
 
     function resetListViewAddBankAccountDialog() {
-        listViewAddBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+        lvAddBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     function resetListViewDeleteBankAccountDialog() {
-        listViewDeleteBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+        lvDeleteBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     function revertAccountToCache() {
-        if (detailViewAccountCache.value) {
-            detailViewAccount.value = JSON.parse(JSON.stringify(detailViewAccountCache.value))
+        if (dvAccountCache.value) {
+            dvAccount.value = JSON.parse(JSON.stringify(dvAccountCache.value))
         }
     }
 
     function prepBlankAccount() {
-        detailViewAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
-        detailViewAccountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
+        dvAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
+        dvAccountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     // chart utils
 
     function extractListViewChartData() {
-        listViewChartData.value = listViewBankAccounts.value.map(acc => {
+        lvChartData.value = lvBankAccounts.value.map(acc => {
             return {
                 label: acc.accountName,
                 data: acc.balances.map(balance => {
@@ -170,23 +170,23 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // hydration
 
     async function dvHydrate(initDetailViewBankAccountId, initDetailViewBalanceStartDate, initDetailViewBalanceEndDate, initDetailViewPageSize) {
-        detailViewBankAccountId.value = initDetailViewBankAccountId
-        detailViewBalancesStartDate.value = initDetailViewBalanceStartDate
-        detailViewBalancesEndDate.value = initDetailViewBalanceEndDate
-        detailViewPageSize.value = initDetailViewPageSize
+        dvBankAccountId.value = initDetailViewBankAccountId
+        dvBalancesStartDate.value = initDetailViewBalanceStartDate
+        dvBalancesEndDate.value = initDetailViewBalanceEndDate
+        dvPageSize.value = initDetailViewPageSize
     }
 
     function dvDehydrate() {
-        detailViewBankAccountId.value = ''
-        detailViewBalancesStartDate.value = 0
-        detailViewBalancesEndDate.value = 0
-        detailViewPageSize.value = 10
-        detailViewAccount.value = {}
-        detailViewAccountCache.value = {}
-        detailViewChartData.value = []
-        detailViewBalanceEditorMode.value = 'Add'
-        detailViewEditBankAccountBalance.value = {}
-        detailViewEditBankAccountBalanceCache.value = {}
+        dvBankAccountId.value = ''
+        dvBalancesStartDate.value = 0
+        dvBalancesEndDate.value = 0
+        dvPageSize.value = 10
+        dvAccount.value = {}
+        dvAccountCache.value = {}
+        dvChartData.value = []
+        dvBalanceEditorMode.value = 'Add'
+        dvEditBankAccountBalance.value = {}
+        dvEditBankAccountBalanceCache.value = {}
         bdBalance.value = {}
     }
 
@@ -194,9 +194,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function createBankAccountBalance() {
         const res = await svc.createBankAccountBalance({
-            bankAccountId: detailViewEditBankAccountBalance.value.bankAccountId,
-            date: detailViewEditBankAccountBalance.value.date,
-            balance: detailViewEditBankAccountBalance.value.balance
+            bankAccountId: dvEditBankAccountBalance.value.bankAccountId,
+            date: dvEditBankAccountBalance.value.date,
+            balance: dvEditBankAccountBalance.value.balance
         })
         if (!res.errorMessage) {
             getBankAccountForDetailView()
@@ -212,28 +212,28 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function getBankAccountForDetailView() {
         const fetchedAccount = await svc.getBankAccount(
-            detailViewBankAccountId.value,
-            detailViewBalancesStartDate.value,
-            detailViewBalancesEndDate.value,
-            detailViewPageSize.value)
+            dvBankAccountId.value,
+            dvBalancesStartDate.value,
+            dvBalancesEndDate.value,
+            dvPageSize.value)
 
-        detailViewAccount.value = JSON.parse(JSON.stringify(fetchedAccount))
-        detailViewAccountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
+        dvAccount.value = JSON.parse(JSON.stringify(fetchedAccount))
+        dvAccountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
 
         extractDetailViewChartData()
     }
 
     async function getBankAccountBalanceById(id) {
         const fetchedBalance = await svc.getBankAccountBalance(id)
-        detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(fetchedBalance))
-        detailViewEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
+        dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(fetchedBalance))
+        dvEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
     }
 
     async function updateBankAccount() {
-        const res = await svc.updateBankAccount(detailViewAccount.value)
+        const res = await svc.updateBankAccount(dvAccount.value)
         if (!res.errorMessage) {
-            detailViewAccount.value = JSON.parse(JSON.stringify(res))
-            detailViewAccountCache.value = JSON.parse(JSON.stringify(res))
+            dvAccount.value = JSON.parse(JSON.stringify(res))
+            dvAccountCache.value = JSON.parse(JSON.stringify(res))
             toast.showToast('Account updated!', 'success')
         } else {
             toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
@@ -241,7 +241,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function updateBankAccountBalance() {
-        const res = await svc.updateBankAccountBalance(detailViewEditBankAccountBalance.value)
+        const res = await svc.updateBankAccountBalance(dvEditBankAccountBalance.value)
         if (!res.errorMessage) {
             getBankAccountForDetailView()
             getBankAccountBalanceById(res.id)
@@ -256,7 +256,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function deleteBankAccountBalance() {
-        const res = await svc.deleteBankAccountBalance(detailViewEditBankAccountBalance.value.id)
+        const res = await svc.deleteBankAccountBalance(dvEditBankAccountBalance.value.id)
         if (!res.errorMessage) {
             getBankAccountForDetailView()
             toast.showToast('Balance deleted!', 'success')
@@ -272,24 +272,24 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // cache prep and reset
 
     function revertBalanceToCache() {
-        if (detailViewEditBankAccountBalanceCache.value) {
-            detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(detailViewEditBankAccountBalanceCache.value))
+        if (dvEditBankAccountBalanceCache.value) {
+            dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(dvEditBankAccountBalanceCache.value))
         }
     }
 
     function prepBlankBalance() {
         const template = JSON.parse(JSON.stringify(blankBankAccountBalance))
-        template.bankAccountId = detailViewBankAccountId.value
-        detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(template))
-        detailViewEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(template))
+        template.bankAccountId = dvBankAccountId.value
+        dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(template))
+        dvEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(template))
     }
 
     // chart utils
 
     function extractDetailViewChartData() {
-        detailViewChartData.value = [{
-            label: detailViewAccount.value.accountName,
-            data: detailViewAccount.value.balances.map(balance => {
+        dvChartData.value = [{
+            label: dvAccount.value.accountName,
+            data: dvAccount.value.balances.map(balance => {
                 return {
                     x: balance.date,
                     y: balance.balance,
@@ -303,30 +303,30 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
         //// list view
         // main page
-        listViewFilter,
-        listViewBalancesStartDate,
-        listViewBalancesEndDate,
-        listViewPageSize,
-        listViewBankAccounts,
-        listViewChartData,
+        lvFilter,
+        lvBalancesStartDate,
+        lvBalancesEndDate,
+        lvPageSize,
+        lvBankAccounts,
+        lvChartData,
         // add bank account dialog box
-        listViewAddBankAccount,
+        lvAddBankAccount,
         // delete bank account dialog box
-        listViewDeleteBankAccount,
+        lvDeleteBankAccount,
 
         //// detail view
         // main page
-        detailViewBankAccountId,
-        detailViewBalancesStartDate,
-        detailViewBalancesEndDate,
-        detailViewPageSize,
-        detailViewAccount,
-        detailViewAccountCache,
-        detailViewChartData,
+        dvBankAccountId,
+        dvBalancesStartDate,
+        dvBalancesEndDate,
+        dvPageSize,
+        dvAccount,
+        dvAccountCache,
+        dvChartData,
         // balance editor dialog box
-        detailViewBalanceEditorMode,
-        detailViewEditBankAccountBalance,
-        detailViewEditBankAccountBalanceCache,
+        dvBalanceEditorMode,
+        dvEditBankAccountBalance,
+        dvEditBankAccountBalanceCache,
         //// balance delete confirmation dialog box
         bdBalance,
 
