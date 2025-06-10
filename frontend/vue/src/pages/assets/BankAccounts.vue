@@ -88,7 +88,7 @@ function refetch() {
   bankAccountsStore.listViewBalancesEndDate = parsedListViewBalancesEndDate
 
   const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
-  bankAccountsStore.hydrate(
+  bankAccountsStore.lvHydrate(
     query.listViewFilter?.toString() || "",
     parsedListViewBalancesStartDate &&
       parsedListViewBalancesStartDate !== defaultListViewBalancesStartDate
@@ -102,7 +102,7 @@ function refetch() {
 }
 
 onMounted(() => refetch())
-onUnmounted(() => bankAccountsStore.dehydrate())
+onUnmounted(() => bankAccountsStore.lvDehydrate())
 
 const createBankAccount = async () => {
   const res = await bankAccountsStore.createBankAccount()

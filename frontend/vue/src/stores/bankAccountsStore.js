@@ -60,14 +60,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     //// list view
     // hydration
-    async function hydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initListViewPageSize) {
+    async function lvHydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initListViewPageSize) {
         listViewFilter.value = initListViewFilter
         listViewBalancesStartDate.value = initListViewBalancesStartDate
         listViewBalancesEndDate.value = initListViewBalancesEndDate
         listViewPageSize.value = initListViewPageSize
     }
 
-    function dehydrate() {
+    function lvDehydrate() {
         listViewFilter.value = ''
         listViewBalancesStartDate.value = 0
         listViewBalancesEndDate.value = 0
@@ -334,8 +334,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
         //// list view
         // hydration
-        hydrate,
-        dehydrate,
+        lvHydrate,
+        lvDehydrate,
         // CRUD
         createBankAccount,
         filterBankAccounts,
