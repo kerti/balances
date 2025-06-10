@@ -53,18 +53,16 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const dvBalanceEditorMode = ref('Add')
     const dvEditBankAccountBalance = ref({})
     const dvEditBankAccountBalanceCache = ref({})
-    // balance delete confirmation dialog box
-    const bdBalance = ref({})
 
     ////// actions
 
     //// list view
     // hydration
-    async function lvHydrate(initListViewFilter, initListViewBalancesStartDate, initListViewBalancesEndDate, initListViewPageSize) {
-        lvFilter.value = initListViewFilter
-        lvBalancesStartDate.value = initListViewBalancesStartDate
-        lvBalancesEndDate.value = initListViewBalancesEndDate
-        lvPageSize.value = initListViewPageSize
+    async function lvHydrate(initLVFilter, initLVBalancesStartDate, initLVBalancesEndDate, initLVPageSize) {
+        lvFilter.value = initLVFilter
+        lvBalancesStartDate.value = initLVBalancesStartDate
+        lvBalancesEndDate.value = initLVBalancesEndDate
+        lvPageSize.value = initLVPageSize
     }
 
     function lvDehydrate() {
@@ -107,7 +105,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             lvBalancesStartDate.value,
             lvBalancesEndDate.value,
             lvPageSize.value)
-        extractListViewChartData()
+        extractLVChartData()
     }
 
     async function getAccountToDeleteById(id) {
@@ -130,28 +128,28 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // cache prep, and reset
 
-    function resetListViewAddBankAccountDialog() {
+    function resetLVAddBankAccountDialog() {
         lvAddBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
-    function resetListViewDeleteBankAccountDialog() {
+    function resetLVDeleteBankAccountDialog() {
         lvDeleteBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
-    function revertAccountToCache() {
+    function revertDVBankAccountToCache() {
         if (dvAccountCache.value) {
             dvAccount.value = JSON.parse(JSON.stringify(dvAccountCache.value))
         }
     }
 
-    function prepBlankAccount() {
+    function prepDVBlankBankAccount() {
         dvAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
         dvAccountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
     // chart utils
 
-    function extractListViewChartData() {
+    function extractLVChartData() {
         lvChartData.value = lvBankAccounts.value.map(acc => {
             return {
                 label: acc.accountName,
@@ -169,11 +167,11 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // hydration
 
-    async function dvHydrate(initDetailViewBankAccountId, initDetailViewBalanceStartDate, initDetailViewBalanceEndDate, initDetailViewPageSize) {
-        dvBankAccountId.value = initDetailViewBankAccountId
-        dvBalancesStartDate.value = initDetailViewBalanceStartDate
-        dvBalancesEndDate.value = initDetailViewBalanceEndDate
-        dvPageSize.value = initDetailViewPageSize
+    async function dvHydrate(initDVBankAccountId, initDVBalanceStartDate, initDVBalanceEndDate, initDVPageSize) {
+        dvBankAccountId.value = initDVBankAccountId
+        dvBalancesStartDate.value = initDVBalanceStartDate
+        dvBalancesEndDate.value = initDVBalanceEndDate
+        dvPageSize.value = initDVPageSize
     }
 
     function dvDehydrate() {
@@ -187,7 +185,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dvBalanceEditorMode.value = 'Add'
         dvEditBankAccountBalance.value = {}
         dvEditBankAccountBalanceCache.value = {}
-        bdBalance.value = {}
     }
 
     // CRUD
@@ -199,7 +196,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             balance: dvEditBankAccountBalance.value.balance
         })
         if (!res.errorMessage) {
-            getBankAccountForDetailView()
+            getBankAccountForDV()
             toast.showToast('Balance created!', 'success')
             return res
         } else {
@@ -210,7 +207,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    async function getBankAccountForDetailView() {
+    async function getBankAccountForDV() {
         const fetchedAccount = await svc.getBankAccount(
             dvBankAccountId.value,
             dvBalancesStartDate.value,
@@ -220,7 +217,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dvAccount.value = JSON.parse(JSON.stringify(fetchedAccount))
         dvAccountCache.value = JSON.parse(JSON.stringify(fetchedAccount))
 
-        extractDetailViewChartData()
+        extractDVChartData()
     }
 
     async function getBankAccountBalanceById(id) {
@@ -243,7 +240,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function updateBankAccountBalance() {
         const res = await svc.updateBankAccountBalance(dvEditBankAccountBalance.value)
         if (!res.errorMessage) {
-            getBankAccountForDetailView()
+            getBankAccountForDV()
             getBankAccountBalanceById(res.id)
             toast.showToast('Balance updated!', 'success')
             return res
@@ -258,7 +255,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function deleteBankAccountBalance() {
         const res = await svc.deleteBankAccountBalance(dvEditBankAccountBalance.value.id)
         if (!res.errorMessage) {
-            getBankAccountForDetailView()
+            getBankAccountForDV()
             toast.showToast('Balance deleted!', 'success')
             return res
         } else {
@@ -271,13 +268,13 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // cache prep and reset
 
-    function revertBalanceToCache() {
+    function revertDVBankAccountBalanceToCache() {
         if (dvEditBankAccountBalanceCache.value) {
             dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(dvEditBankAccountBalanceCache.value))
         }
     }
 
-    function prepBlankBalance() {
+    function prepDVBlankBankAccountBalance() {
         const template = JSON.parse(JSON.stringify(blankBankAccountBalance))
         template.bankAccountId = dvBankAccountId.value
         dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(template))
@@ -286,7 +283,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // chart utils
 
-    function extractDetailViewChartData() {
+    function extractDVChartData() {
         dvChartData.value = [{
             label: dvAccount.value.accountName,
             data: dvAccount.value.balances.map(balance => {
@@ -327,8 +324,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dvBalanceEditorMode,
         dvEditBankAccountBalance,
         dvEditBankAccountBalanceCache,
-        //// balance delete confirmation dialog box
-        bdBalance,
 
         ////// actions
 
@@ -342,10 +337,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         getAccountToDeleteById,
         deleteBankAccount,
         // cache and prep
-        resetListViewAddBankAccountDialog,
-        resetListViewDeleteBankAccountDialog,
-        revertAccountToCache,
-        prepBlankAccount,
+        resetLVAddBankAccountDialog,
+        resetLVDeleteBankAccountDialog,
+        revertDVBankAccountToCache,
+        prepDVBlankBankAccount,
 
         //// detail view
         // hydration
@@ -353,13 +348,13 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         dvDehydrate,
         // CRUD
         createBankAccountBalance,
-        getBankAccountForDetailView,
+        getBankAccountForDV,
         getBankAccountBalanceById,
         updateBankAccount,
         updateBankAccountBalance,
         deleteBankAccountBalance,
         // cache and prep
-        revertBalanceToCache,
-        prepBlankBalance,
+        revertDVBankAccountBalanceToCache,
+        prepDVBlankBankAccountBalance,
     }
 })

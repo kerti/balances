@@ -22,7 +22,7 @@ const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize() * 31 // assume maximum of 31 balances per month
 
 const debouncedGet = debounce(() => {
-  bankAccountsStore.getBankAccountForDetailView()
+  bankAccountsStore.getBankAccountForDV()
 }, 300)
 
 // TODO: add controls to leverage this
@@ -38,10 +38,10 @@ watch(
         ? newPageSize
         : undefined
 
-    const defaultDetailViewBalanceStartDate = dateUtils.getEpochOneYearAgo()
+    const defaultDVBalanceStartDate = dateUtils.getEpochOneYearAgo()
     const dvBalancesStartDateParam =
       Number.isInteger(newBalanceStartDate) &&
-      newBalanceStartDate !== defaultDetailViewBalanceStartDate
+      newBalanceStartDate !== defaultDVBalanceStartDate
         ? newBalanceStartDate
         : undefined
 
@@ -63,42 +63,42 @@ watch(
 function refetch() {
   const query = route.query
 
-  const parsedDetailViewPageSize = numUtils.queryParamToInt(
+  const parsedDVPageSize = numUtils.queryParamToInt(
     query.pageSize,
     defaultPageSize
   )
 
-  const parsedDetailViewBalanceStartDate = numUtils.queryParamToNullableInt(
+  const parsedDVBalanceStartDate = numUtils.queryParamToNullableInt(
     query.dvBalancesStartDate
   )
-  bankAccountsStore.dvBalancesStartDate = parsedDetailViewBalanceStartDate
+  bankAccountsStore.dvBalancesStartDate = parsedDVBalanceStartDate
 
-  const parsedDetailViewBalanceEndDate = numUtils.queryParamToNullableInt(
+  const parsedDVBalanceEndDate = numUtils.queryParamToNullableInt(
     query.dvBalancesEndDate
   )
-  bankAccountsStore.dvBalancesEndDate = parsedDetailViewBalanceEndDate
+  bankAccountsStore.dvBalancesEndDate = parsedDVBalanceEndDate
 
-  const defaultDetailViewBalanceStartDate = dateUtils.getEpochOneYearAgo()
+  const defaultDVBalanceStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.dvHydrate(
     route.params.id,
-    parsedDetailViewBalanceStartDate &&
-      parsedDetailViewBalanceStartDate !== defaultDetailViewBalanceStartDate
-      ? parsedDetailViewBalanceStartDate
-      : defaultDetailViewBalanceStartDate,
-    parsedDetailViewBalanceEndDate,
-    parsedDetailViewPageSize
+    parsedDVBalanceStartDate &&
+      parsedDVBalanceStartDate !== defaultDVBalanceStartDate
+      ? parsedDVBalanceStartDate
+      : defaultDVBalanceStartDate,
+    parsedDVBalanceEndDate,
+    parsedDVPageSize
   )
 }
 
 onMounted(() => {
   refetch()
-  bankAccountsStore.getBankAccountForDetailView()
+  bankAccountsStore.getBankAccountForDV()
 })
 
 onUnmounted(() => bankAccountsStore.dvDehydrate())
 
 const resetAccountForm = () => {
-  bankAccountsStore.revertAccountToCache()
+  bankAccountsStore.revertDVBankAccountToCache()
 }
 
 const saveAccount = () => {
@@ -111,13 +111,13 @@ const showEditor = (balanceId) => {
     bankAccountsStore.getBankAccountBalanceById(balanceId)
   } else {
     bankAccountsStore.dvBalanceEditorMode = "Add"
-    bankAccountsStore.prepBlankBalance()
+    bankAccountsStore.prepDVBlankBankAccountBalance()
   }
   balanceEditor.showModal()
 }
 
 const resetBalanceForm = () => {
-  bankAccountsStore.revertBalanceToCache()
+  bankAccountsStore.revertDVBankAccountBalanceToCache()
 }
 
 const saveBalance = async () => {

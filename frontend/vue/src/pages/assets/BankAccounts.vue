@@ -33,30 +33,29 @@ watch(
     () => bankAccountsStore.lvPageSize,
   ],
   ([
-    newListViewFilter,
-    newListViewBalancesStartDate,
-    newListViewBalancesEndDate,
-    newListViewPageSize,
+    newLVFilter,
+    newLVBalancesStartDate,
+    newLVBalancesEndDate,
+    newLVPageSize,
   ]) => {
     const lvPageSizeParam =
-      Number.isInteger(newListViewPageSize) &&
-      newListViewPageSize !== defaultPageSize
-        ? newListViewPageSize
+      Number.isInteger(newLVPageSize) && newLVPageSize !== defaultPageSize
+        ? newLVPageSize
         : undefined
 
-    const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
+    const defaultLVBalancesStartDate = dateUtils.getEpochOneYearAgo()
     const lvBalancesStartDateParam =
-      Number.isInteger(newListViewBalancesStartDate) &&
-      newListViewBalancesStartDate !== defaultListViewBalancesStartDate
-        ? newListViewBalancesStartDate
+      Number.isInteger(newLVBalancesStartDate) &&
+      newLVBalancesStartDate !== defaultLVBalancesStartDate
+        ? newLVBalancesStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
-        lvFilter: newListViewFilter || undefined,
+        lvFilter: newLVFilter || undefined,
         lvBalancesStartDate: lvBalancesStartDateParam,
-        lvBalancesEndDate: newListViewBalancesEndDate || undefined,
+        lvBalancesEndDate: newLVBalancesEndDate || undefined,
         lvPageSize: lvPageSizeParam,
       },
     })
@@ -65,37 +64,37 @@ watch(
 )
 
 const showAddBankAccountDialog = () => {
-  bankAccountsStore.resetListViewAddBankAccountDialog()
+  bankAccountsStore.resetLVAddBankAccountDialog()
   lvAddBankAccountDialog.showModal()
 }
 
 function refetch() {
   const query = route.query
 
-  const parsedListViewPageSize = numUtils.queryParamToInt(
+  const parsedLVPageSize = numUtils.queryParamToInt(
     query.lvPageSize,
     defaultPageSize
   )
 
-  const parsedListViewBalancesStartDate = numUtils.queryParamToNullableInt(
+  const parsedLVBalancesStartDate = numUtils.queryParamToNullableInt(
     query.lvBalancesStartDate
   )
-  bankAccountsStore.lvBalancesStartDate = parsedListViewBalancesStartDate
+  bankAccountsStore.lvBalancesStartDate = parsedLVBalancesStartDate
 
-  const parsedListViewBalancesEndDate = numUtils.queryParamToNullableInt(
+  const parsedLVBalancesEndDate = numUtils.queryParamToNullableInt(
     query.lvBalancesEndDate
   )
-  bankAccountsStore.lvBalancesEndDate = parsedListViewBalancesEndDate
+  bankAccountsStore.lvBalancesEndDate = parsedLVBalancesEndDate
 
-  const defaultListViewBalancesStartDate = dateUtils.getEpochOneYearAgo()
+  const defaultLVBalancesStartDate = dateUtils.getEpochOneYearAgo()
   bankAccountsStore.lvHydrate(
     query.lvFilter?.toString() || "",
-    parsedListViewBalancesStartDate &&
-      parsedListViewBalancesStartDate !== defaultListViewBalancesStartDate
-      ? parsedListViewBalancesStartDate
-      : defaultListViewBalancesStartDate,
-    parsedListViewBalancesEndDate,
-    parsedListViewPageSize
+    parsedLVBalancesStartDate &&
+      parsedLVBalancesStartDate !== defaultLVBalancesStartDate
+      ? parsedLVBalancesStartDate
+      : defaultLVBalancesStartDate,
+    parsedLVBalancesEndDate,
+    parsedLVPageSize
   )
 
   debouncedFilterBankAccounts()
@@ -108,7 +107,7 @@ const createBankAccount = async () => {
   const res = await bankAccountsStore.createBankAccount()
   if (!res.errorMessage) {
     lvAddBankAccountDialog.close()
-    bankAccountsStore.resetListViewAddBankAccountDialog()
+    bankAccountsStore.resetLVAddBankAccountDialog()
   }
 }
 
@@ -119,14 +118,14 @@ const showDeleteBankAccountConfirmation = (accountId) => {
 
 const cancelDeleteBankAccount = () => {
   lvDeleteBankAccountDialog.close()
-  bankAccountsStore.resetListViewDeleteBankAccountDialog()
+  bankAccountsStore.resetLVDeleteBankAccountDialog()
 }
 
 const deleteBankAccount = async () => {
   const res = await bankAccountsStore.deleteBankAccount()
   if (!res.errorMessage) {
     lvDeleteBankAccountDialog.close()
-    bankAccountsStore.resetListViewDeleteBankAccountDialog()
+    bankAccountsStore.resetLVDeleteBankAccountDialog()
   }
 }
 </script>
@@ -318,7 +317,7 @@ const deleteBankAccount = async () => {
           </button>
           <button
             type="button"
-            @click="bankAccountsStore.resetListViewAddBankAccountDialog()"
+            @click="bankAccountsStore.resetLVAddBankAccountDialog()"
             class="btn btn-secondary"
           >
             Reset
