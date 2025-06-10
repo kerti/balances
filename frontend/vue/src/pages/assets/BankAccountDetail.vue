@@ -80,7 +80,7 @@ function refetch() {
   bankAccountsStore.detailViewBalancesEndDate = parsedDetailViewBalanceEndDate
 
   const defaultDetailViewBalanceStartDate = dateUtils.getEpochOneYearAgo()
-  bankAccountsStore.hydrateDetail(
+  bankAccountsStore.dvHydrate(
     route.params.id,
     parsedDetailViewBalanceStartDate &&
       parsedDetailViewBalanceStartDate !== defaultDetailViewBalanceStartDate
@@ -96,7 +96,7 @@ onMounted(() => {
   bankAccountsStore.getBankAccountForDetailView()
 })
 
-onUnmounted(() => bankAccountsStore.dehydrateDetail())
+onUnmounted(() => bankAccountsStore.dvDehydrate())
 
 const resetAccountForm = () => {
   bankAccountsStore.revertAccountToCache()

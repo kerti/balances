@@ -169,14 +169,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // hydration
 
-    async function hydrateDetail(initDetailViewBankAccountId, initDetailViewBalanceStartDate, initDetailViewBalanceEndDate, initDetailViewPageSize) {
+    async function dvHydrate(initDetailViewBankAccountId, initDetailViewBalanceStartDate, initDetailViewBalanceEndDate, initDetailViewPageSize) {
         detailViewBankAccountId.value = initDetailViewBankAccountId
         detailViewBalancesStartDate.value = initDetailViewBalanceStartDate
         detailViewBalancesEndDate.value = initDetailViewBalanceEndDate
         detailViewPageSize.value = initDetailViewPageSize
     }
 
-    function dehydrateDetail() {
+    function dvDehydrate() {
         detailViewBankAccountId.value = ''
         detailViewBalancesStartDate.value = 0
         detailViewBalancesEndDate.value = 0
@@ -349,8 +349,8 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
         //// detail view
         // hydration
-        hydrateDetail,
-        dehydrateDetail,
+        dvHydrate,
+        dvDehydrate,
         // CRUD
         createBankAccountBalance,
         getBankAccountForDetailView,
