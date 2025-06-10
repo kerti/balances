@@ -19,18 +19,18 @@ const ev = useEnvUtils()
 const route = useRoute()
 const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
-const defaultPageSize = ev.getDefaultPageSize() * 12 // assume about 10 balances per month
+const defaultPageSize = ev.getDefaultPageSize() * 31 // assume maximum of 31 balances per month
 
 const debouncedGet = debounce(() => {
-  bankAccountsStore.get()
+  bankAccountsStore.getBankAccountForDV()
 }, 300)
 
 // TODO: add controls to leverage this
 watch(
   [
-    () => bankAccountsStore.detailBalanceStartDate,
-    () => bankAccountsStore.detailBalanceEndDate,
-    () => bankAccountsStore.detailPageSize,
+    () => bankAccountsStore.dvBalancesStartDate,
+    () => bankAccountsStore.dvBalancesEndDate,
+    () => bankAccountsStore.dvPageSize,
   ],
   ([newBalanceStartDate, newBalanceEndDate, newPageSize]) => {
     const pageSizeParam =
@@ -38,23 +38,23 @@ watch(
         ? newPageSize
         : undefined
 
-    const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
-    const balanceStartDateParam =
+    const defaultDVBalanceStartDate = dateUtils.getEpochOneYearAgo()
+    const dvBalancesStartDateParam =
       Number.isInteger(newBalanceStartDate) &&
-      newBalanceStartDate !== defaultBalanceStartDate
+      newBalanceStartDate !== defaultDVBalanceStartDate
         ? newBalanceStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
-        balanceStartDate: balanceStartDateParam,
-        balanceEndDate: newBalanceEndDate || undefined,
+        dvBalancesStartDate: dvBalancesStartDateParam,
+        dvBalancesEndDate: newBalanceEndDate || undefined,
         pageSize: pageSizeParam,
       },
     })
     // prevent double-fetching on initial component mount
-    if (bankAccountsStore.account.bankName !== undefined) {
+    if (bankAccountsStore.dvAccount.bankName !== undefined) {
       debouncedGet()
     }
   }
@@ -63,70 +63,71 @@ watch(
 function refetch() {
   const query = route.query
 
-  const parsedPageSize = numUtils.queryParamToInt(
+  const parsedDVPageSize = numUtils.queryParamToInt(
     query.pageSize,
     defaultPageSize
   )
 
-  const parsedBalanceStartDate = numUtils.queryParamToNullableInt(
-    query.balanceStartDate
+  const parsedDVBalanceStartDate = numUtils.queryParamToNullableInt(
+    query.dvBalancesStartDate
   )
-  bankAccountsStore.balancesStartDate = parsedBalanceStartDate
+  bankAccountsStore.dvBalancesStartDate = parsedDVBalanceStartDate
 
-  const parsedBalanceEndDate = numUtils.queryParamToNullableInt(
-    query.balanceEndDate
+  const parsedDVBalanceEndDate = numUtils.queryParamToNullableInt(
+    query.dvBalancesEndDate
   )
-  bankAccountsStore.balancesEndDate = parsedBalanceEndDate
+  bankAccountsStore.dvBalancesEndDate = parsedDVBalanceEndDate
 
-  const defaultBalanceStartDate = dateUtils.getEpochOneYearAgo()
-  bankAccountsStore.hydrateDetail(
+  const defaultDVBalanceStartDate = dateUtils.getEpochOneYearAgo()
+  bankAccountsStore.dvHydrate(
     route.params.id,
-    parsedBalanceStartDate && parsedBalanceStartDate !== defaultBalanceStartDate
-      ? parsedBalanceStartDate
-      : defaultBalanceStartDate,
-    parsedBalanceEndDate,
-    parsedPageSize
+    parsedDVBalanceStartDate &&
+      parsedDVBalanceStartDate !== defaultDVBalanceStartDate
+      ? parsedDVBalanceStartDate
+      : defaultDVBalanceStartDate,
+    parsedDVBalanceEndDate,
+    parsedDVPageSize
   )
 }
 
 onMounted(() => {
   refetch()
-  bankAccountsStore.get()
+  bankAccountsStore.getBankAccountForDV()
 })
 
-onUnmounted(() => bankAccountsStore.dehydrateDetail())
+onUnmounted(() => bankAccountsStore.dvDehydrate())
 
 const resetAccountForm = () => {
-  bankAccountsStore.revertAccountToCache()
+  bankAccountsStore.revertDVBankAccountToCache()
 }
 
 const saveAccount = () => {
-  bankAccountsStore.update()
+  bankAccountsStore.updateBankAccount()
 }
 
 const showEditor = (balanceId) => {
   if (balanceId) {
-    bankAccountsStore.balanceEditorMode = "Edit"
-    bankAccountsStore.getBalanceById(balanceId)
+    bankAccountsStore.dvBalanceEditorMode = "Edit"
+    bankAccountsStore.getBankAccountBalanceById(balanceId)
   } else {
-    bankAccountsStore.balanceEditorMode = "Add"
-    bankAccountsStore.prepBlankBalance()
+    bankAccountsStore.dvBalanceEditorMode = "Add"
+    bankAccountsStore.prepDVBlankBankAccountBalance()
   }
   balanceEditor.showModal()
 }
 
 const resetBalanceForm = () => {
-  bankAccountsStore.revertBalanceToCache()
+  bankAccountsStore.revertDVBankAccountBalanceToCache()
 }
 
 const saveBalance = async () => {
-  if (bankAccountsStore.balanceEditorMode == "Edit") {
-    const res = await bankAccountsStore.updateBalance()
+  if (bankAccountsStore.dvBalanceEditorMode == "Edit") {
+    const res = await bankAccountsStore.updateBankAccountBalance()
     if (!res.errorMessage) {
       balanceEditor.close()
     }
-  } else if (bankAccountsStore.balanceEditorMode == "Add") {
-    const res = await bankAccountsStore.createBalance()
+  } else if (bankAccountsStore.dvBalanceEditorMode == "Add") {
+    const res = await bankAccountsStore.createBankAccountBalance()
     if (!res.errorMessage) {
       balanceEditor.close()
     }
@@ -134,7 +135,7 @@ const saveBalance = async () => {
 }
 
 const showBalanceDeleteConfirmaton = (balanceId) => {
-  bankAccountsStore.getBalanceById(balanceId)
+  bankAccountsStore.getBankAccountBalanceById(balanceId)
   bdConfirm.showModal()
 }
 
@@ -143,7 +144,7 @@ const cancelBalanceDelete = () => {
 }
 
 const deleteBalance = async () => {
-  const res = await bankAccountsStore.deleteAccountBalance()
+  const res = await bankAccountsStore.deleteBankAccountBalance()
   if (!res.errorMessage) {
     bdConfirm.close()
   }
@@ -162,7 +163,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Name</label>
               <input
-                v-model="bankAccountsStore.account.accountName"
+                v-model="bankAccountsStore.dvAccount.accountName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -170,7 +171,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Bank Name</label>
               <input
-                v-model="bankAccountsStore.account.bankName"
+                v-model="bankAccountsStore.dvAccount.bankName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -178,7 +179,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Holder Name</label>
               <input
-                v-model="bankAccountsStore.account.accountHolderName"
+                v-model="bankAccountsStore.dvAccount.accountHolderName"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -186,7 +187,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Account Number</label>
               <input
-                v-model="bankAccountsStore.account.accountNumber"
+                v-model="bankAccountsStore.dvAccount.accountNumber"
                 type="text"
                 class="input input-bordered w-full"
               />
@@ -194,7 +195,7 @@ const deleteBalance = async () => {
             <div>
               <label class="label">Status</label>
               <select
-                v-model="bankAccountsStore.account.status"
+                v-model="bankAccountsStore.dvAccount.status"
                 class="select select-bordered w-full"
               >
                 <option>active</option>
@@ -245,7 +246,8 @@ const deleteBalance = async () => {
               </thead>
               <tbody>
                 <tr
-                  v-for="(balance, index) in bankAccountsStore.account.balances"
+                  v-for="(balance, index) in bankAccountsStore.dvAccount
+                    .balances"
                   :key="index"
                 >
                   <td>{{ dateUtils.epochToShortLocalDate(balance.date) }}</td>
@@ -296,13 +298,13 @@ const deleteBalance = async () => {
         </button>
       </form>
       <h3 class="text-lg font-bold pb-5">
-        {{ bankAccountsStore.balanceEditorMode }} Bank Account Balance
+        {{ bankAccountsStore.dvBalanceEditorMode }} Bank Account Balance
       </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
           <label class="label">Balance</label>
           <input
-            v-model="bankAccountsStore.beBalance.balance"
+            v-model="bankAccountsStore.dvEditBankAccountBalance.balance"
             type="text"
             class="input input-bordered w-full"
           />
@@ -310,7 +312,7 @@ const deleteBalance = async () => {
         <div>
           <label class="label">Date</label>
           <DatePicker
-            v-model:date="bankAccountsStore.beBalance.date"
+            v-model:date="bankAccountsStore.dvEditBankAccountBalance.date"
             placeholder="pick a date"
             required
           />
@@ -347,11 +349,19 @@ const deleteBalance = async () => {
         <div class="grid grid-cols-2 grid-rows-2 gap-4">
           <div>Balance</div>
           <div>
-            {{ numUtils.numericToMoney(bankAccountsStore.beBalance.balance) }}
+            {{
+              numUtils.numericToMoney(
+                bankAccountsStore.dvEditBankAccountBalance.balance
+              )
+            }}
           </div>
           <div>Date</div>
           <div>
-            {{ dateUtils.epochToLocalDate(bankAccountsStore.beBalance.date) }}
+            {{
+              dateUtils.epochToLocalDate(
+                bankAccountsStore.dvEditBankAccountBalance.date
+              )
+            }}
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-4">

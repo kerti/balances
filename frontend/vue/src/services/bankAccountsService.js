@@ -10,7 +10,7 @@ import {
     searchBankAccountBalancesFromAPI,
     getBankAccountBalanceFromAPI,
     updateAccountBalanceWithAPI,
-    deleteAccountBalanceWithAPI,
+    deleteBankAccountBalanceWithAPI,
 } from '@/api/bankAccountsApi';
 
 export function useBankAccountsService() {
@@ -175,7 +175,7 @@ export function useBankAccountsService() {
 
     // delete
     async function deleteBankAccountBalance(id) {
-        const result = await deleteAccountBalanceWithAPI(id)
+        const result = await deleteBankAccountBalanceWithAPI(id)
 
         if (!result.errorMessage) {
             return result.data

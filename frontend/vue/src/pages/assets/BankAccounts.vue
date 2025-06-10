@@ -21,101 +21,111 @@ const router = useRouter()
 const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize()
 
-const debouncedSearch = debounce(() => {
-  bankAccountsStore.search()
+const debouncedFilterBankAccounts = debounce(() => {
+  bankAccountsStore.filterBankAccounts()
 }, 300)
 
 watch(
   [
-    () => bankAccountsStore.filter,
-    () => bankAccountsStore.balancesStartDate,
-    () => bankAccountsStore.balancesEndDate,
-    () => bankAccountsStore.pageSize,
+    () => bankAccountsStore.lvFilter,
+    () => bankAccountsStore.lvBalancesStartDate,
+    () => bankAccountsStore.lvBalancesEndDate,
+    () => bankAccountsStore.lvPageSize,
   ],
-  ([newFilter, newBalancesStartDate, newBalancesEndDate, newPageSize]) => {
-    const pageSizeParam =
-      Number.isInteger(newPageSize) && newPageSize !== defaultPageSize
-        ? newPageSize
+  ([
+    newLVFilter,
+    newLVBalancesStartDate,
+    newLVBalancesEndDate,
+    newLVPageSize,
+  ]) => {
+    const lvPageSizeParam =
+      Number.isInteger(newLVPageSize) && newLVPageSize !== defaultPageSize
+        ? newLVPageSize
         : undefined
 
-    const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
-    const balancesStartDateParam =
-      Number.isInteger(newBalancesStartDate) &&
-      newBalancesStartDate !== defaultBalancesStartDate
-        ? newBalancesStartDate
+    const defaultLVBalancesStartDate = dateUtils.getEpochOneYearAgo()
+    const lvBalancesStartDateParam =
+      Number.isInteger(newLVBalancesStartDate) &&
+      newLVBalancesStartDate !== defaultLVBalancesStartDate
+        ? newLVBalancesStartDate
         : undefined
 
     router.replace({
       query: {
         ...route.query,
-        filter: newFilter || undefined,
-        balancesStartDate: balancesStartDateParam,
-        balancesEndDate: newBalancesEndDate || undefined,
-        pageSize: pageSizeParam,
+        lvFilter: newLVFilter || undefined,
+        lvBalancesStartDate: lvBalancesStartDateParam,
+        lvBalancesEndDate: newLVBalancesEndDate || undefined,
+        lvPageSize: lvPageSizeParam,
       },
     })
-    debouncedSearch()
+    debouncedFilterBankAccounts()
   }
 )
 
-const showAdder = () => {
-  bankAccountsStore.prepBlankAccount()
-  accountAdder.showModal()
+const showAddBankAccountDialog = () => {
+  bankAccountsStore.resetLVAddBankAccountDialog()
+  lvAddBankAccountDialog.showModal()
 }
 
 function refetch() {
   const query = route.query
 
-  const parsedPageSize = numUtils.queryParamToInt(
-    query.pageSize,
+  const parsedLVPageSize = numUtils.queryParamToInt(
+    query.lvPageSize,
     defaultPageSize
   )
 
-  const parsedBalancesStartDate = numUtils.queryParamToNullableInt(
-    query.balancesStartDate
+  const parsedLVBalancesStartDate = numUtils.queryParamToNullableInt(
+    query.lvBalancesStartDate
   )
-  bankAccountsStore.balancesStartDate = parsedBalancesStartDate
+  bankAccountsStore.lvBalancesStartDate = parsedLVBalancesStartDate
 
-  const parsedBalancesEndDate = numUtils.queryParamToNullableInt(
-    query.balancesEndDate
+  const parsedLVBalancesEndDate = numUtils.queryParamToNullableInt(
+    query.lvBalancesEndDate
   )
-  bankAccountsStore.balancesEndDate = parsedBalancesEndDate
+  bankAccountsStore.lvBalancesEndDate = parsedLVBalancesEndDate
 
-  const defaultBalancesStartDate = dateUtils.getEpochOneYearAgo()
-  bankAccountsStore.hydrate(
-    query.filter?.toString() || "",
-    parsedBalancesStartDate &&
-      parsedBalancesStartDate !== defaultBalancesStartDate
-      ? parsedBalancesStartDate
-      : defaultBalancesStartDate,
-    parsedBalancesEndDate,
-    parsedPageSize
+  const defaultLVBalancesStartDate = dateUtils.getEpochOneYearAgo()
+  bankAccountsStore.lvHydrate(
+    query.lvFilter?.toString() || "",
+    parsedLVBalancesStartDate &&
+      parsedLVBalancesStartDate !== defaultLVBalancesStartDate
+      ? parsedLVBalancesStartDate
+      : defaultLVBalancesStartDate,
+    parsedLVBalancesEndDate,
+    parsedLVPageSize
   )
+
+  debouncedFilterBankAccounts()
 }
 
 onMounted(() => refetch())
-onUnmounted(() => bankAccountsStore.dehydrate())
+onUnmounted(() => bankAccountsStore.lvDehydrate())
 
-const saveAccount = async () => {
-  const res = await bankAccountsStore.createAccount()
+const createBankAccount = async () => {
+  const res = await bankAccountsStore.createBankAccount()
   if (!res.errorMessage) {
-    accountAdder.close()
+    lvAddBankAccountDialog.close()
+    bankAccountsStore.resetLVAddBankAccountDialog()
   }
 }
 
-const showAccountDeleteConfirmation = (accountId) => {
-  bankAccountsStore.getById(accountId)
-  adConfirm.showModal()
+const showDeleteBankAccountConfirmation = (accountId) => {
+  bankAccountsStore.getAccountToDeleteById(accountId)
+  lvDeleteBankAccountDialog.showModal()
 }
 
-const cancelAccountDelete = () => {
-  adConfirm.close()
+const cancelDeleteBankAccount = () => {
+  lvDeleteBankAccountDialog.close()
+  bankAccountsStore.resetLVDeleteBankAccountDialog()
 }
 
-const deleteAccount = async () => {
-  const res = await bankAccountsStore.deleteAccount()
+const deleteBankAccount = async () => {
+  const res = await bankAccountsStore.deleteBankAccount()
   if (!res.errorMessage) {
-    adConfirm.close()
+    lvDeleteBankAccountDialog.close()
+    bankAccountsStore.resetLVDeleteBankAccountDialog()
   }
 }
 </script>
@@ -130,14 +140,14 @@ const deleteAccount = async () => {
           <div class="form-control flex gap-3">
             <input
               type="text"
-              v-model="bankAccountsStore.filter"
+              v-model="bankAccountsStore.lvFilter"
               placeholder="Search accounts..."
               class="input input-bordered w-64"
             />
             <button
               class="btn btn-neutral btn-circle tooltip"
               data-tip="Add New Bank Account"
-              v-on:click="showAdder()"
+              v-on:click="showAddBankAccountDialog()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
             </button>
@@ -156,7 +166,7 @@ const deleteAccount = async () => {
             </thead>
             <tbody>
               <tr
-                v-for="(account, index) in bankAccountsStore.accounts"
+                v-for="(account, index) in bankAccountsStore.lvBankAccounts"
                 :key="index"
                 class="hover:bg-base-300"
               >
@@ -217,7 +227,7 @@ const deleteAccount = async () => {
                     <button
                       class="btn btn-neutral tooltip"
                       data-tip="Delete"
-                      v-on:click="showAccountDeleteConfirmation(account.id)"
+                      v-on:click="showDeleteBankAccountConfirmation(account.id)"
                     >
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
@@ -240,7 +250,7 @@ const deleteAccount = async () => {
   </div>
 
   <!-- Dialog Box: Account Adder -->
-  <dialog id="accountAdder" class="modal">
+  <dialog id="lvAddBankAccountDialog" class="modal">
     <div class="modal-box overflow-visible relative z-50">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
@@ -252,7 +262,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Name</label>
           <input
-            v-model="bankAccountsStore.account.accountName"
+            v-model="bankAccountsStore.lvAddBankAccount.accountName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -260,7 +270,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Bank Name</label>
           <input
-            v-model="bankAccountsStore.account.bankName"
+            v-model="bankAccountsStore.lvAddBankAccount.bankName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -268,7 +278,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Holder Name</label>
           <input
-            v-model="bankAccountsStore.account.accountHolderName"
+            v-model="bankAccountsStore.lvAddBankAccount.accountHolderName"
             type="text"
             class="input input-bordered w-full"
           />
@@ -276,7 +286,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Account Number</label>
           <input
-            v-model="bankAccountsStore.account.accountNumber"
+            v-model="bankAccountsStore.lvAddBankAccount.accountNumber"
             type="text"
             class="input input-bordered w-full"
           />
@@ -284,7 +294,7 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Initial Balance</label>
           <input
-            v-model="bankAccountsStore.account.lastBalance"
+            v-model="bankAccountsStore.lvAddBankAccount.lastBalance"
             type="text"
             class="input input-bordered w-full"
           />
@@ -292,18 +302,22 @@ const deleteAccount = async () => {
         <div>
           <label class="label">Initial Balance Date</label>
           <DatePicker
-            v-model:date="bankAccountsStore.account.lastBalanceDate"
+            v-model:date="bankAccountsStore.lvAddBankAccount.lastBalanceDate"
             placeholder="pick a date"
             required
           />
         </div>
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" @click="saveAccount" class="btn btn-primary">
+          <button
+            type="button"
+            @click="createBankAccount"
+            class="btn btn-primary"
+          >
             Save
           </button>
           <button
             type="button"
-            @click="resetBalanceForm"
+            @click="bankAccountsStore.resetLVAddBankAccountDialog()"
             class="btn btn-secondary"
           >
             Reset
@@ -314,7 +328,7 @@ const deleteAccount = async () => {
   </dialog>
 
   <!-- Dialog Box: Confirm Account Delete -->
-  <dialog id="adConfirm" class="modal">
+  <dialog id="lvDeleteBankAccountDialog" class="modal">
     <div class="modal-box overflow-visible relative z-50">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
@@ -325,24 +339,34 @@ const deleteAccount = async () => {
       <form class="grid grid-cols-1 gap-4">
         <div class="grid grid-cols-2 grid-rows-7 gap-4">
           <div>Account Name</div>
-          <div>{{ bankAccountsStore.account.accountName }}</div>
+          <div>
+            {{ bankAccountsStore.lvDeleteBankAccount.accountName }}
+          </div>
           <div>Bank Name</div>
-          <div>{{ bankAccountsStore.account.bankName }}</div>
+          <div>{{ bankAccountsStore.lvDeleteBankAccount.bankName }}</div>
           <div>Account Holder Name</div>
-          <div>{{ bankAccountsStore.account.accountHolderName }}</div>
+          <div>
+            {{ bankAccountsStore.lvDeleteBankAccount.accountHolderName }}
+          </div>
           <div>Account Number</div>
-          <div>{{ bankAccountsStore.account.accountNumber }}</div>
+          <div>
+            {{ bankAccountsStore.lvDeleteBankAccount.accountNumber }}
+          </div>
           <div>Status</div>
-          <div>{{ bankAccountsStore.account.status }}</div>
+          <div>{{ bankAccountsStore.lvDeleteBankAccount.status }}</div>
           <div>Last Balance</div>
           <div>
-            {{ numUtils.numericToMoney(bankAccountsStore.account.lastBalance) }}
+            {{
+              numUtils.numericToMoney(
+                bankAccountsStore.lvDeleteBankAccount.lastBalance
+              )
+            }}
           </div>
           <div>Last Balance Date</div>
           <div>
             {{
               dateUtils.epochToLocalDate(
-                bankAccountsStore.account.lastBalanceDate
+                bankAccountsStore.lvDeleteBankAccount.lastBalanceDate
               )
             }}
           </div>
@@ -350,14 +374,14 @@ const deleteAccount = async () => {
         <div class="flex justify-end gap-2 pt-4">
           <button
             type="button"
-            @click="deleteAccount()"
+            @click="deleteBankAccount()"
             class="btn btn-primary"
           >
             Confirm
           </button>
           <button
             type="button"
-            @click="cancelAccountDelete()"
+            @click="cancelDeleteBankAccount()"
             class="btn btn-secondary"
           >
             Cancel
