@@ -92,7 +92,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create account: ' + res.errorMessage)
+            toast.showToast('Failed to create account: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -119,7 +119,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete account: ' + res.errorMessage)
+            toast.showToast('Failed to delete account: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -200,7 +200,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create balance: ' + res.errorMessage)
+            toast.showToast('Failed to create balance: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -248,7 +248,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance updated!', 'success')
             return res
         } else {
-            toast.showToast('Failed to save balance: ' + res.errorMessage)
+            toast.showToast('Failed to save balance: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -262,7 +262,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete balance: ' + res.errorMessage)
+            toast.showToast('Failed to delete balance: ' + res.errorMessage, 'error')
             return {
                 errorMessages: res.errorMessage
             }
