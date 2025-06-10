@@ -22,7 +22,7 @@ const bankAccountsStore = useBankAccountsStore()
 const defaultPageSize = ev.getDefaultPageSize() * 31 // assume maximum of 31 balances per month
 
 const debouncedGet = debounce(() => {
-  bankAccountsStore.get()
+  bankAccountsStore.getBankAccountForDetailView()
 }, 300)
 
 // TODO: add controls to leverage this
@@ -93,7 +93,7 @@ function refetch() {
 
 onMounted(() => {
   refetch()
-  bankAccountsStore.get()
+  bankAccountsStore.getBankAccountForDetailView()
 })
 
 onUnmounted(() => bankAccountsStore.dehydrateDetail())
@@ -103,15 +103,15 @@ const resetAccountForm = () => {
 }
 
 const saveAccount = () => {
-  bankAccountsStore.update()
+  bankAccountsStore.updateBankAccount()
 }
 
 const showEditor = (balanceId) => {
   if (balanceId) {
-    bankAccountsStore.balanceEditorMode = "Edit"
-    bankAccountsStore.getBalanceById(balanceId)
+    bankAccountsStore.detailViewBalanceEditorMode = "Edit"
+    bankAccountsStore.getBankAccountBalanceById(balanceId)
   } else {
-    bankAccountsStore.balanceEditorMode = "Add"
+    bankAccountsStore.detailViewBalanceEditorMode = "Add"
     bankAccountsStore.prepBlankBalance()
   }
   balanceEditor.showModal()
@@ -122,13 +122,13 @@ const resetBalanceForm = () => {
 }
 
 const saveBalance = async () => {
-  if (bankAccountsStore.balanceEditorMode == "Edit") {
-    const res = await bankAccountsStore.updateBalance()
+  if (bankAccountsStore.detailViewBalanceEditorMode == "Edit") {
+    const res = await bankAccountsStore.updateBankAccountBalance()
     if (!res.errorMessage) {
       balanceEditor.close()
     }
-  } else if (bankAccountsStore.balanceEditorMode == "Add") {
-    const res = await bankAccountsStore.createBalance()
+  } else if (bankAccountsStore.detailViewBalanceEditorMode == "Add") {
+    const res = await bankAccountsStore.createBankAccountBalance()
     if (!res.errorMessage) {
       balanceEditor.close()
     }
@@ -136,7 +136,7 @@ const saveBalance = async () => {
 }
 
 const showBalanceDeleteConfirmaton = (balanceId) => {
-  bankAccountsStore.getBalanceById(balanceId)
+  bankAccountsStore.getBankAccountBalanceById(balanceId)
   bdConfirm.showModal()
 }
 
@@ -145,7 +145,7 @@ const cancelBalanceDelete = () => {
 }
 
 const deleteBalance = async () => {
-  const res = await bankAccountsStore.deleteAccountBalance()
+  const res = await bankAccountsStore.deleteBankAccountBalance()
   if (!res.errorMessage) {
     bdConfirm.close()
   }
@@ -299,13 +299,13 @@ const deleteBalance = async () => {
         </button>
       </form>
       <h3 class="text-lg font-bold pb-5">
-        {{ bankAccountsStore.balanceEditorMode }} Bank Account Balance
+        {{ bankAccountsStore.detailViewBalanceEditorMode }} Bank Account Balance
       </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
           <label class="label">Balance</label>
           <input
-            v-model="bankAccountsStore.beBalance.balance"
+            v-model="bankAccountsStore.detailViewEditBankAccountBalance.balance"
             type="text"
             class="input input-bordered w-full"
           />
@@ -313,7 +313,9 @@ const deleteBalance = async () => {
         <div>
           <label class="label">Date</label>
           <DatePicker
-            v-model:date="bankAccountsStore.beBalance.date"
+            v-model:date="
+              bankAccountsStore.detailViewEditBankAccountBalance.date
+            "
             placeholder="pick a date"
             required
           />
@@ -350,11 +352,19 @@ const deleteBalance = async () => {
         <div class="grid grid-cols-2 grid-rows-2 gap-4">
           <div>Balance</div>
           <div>
-            {{ numUtils.numericToMoney(bankAccountsStore.beBalance.balance) }}
+            {{
+              numUtils.numericToMoney(
+                bankAccountsStore.detailViewEditBankAccountBalance.balance
+              )
+            }}
           </div>
           <div>Date</div>
           <div>
-            {{ dateUtils.epochToLocalDate(bankAccountsStore.beBalance.date) }}
+            {{
+              dateUtils.epochToLocalDate(
+                bankAccountsStore.detailViewEditBankAccountBalance.date
+              )
+            }}
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-4">

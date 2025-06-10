@@ -146,7 +146,7 @@ export async function updateAccountBalanceWithAPI(accountBalance) {
 }
 
 // delete
-export async function deleteAccountBalanceWithAPI(id) {
+export async function deleteBankAccountBalanceWithAPI(id) {
     try {
         const { data } = await axiosInstance.delete('bankAccounts/balances/' + id)
         return data

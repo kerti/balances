@@ -50,9 +50,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     const detailViewAccountCache = ref({})
     const detailViewChartData = ref([])
     // balance editor dialog box
-    const balanceEditorMode = ref('Add')
-    const beBalance = ref({})
-    const beBalanceCache = ref({})
+    const detailViewBalanceEditorMode = ref('Add')
+    const detailViewEditBankAccountBalance = ref({})
+    const detailViewEditBankAccountBalanceCache = ref({})
     // balance delete confirmation dialog box
     const bdBalance = ref({})
 
@@ -112,17 +112,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function getAccountToDeleteById(id) {
         listViewDeleteBankAccount.value = await svc.getBankAccount(id, null, null, 0)
-    }
-
-    async function update() {
-        const res = await svc.updateBankAccount(detailViewAccount.value)
-        if (!res.errorMessage) {
-            detailViewAccount.value = JSON.parse(JSON.stringify(res))
-            detailViewAccountCache.value = JSON.parse(JSON.stringify(res))
-            toast.showToast('Account updated!', 'success')
-        } else {
-            toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
-        }
     }
 
     async function deleteBankAccount() {
@@ -195,22 +184,22 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewAccount.value = {}
         detailViewAccountCache.value = {}
         detailViewChartData.value = []
-        balanceEditorMode.value = 'Add'
-        beBalance.value = {}
-        beBalanceCache.value = {}
+        detailViewBalanceEditorMode.value = 'Add'
+        detailViewEditBankAccountBalance.value = {}
+        detailViewEditBankAccountBalanceCache.value = {}
         bdBalance.value = {}
     }
 
     // CRUD
 
-    async function createBalance() {
+    async function createBankAccountBalance() {
         const res = await svc.createBankAccountBalance({
-            bankAccountId: beBalance.value.bankAccountId,
-            date: beBalance.value.date,
-            balance: beBalance.value.balance
+            bankAccountId: detailViewEditBankAccountBalance.value.bankAccountId,
+            date: detailViewEditBankAccountBalance.value.date,
+            balance: detailViewEditBankAccountBalance.value.balance
         })
         if (!res.errorMessage) {
-            get()
+            getBankAccountForDetailView()
             toast.showToast('Balance created!', 'success')
             return res
         } else {
@@ -221,7 +210,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    async function get() {
+    async function getBankAccountForDetailView() {
         const fetchedAccount = await svc.getBankAccount(
             detailViewBankAccountId.value,
             detailViewBalancesStartDate.value,
@@ -234,17 +223,28 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         extractDetailViewChartData()
     }
 
-    async function getBalanceById(id) {
+    async function getBankAccountBalanceById(id) {
         const fetchedBalance = await svc.getBankAccountBalance(id)
-        beBalance.value = JSON.parse(JSON.stringify(fetchedBalance))
-        beBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
+        detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(fetchedBalance))
+        detailViewEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(fetchedBalance))
     }
 
-    async function updateBalance() {
-        const res = await svc.updateBankAccountBalance(beBalance.value)
+    async function updateBankAccount() {
+        const res = await svc.updateBankAccount(detailViewAccount.value)
         if (!res.errorMessage) {
-            get()
-            getBalanceById(res.id)
+            detailViewAccount.value = JSON.parse(JSON.stringify(res))
+            detailViewAccountCache.value = JSON.parse(JSON.stringify(res))
+            toast.showToast('Account updated!', 'success')
+        } else {
+            toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
+        }
+    }
+
+    async function updateBankAccountBalance() {
+        const res = await svc.updateBankAccountBalance(detailViewEditBankAccountBalance.value)
+        if (!res.errorMessage) {
+            getBankAccountForDetailView()
+            getBankAccountBalanceById(res.id)
             toast.showToast('Balance updated!', 'success')
             return res
         } else {
@@ -255,10 +255,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    async function deleteAccountBalance() {
-        const res = await svc.deleteBankAccountBalance(beBalance.value.id)
+    async function deleteBankAccountBalance() {
+        const res = await svc.deleteBankAccountBalance(detailViewEditBankAccountBalance.value.id)
         if (!res.errorMessage) {
-            get()
+            getBankAccountForDetailView()
             toast.showToast('Balance deleted!', 'success')
             return res
         } else {
@@ -272,14 +272,16 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     // cache prep and reset
 
     function revertBalanceToCache() {
-        if (beBalanceCache.value) {
-            beBalance.value = JSON.parse(JSON.stringify(beBalanceCache.value))
+        if (detailViewEditBankAccountBalanceCache.value) {
+            detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(detailViewEditBankAccountBalanceCache.value))
         }
     }
 
     function prepBlankBalance() {
-        beBalance.value = JSON.parse(JSON.stringify(blankBankAccountBalance))
-        beBalanceCache.value = JSON.parse(JSON.stringify(blankBankAccountBalance))
+        const template = JSON.parse(JSON.stringify(blankBankAccountBalance))
+        template.bankAccountId = detailViewBankAccountId.value
+        detailViewEditBankAccountBalance.value = JSON.parse(JSON.stringify(template))
+        detailViewEditBankAccountBalanceCache.value = JSON.parse(JSON.stringify(template))
     }
 
     // chart utils
@@ -322,9 +324,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         detailViewAccountCache,
         detailViewChartData,
         // balance editor dialog box
-        balanceEditorMode,
-        beBalance,
-        beBalanceCache,
+        detailViewBalanceEditorMode,
+        detailViewEditBankAccountBalance,
+        detailViewEditBankAccountBalanceCache,
         //// balance delete confirmation dialog box
         bdBalance,
 
@@ -338,7 +340,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         createBankAccount,
         filterBankAccounts,
         getAccountToDeleteById,
-        update,
         deleteBankAccount,
         // cache and prep
         resetListViewAddBankAccountDialog,
@@ -351,11 +352,12 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         hydrateDetail,
         dehydrateDetail,
         // CRUD
-        createBalance,
-        get,
-        getBalanceById,
-        updateBalance,
-        deleteAccountBalance,
+        createBankAccountBalance,
+        getBankAccountForDetailView,
+        getBankAccountBalanceById,
+        updateBankAccount,
+        updateBankAccountBalance,
+        deleteBankAccountBalance,
         // cache and prep
         revertBalanceToCache,
         prepBlankBalance,
