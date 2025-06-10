@@ -229,6 +229,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function updateBankAccount() {
         const res = await svc.updateBankAccount(dvAccount.value)
         if (!res.errorMessage) {
+            // preserve balances records not fetched during bank account update
+            res.balances = JSON.parse(JSON.stringify(dvAccountCache.value.balances))
+            // then sync the store to the latest data from update
             dvAccount.value = JSON.parse(JSON.stringify(res))
             dvAccountCache.value = JSON.parse(JSON.stringify(res))
             toast.showToast('Account updated!', 'success')
