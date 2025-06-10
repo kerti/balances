@@ -92,7 +92,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create account: ' + res.errorMessage)
+            toast.showToast('Failed to create account: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -119,7 +119,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Account deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete account: ' + res.errorMessage)
+            toast.showToast('Failed to delete account: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -200,7 +200,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create balance: ' + res.errorMessage)
+            toast.showToast('Failed to create balance: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -229,6 +229,9 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     async function updateBankAccount() {
         const res = await svc.updateBankAccount(dvAccount.value)
         if (!res.errorMessage) {
+            // preserve balances records not fetched during bank account update
+            res.balances = JSON.parse(JSON.stringify(dvAccountCache.value.balances))
+            // then sync the store to the latest data from update
             dvAccount.value = JSON.parse(JSON.stringify(res))
             dvAccountCache.value = JSON.parse(JSON.stringify(res))
             toast.showToast('Account updated!', 'success')
@@ -245,7 +248,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance updated!', 'success')
             return res
         } else {
-            toast.showToast('Failed to save balance: ' + res.errorMessage)
+            toast.showToast('Failed to save balance: ' + res.errorMessage, 'error')
             return {
                 errorMessage: res.errorMessage
             }
@@ -259,7 +262,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             toast.showToast('Balance deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete balance: ' + res.errorMessage)
+            toast.showToast('Failed to delete balance: ' + res.errorMessage, 'error')
             return {
                 errorMessages: res.errorMessage
             }
