@@ -15,7 +15,8 @@ import (
 
 // common
 var (
-	banksTestNow       = time.Now()
+	bankTestNow        = time.Now()
+	banksTestYesterday = time.Now().AddDate(0, 0, -1)
 	banksTestUserID, _ = uuid.NewV7()
 )
 
@@ -24,6 +25,11 @@ var (
 	bankAccountsStmtInsert = `INSERT INTO bank_accounts
 	( entity_id, account_name, bank_name, account_holder_name, account_number, last_balance, last_balance_date, status, created, created_by, updated, updated_by, deleted, deleted_by )
 	VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )`
+
+	bankAccountsStmtUpdate = `
+	UPDATE bank_accounts
+	SET account_name = ?, bank_name = ?, account_holder_name = ?, account_number = ?, last_balance = ?, last_balance_date = ?, status = ?, created = ?, created_by = ?, updated = ?, updated_by = ?, deleted = ?, deleted_by = ?
+	WHERE entity_id = ?`
 )
 
 // bank account balances
@@ -34,14 +40,23 @@ var (
 )
 
 var (
-	banksTestAccountBalanceID1, _    = uuid.NewV7()
-	banksTestAccountBalanceID2, _    = uuid.NewV7()
-	banksTestBankAccountBalanceModel = model.BankAccountBalance{
+	banksTestAccountBalanceID1, _ = uuid.NewV7()
+	banksTestAccountBalanceID2, _ = uuid.NewV7()
+
+	banksTestBankAccountBalanceModel1 = model.BankAccountBalance{
 		ID:            banksTestAccountBalanceID1,
 		BankAccountID: banksTestAccountID1,
-		Date:          banksTestNow,
+		Date:          bankTestNow,
 		Balance:       float64(1000000),
-		Created:       banksTestNow,
+		Created:       bankTestNow,
+		CreatedBy:     banksTestUserID,
+	}
+	banksTestBankAccountBalanceModel2 = model.BankAccountBalance{
+		ID:            banksTestAccountBalanceID2,
+		BankAccountID: banksTestAccountID1,
+		Date:          banksTestYesterday,
+		Balance:       float64(1100000),
+		Created:       banksTestYesterday,
 		CreatedBy:     banksTestUserID,
 	}
 )
@@ -56,11 +71,11 @@ var (
 		AccountHolderName: "John Doe",
 		AccountNumber:     "12345678790",
 		LastBalance:       float64(1000000),
-		LastBalanceDate:   banksTestNow,
+		LastBalanceDate:   bankTestNow,
 		Status:            model.BankAccountStatusActive,
-		Created:           banksTestNow,
+		Created:           bankTestNow,
 		CreatedBy:         banksTestUserID,
-		Balances:          []model.BankAccountBalance{banksTestBankAccountBalanceModel},
+		Balances:          []model.BankAccountBalance{banksTestBankAccountBalanceModel1},
 	}
 )
 
@@ -107,16 +122,16 @@ func TestBanksRepository(t *testing.T) {
 				ExpectPrepare(bankAccountBalancesStmtInsert).
 				ExpectExec().
 				WithArgs(
-					banksTestBankAccountBalanceModel.ID,
-					banksTestBankAccountBalanceModel.BankAccountID,
-					banksTestBankAccountBalanceModel.Date,
-					banksTestBankAccountBalanceModel.Balance,
-					banksTestBankAccountBalanceModel.Created,
-					banksTestBankAccountBalanceModel.CreatedBy,
-					banksTestBankAccountBalanceModel.Updated,
-					banksTestBankAccountBalanceModel.UpdatedBy,
-					banksTestBankAccountBalanceModel.Deleted,
-					banksTestBankAccountBalanceModel.DeletedBy,
+					banksTestBankAccountBalanceModel1.ID,
+					banksTestBankAccountBalanceModel1.BankAccountID,
+					banksTestBankAccountBalanceModel1.Date,
+					banksTestBankAccountBalanceModel1.Balance,
+					banksTestBankAccountBalanceModel1.Created,
+					banksTestBankAccountBalanceModel1.CreatedBy,
+					banksTestBankAccountBalanceModel1.Updated,
+					banksTestBankAccountBalanceModel1.UpdatedBy,
+					banksTestBankAccountBalanceModel1.Deleted,
+					banksTestBankAccountBalanceModel1.DeletedBy,
 				).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -365,16 +380,16 @@ func TestBanksRepository(t *testing.T) {
 				ExpectPrepare(bankAccountBalancesStmtInsert).
 				ExpectExec().
 				WithArgs(
-					banksTestBankAccountBalanceModel.ID,
-					banksTestBankAccountBalanceModel.BankAccountID,
-					banksTestBankAccountBalanceModel.Date,
-					banksTestBankAccountBalanceModel.Balance,
-					banksTestBankAccountBalanceModel.Created,
-					banksTestBankAccountBalanceModel.CreatedBy,
-					banksTestBankAccountBalanceModel.Updated,
-					banksTestBankAccountBalanceModel.UpdatedBy,
-					banksTestBankAccountBalanceModel.Deleted,
-					banksTestBankAccountBalanceModel.DeletedBy,
+					banksTestBankAccountBalanceModel1.ID,
+					banksTestBankAccountBalanceModel1.BankAccountID,
+					banksTestBankAccountBalanceModel1.Date,
+					banksTestBankAccountBalanceModel1.Balance,
+					banksTestBankAccountBalanceModel1.Created,
+					banksTestBankAccountBalanceModel1.CreatedBy,
+					banksTestBankAccountBalanceModel1.Updated,
+					banksTestBankAccountBalanceModel1.UpdatedBy,
+					banksTestBankAccountBalanceModel1.Deleted,
+					banksTestBankAccountBalanceModel1.DeletedBy,
 				).
 				WillReturnError(errors.New(""))
 
@@ -393,6 +408,127 @@ func TestBanksRepository(t *testing.T) {
 
 			assert.Nil(t, errMockExpectationsMet)
 		})
+
+	})
+
+	t.Run("createBankAccountBalance", func(t *testing.T) {
+
+		t.Run("normal", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
+				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountBalancesStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountBalanceModel2.ID,
+					banksTestBankAccountBalanceModel2.BankAccountID,
+					banksTestBankAccountBalanceModel2.Date,
+					banksTestBankAccountBalanceModel2.Balance,
+					banksTestBankAccountBalanceModel2.Created,
+					banksTestBankAccountBalanceModel2.CreatedBy,
+					nil,
+					nil,
+					nil,
+					nil,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.
+				ExpectPrepare(bankAccountsStmtUpdate).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountModel.AccountName,
+					banksTestBankAccountModel.BankName,
+					banksTestBankAccountModel.AccountHolderName,
+					banksTestBankAccountModel.AccountNumber,
+					banksTestBankAccountModel.LastBalance,
+					banksTestBankAccountModel.LastBalanceDate,
+					banksTestBankAccountModel.Status,
+					banksTestBankAccountModel.Created,
+					banksTestBankAccountModel.CreatedBy,
+					banksTestBankAccountModel.Updated,
+					banksTestBankAccountModel.UpdatedBy,
+					banksTestBankAccountModel.Deleted,
+					banksTestBankAccountModel.DeletedBy,
+					banksTestBankAccountModel.ID,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.ExpectCommit()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			err := repo.CreateBalance(banksTestBankAccountBalanceModel2, &banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("normalNoAccountUpdate", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
+				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountBalancesStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountBalanceModel2.ID,
+					banksTestBankAccountBalanceModel2.BankAccountID,
+					banksTestBankAccountBalanceModel2.Date,
+					banksTestBankAccountBalanceModel2.Balance,
+					banksTestBankAccountBalanceModel2.Created,
+					banksTestBankAccountBalanceModel2.CreatedBy,
+					nil,
+					nil,
+					nil,
+					nil,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.ExpectCommit()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			err := repo.CreateBalance(banksTestBankAccountBalanceModel2, nil)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+
+		})
+
 	})
 
 	t.Run("resolveBankAccountByIDs", func(t *testing.T) {
