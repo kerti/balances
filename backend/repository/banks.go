@@ -213,7 +213,7 @@ func (r *BankAccountMySQLRepo) ResolveByIDs(ids []uuid.UUID) (bankAccounts []mod
 	return
 }
 
-// ResolveBalancesByIDs resoloves Bank Account Balances by their IDs
+// ResolveBalancesByIDs resolves Bank Account Balances by their IDs
 func (r *BankAccountMySQLRepo) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error) {
 	if len(ids) == 0 {
 		return
