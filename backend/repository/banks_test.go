@@ -124,6 +124,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -145,6 +146,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -170,6 +172,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -205,6 +208,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -255,6 +259,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -309,6 +314,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -376,6 +382,7 @@ func TestBanksRepository(t *testing.T) {
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(banksTestBankAccountModel)
 			repo.Shutdown()
 
@@ -386,4 +393,5 @@ func TestBanksRepository(t *testing.T) {
 			assert.Nil(t, errMockExpectationsMet)
 		})
 	})
+
 }

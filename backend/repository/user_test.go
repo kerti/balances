@@ -74,6 +74,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -95,6 +96,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -120,6 +122,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -151,6 +154,7 @@ func TestUserRepository(t *testing.T) {
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
+			repo.Startup()
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -190,6 +194,8 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -218,14 +224,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("error", func(t *testing.T) {
@@ -238,14 +246,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 	})
@@ -257,14 +267,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIDs([]uuid.UUID{})
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("normalSingleID", func(t *testing.T) {
@@ -283,14 +295,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("normalMultipleID", func(t *testing.T) {
@@ -310,14 +324,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("errorExecutingSelect", func(t *testing.T) {
@@ -332,14 +348,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 	})
@@ -357,14 +375,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIdentity(userTestModel.Email)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("error", func(t *testing.T) {
@@ -377,14 +397,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			_, err := repo.ResolveByIdentity(userTestModel.Email)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 	})
@@ -436,14 +458,15 @@ func TestUserRepository(t *testing.T) {
 			testFilter := model.UserFilterInput{}
 			testFilter.Keyword = &keyword
 
+			repo.Startup()
 			_, _, err := repo.ResolveByFilter(testFilter.ToFilter())
-
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			errMockExp := mock.ExpectationsWereMet()
-			assert.Nil(t, errMockExp)
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 	})
 
@@ -478,14 +501,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("errorOnCheckExistence", func(t *testing.T) {
@@ -498,14 +523,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("doesNotExist", func(t *testing.T) {
@@ -522,6 +549,8 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
@@ -529,9 +558,9 @@ func TestUserRepository(t *testing.T) {
 			assert.IsType(t, &failure.Failure{}, err)
 			assert.Equal(t, failure.CodeEntityNotFound, err.(*failure.Failure).Code)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("failOnPrepare", func(t *testing.T) {
@@ -552,14 +581,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("failOnExec", func(t *testing.T) {
@@ -591,14 +622,16 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
+			repo.Startup()
 			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 	})
