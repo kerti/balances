@@ -42,6 +42,162 @@ var (
 
 func TestUserRepository(t *testing.T) {
 
+	t.Run("create", func(t *testing.T) {
+
+		t.Run("normal", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
+				WithArgs(userTestID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.
+				ExpectPrepare(userStmtInsert).
+				ExpectExec().
+				WithArgs(
+					testUserModel.ID,
+					testUserModel.Username,
+					testUserModel.Email,
+					testUserModel.Password,
+					testUserModel.Name,
+					testUserModel.Created,
+					testUserModel.CreatedBy,
+					nil,
+					nil).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			repo := new(repository.UserMySQLRepo)
+			repo.DB = &db
+			err := repo.Create(testUserModel)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("not all mock expectations met")
+			}
+		})
+
+		t.Run("errorOnCheckExistence", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
+				WithArgs(userTestID1.String()).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.UserMySQLRepo)
+			repo.DB = &db
+			err := repo.Create(testUserModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("not all mock expectations met")
+			}
+		})
+
+		t.Run("alreadyExists", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(true)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
+				WithArgs(userTestID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			repo := new(repository.UserMySQLRepo)
+			repo.DB = &db
+			err := repo.Create(testUserModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+			assert.IsType(t, &failure.Failure{}, err)
+			assert.Equal(t, failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("not all mock expectations met")
+			}
+		})
+
+		t.Run("failOnPrepare", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
+				WithArgs(userTestID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.
+				ExpectPrepare(userStmtInsert).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.UserMySQLRepo)
+			repo.DB = &db
+			err := repo.Create(testUserModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("not all mock expectations met")
+			}
+		})
+
+		t.Run("failOnExec", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
+				WithArgs(userTestID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.
+				ExpectPrepare(userStmtInsert).
+				ExpectExec().
+				WithArgs(
+					testUserModel.ID,
+					testUserModel.Username,
+					testUserModel.Email,
+					testUserModel.Password,
+					testUserModel.Name,
+					testUserModel.Created,
+					testUserModel.CreatedBy,
+					nil,
+					nil).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.UserMySQLRepo)
+			repo.DB = &db
+			err := repo.Create(testUserModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("not all mock expectations met")
+			}
+		})
+
+	})
+
 	t.Run("existsByID", func(t *testing.T) {
 
 		t.Run("normal", func(t *testing.T) {
@@ -229,160 +385,62 @@ func TestUserRepository(t *testing.T) {
 
 	})
 
-	t.Run("create", func(t *testing.T) {
+	t.Run("resolveByFilter", func(t *testing.T) {
 
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
+			keyword := "example"
+			likeKeyword := "%example%"
+
+			countResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(1)
+			dataResult := sqlmock.NewRows([]string{
+				"entity_id",
+				"username",
+				"email",
+				"password",
+				"name",
+				"created",
+				"created_by",
+				"updated",
+				"updated_by",
+			}).AddRow(
+				testUserModel.ID,
+				testUserModel.Username,
+				testUserModel.Email,
+				testUserModel.Password,
+				testUserModel.Name,
+				testUserModel.Created,
+				testUserModel.CreatedBy,
+				testUserModel.Updated,
+				testUserModel.UpdatedBy,
+			)
 
 			mock.
-				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(userTestID1.String()).
-				WillReturnRows(checkExistenceResult)
+				ExpectQuery(repository.QuerySelectUser+" WHERE (((users.username LIKE ?) OR (users.email LIKE ?)) OR (users.name LIKE ?)) LIMIT ? OFFSET ?").
+				WithArgs(likeKeyword, likeKeyword, likeKeyword, 10, 0).
+				WillReturnRows(dataResult)
 
 			mock.
-				ExpectPrepare(userStmtInsert).
-				ExpectExec().
-				WithArgs(
-					testUserModel.ID,
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
-					nil,
-					nil).
-				WillReturnResult(sqlmock.NewResult(1, 1))
+				ExpectQuery("SELECT COUNT(entity_id) FROM users WHERE (((users.username LIKE ?) OR (users.email LIKE ?)) OR (users.name LIKE ?))").
+				WithArgs(likeKeyword, likeKeyword, likeKeyword).
+				WillReturnRows(countResult)
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+
+			testFilter := model.UserFilterInput{}
+			testFilter.Keyword = &keyword
+
+			_, _, err := repo.ResolveByFilter(testFilter.ToFilter())
+
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExp := mock.ExpectationsWereMet()
+			assert.Nil(t, errMockExp)
 		})
-
-		t.Run("errorOnCheckExistence", func(t *testing.T) {
-			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
-
-			mock.
-				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(userTestID1.String()).
-				WillReturnError(errors.New(""))
-
-			repo := new(repository.UserMySQLRepo)
-			repo.DB = &db
-			err := repo.Create(testUserModel)
-			repo.Shutdown()
-
-			assert.NotNil(t, err)
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
-		})
-
-		t.Run("alreadyExists", func(t *testing.T) {
-			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
-
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
-			mock.
-				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(userTestID1.String()).
-				WillReturnRows(checkExistenceResult)
-
-			repo := new(repository.UserMySQLRepo)
-			repo.DB = &db
-			err := repo.Create(testUserModel)
-			repo.Shutdown()
-
-			assert.NotNil(t, err)
-			assert.IsType(t, &failure.Failure{}, err)
-			assert.Equal(t, failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
-		})
-
-		t.Run("failOnPrepare", func(t *testing.T) {
-			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
-
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
-			mock.
-				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(userTestID1.String()).
-				WillReturnRows(checkExistenceResult)
-
-			mock.
-				ExpectPrepare(userStmtInsert).
-				WillReturnError(errors.New(""))
-
-			repo := new(repository.UserMySQLRepo)
-			repo.DB = &db
-			err := repo.Create(testUserModel)
-			repo.Shutdown()
-
-			assert.NotNil(t, err)
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
-		})
-
-		t.Run("failOnExec", func(t *testing.T) {
-			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
-
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
-			mock.
-				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(userTestID1.String()).
-				WillReturnRows(checkExistenceResult)
-
-			mock.
-				ExpectPrepare(userStmtInsert).
-				ExpectExec().
-				WithArgs(
-					testUserModel.ID,
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
-					nil,
-					nil).
-				WillReturnError(errors.New(""))
-
-			repo := new(repository.UserMySQLRepo)
-			repo.DB = &db
-			err := repo.Create(testUserModel)
-			repo.Shutdown()
-
-			assert.NotNil(t, err)
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
-		})
-
 	})
 
 	t.Run("update", func(t *testing.T) {
