@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -126,6 +128,258 @@ func TestBanksRepository(t *testing.T) {
 			repo.Shutdown()
 
 			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("errorOnCheckExistence", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("alreadyExists", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(true)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+			assert.IsType(t, &failure.Failure{}, err)
+			assert.Equal(t, failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("failOnPrepareBankAccountStatement", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountsStmtInsert).
+				WillReturnError(errors.New(""))
+
+			mock.ExpectRollback()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("failOnExecBankAccountStatement", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountsStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountModel.ID,
+					banksTestBankAccountModel.AccountName,
+					banksTestBankAccountModel.BankName,
+					banksTestBankAccountModel.AccountHolderName,
+					banksTestBankAccountModel.AccountNumber,
+					banksTestBankAccountModel.LastBalance,
+					banksTestBankAccountModel.LastBalanceDate,
+					banksTestBankAccountModel.Status,
+					banksTestBankAccountModel.Created,
+					banksTestBankAccountModel.CreatedBy,
+					banksTestBankAccountModel.Updated,
+					banksTestBankAccountModel.UpdatedBy,
+					banksTestBankAccountModel.Deleted,
+					banksTestBankAccountModel.DeletedBy,
+				).
+				WillReturnError(errors.New(""))
+
+			mock.ExpectRollback()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("failOnPrepareBankAccountBalanceStatement", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountsStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountModel.ID,
+					banksTestBankAccountModel.AccountName,
+					banksTestBankAccountModel.BankName,
+					banksTestBankAccountModel.AccountHolderName,
+					banksTestBankAccountModel.AccountNumber,
+					banksTestBankAccountModel.LastBalance,
+					banksTestBankAccountModel.LastBalanceDate,
+					banksTestBankAccountModel.Status,
+					banksTestBankAccountModel.Created,
+					banksTestBankAccountModel.CreatedBy,
+					banksTestBankAccountModel.Updated,
+					banksTestBankAccountModel.UpdatedBy,
+					banksTestBankAccountModel.Deleted,
+					banksTestBankAccountModel.DeletedBy,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.
+				ExpectPrepare(bankAccountBalancesStmtInsert).
+				WillReturnError(errors.New(""))
+
+			mock.ExpectRollback()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("failOnExecBankAccountBalanceStatement", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
+				WithArgs(banksTestAccountID1.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountsStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountModel.ID,
+					banksTestBankAccountModel.AccountName,
+					banksTestBankAccountModel.BankName,
+					banksTestBankAccountModel.AccountHolderName,
+					banksTestBankAccountModel.AccountNumber,
+					banksTestBankAccountModel.LastBalance,
+					banksTestBankAccountModel.LastBalanceDate,
+					banksTestBankAccountModel.Status,
+					banksTestBankAccountModel.Created,
+					banksTestBankAccountModel.CreatedBy,
+					banksTestBankAccountModel.Updated,
+					banksTestBankAccountModel.UpdatedBy,
+					banksTestBankAccountModel.Deleted,
+					banksTestBankAccountModel.DeletedBy,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.
+				ExpectPrepare(bankAccountBalancesStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountBalanceModel.ID,
+					banksTestBankAccountBalanceModel.BankAccountID,
+					banksTestBankAccountBalanceModel.Date,
+					banksTestBankAccountBalanceModel.Balance,
+					banksTestBankAccountBalanceModel.Created,
+					banksTestBankAccountBalanceModel.CreatedBy,
+					banksTestBankAccountBalanceModel.Updated,
+					banksTestBankAccountBalanceModel.UpdatedBy,
+					banksTestBankAccountBalanceModel.Deleted,
+					banksTestBankAccountBalanceModel.DeletedBy,
+				).
+				WillReturnError(errors.New(""))
+
+			mock.ExpectRollback()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			err := repo.Create(banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
 
 			errMockExpectationsMet := mock.ExpectationsWereMet()
 

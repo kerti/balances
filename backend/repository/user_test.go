@@ -73,14 +73,15 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("errorOnCheckExistence", func(t *testing.T) {
@@ -93,14 +94,15 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("alreadyExists", func(t *testing.T) {
@@ -117,6 +119,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
@@ -124,9 +127,9 @@ func TestUserRepository(t *testing.T) {
 			assert.IsType(t, &failure.Failure{}, err)
 			assert.Equal(t, failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("failOnPrepare", func(t *testing.T) {
@@ -147,14 +150,15 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
+
 			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 		t.Run("failOnExec", func(t *testing.T) {
@@ -191,9 +195,9 @@ func TestUserRepository(t *testing.T) {
 
 			assert.NotNil(t, err)
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("not all mock expectations met")
-			}
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
 		})
 
 	})
