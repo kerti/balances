@@ -1,0 +1,33 @@
+name: Go Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    name: Run Go Tests and Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'  # Adjust based on your Go version
+
+      - name: Run tests with coverage
+        run: |
+          cd backend
+          go test ./... -coverprofile=coverage.out -covermode=atomic
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: backend/coverage.out
