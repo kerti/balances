@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	querySelectUser = `
+	QuerySelectUser = `
 		SELECT
 			users.entity_id,
 			users.username,
@@ -24,7 +24,7 @@ const (
 		FROM
 			users `
 
-	queryInsertUser = `
+	QueryInsertUser = `
 		INSERT INTO users (
 			entity_id,
 			username,
@@ -47,7 +47,7 @@ const (
 			:updated_by
 		)`
 
-	queryUpdateUser = `
+	QueryUpdateUser = `
 		UPDATE users
 		SET
 			username = :username,
@@ -106,7 +106,7 @@ func (r *UserMySQLRepo) ResolveByIDs(ids []uuid.UUID) (users []model.User, err e
 		return
 	}
 
-	query, args, err := r.DB.In(querySelectUser+" WHERE users.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(QuerySelectUser+" WHERE users.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -124,7 +124,7 @@ func (r *UserMySQLRepo) ResolveByIDs(ids []uuid.UUID) (users []model.User, err e
 func (r *UserMySQLRepo) ResolveByIdentity(identity string) (user model.User, err error) {
 	err = r.DB.Get(
 		&user,
-		querySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1",
+		QuerySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1",
 		identity,
 		identity,
 	)
@@ -143,7 +143,7 @@ func (r *UserMySQLRepo) ResolveByFilter(filter filter.Filter) (users []model.Use
 
 	filterArgs := filter.GetArgs(true)
 	query, args, err := r.DB.In(
-		querySelectUser+filterQueryString+filter.Pagination.ToQueryString(),
+		QuerySelectUser+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -190,7 +190,7 @@ func (r *UserMySQLRepo) Create(user model.User) error {
 		return err
 	}
 
-	stmt, err := r.DB.Prepare(queryInsertUser)
+	stmt, err := r.DB.Prepare(QueryInsertUser)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err
@@ -219,7 +219,7 @@ func (r *UserMySQLRepo) Update(user model.User) error {
 		return err
 	}
 
-	stmt, err := r.DB.Prepare(queryUpdateUser)
+	stmt, err := r.DB.Prepare(QueryUpdateUser)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err

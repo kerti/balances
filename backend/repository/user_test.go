@@ -1,4 +1,4 @@
-package repository
+package repository_test
 
 import (
 	"errors"
@@ -8,16 +8,17 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/model"
+	"github.com/kerti/balances/backend/repository"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	testInsertUserStatement = `INSERT INTO users
+	userStmtInsert = `INSERT INTO users
 	( entity_id, username, email, password, name, created, created_by, updated, updated_by )
 	VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )`
 
-	testUpdateUserStatement = `
+	userStmtUpdate = `
 	UPDATE users
 	SET username = ?, email = ?, password = ?, name = ?, created = ?, created_by = ?, updated = ?, updated_by = ?
 	WHERE entity_id = ?`
@@ -55,7 +56,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnRows(result)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
@@ -75,7 +76,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
@@ -94,7 +95,7 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normalNoID", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs([]uuid.UUID{})
 			repo.Shutdown()
@@ -116,11 +117,11 @@ func TestUserRepository(t *testing.T) {
 				AddRow(userTestID1.String())
 
 			mock.
-				ExpectQuery(querySelectUser + " WHERE users.entity_id IN (?)").
+				ExpectQuery(repository.QuerySelectUser + " WHERE users.entity_id IN (?)").
 				WithArgs(userTestID1).
 				WillReturnRows(result)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
@@ -143,11 +144,11 @@ func TestUserRepository(t *testing.T) {
 				AddRow(userTestID2.String())
 
 			mock.
-				ExpectQuery(querySelectUser+" WHERE users.entity_id IN (?, ?)").
+				ExpectQuery(repository.QuerySelectUser+" WHERE users.entity_id IN (?, ?)").
 				WithArgs(userTestID1, userTestID2).
 				WillReturnRows(result)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
@@ -165,11 +166,11 @@ func TestUserRepository(t *testing.T) {
 			ids := []uuid.UUID{userTestID1}
 
 			mock.
-				ExpectQuery(querySelectUser + " WHERE users.entity_id IN (?)").
+				ExpectQuery(repository.QuerySelectUser + " WHERE users.entity_id IN (?)").
 				WithArgs(userTestID1).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIDs(ids)
 			repo.Shutdown()
@@ -190,11 +191,11 @@ func TestUserRepository(t *testing.T) {
 
 			result := sqlmock.NewRows([]string{"email"}).AddRow(testUserModel.Email)
 			mock.
-				ExpectQuery(querySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
+				ExpectQuery(repository.QuerySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
 				WithArgs(testUserModel.Email, testUserModel.Email).
 				WillReturnRows(result)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIdentity(testUserModel.Email)
 			repo.Shutdown()
@@ -210,11 +211,11 @@ func TestUserRepository(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
 			mock.
-				ExpectQuery(querySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
+				ExpectQuery(repository.QuerySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
 				WithArgs(testUserModel.Email, testUserModel.Email).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			_, err := repo.ResolveByIdentity(testUserModel.Email)
 			repo.Shutdown()
@@ -243,7 +244,7 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testInsertUserStatement).
+				ExpectPrepare(userStmtInsert).
 				ExpectExec().
 				WithArgs(
 					testUserModel.ID,
@@ -257,7 +258,7 @@ func TestUserRepository(t *testing.T) {
 					nil).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
 			repo.Shutdown()
@@ -277,7 +278,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
 			repo.Shutdown()
@@ -301,7 +302,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
 			repo.Shutdown()
@@ -328,10 +329,10 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testInsertUserStatement).
+				ExpectPrepare(userStmtInsert).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
 			repo.Shutdown()
@@ -356,7 +357,7 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testInsertUserStatement).
+				ExpectPrepare(userStmtInsert).
 				ExpectExec().
 				WithArgs(
 					testUserModel.ID,
@@ -370,7 +371,7 @@ func TestUserRepository(t *testing.T) {
 					nil).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Create(testUserModel)
 			repo.Shutdown()
@@ -399,7 +400,7 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testUpdateUserStatement).
+				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
 				WithArgs(
 					testUserModel.Username,
@@ -413,7 +414,7 @@ func TestUserRepository(t *testing.T) {
 					testUserModel.ID).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
 			repo.Shutdown()
@@ -433,7 +434,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
 			repo.Shutdown()
@@ -457,7 +458,7 @@ func TestUserRepository(t *testing.T) {
 				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
 			repo.Shutdown()
@@ -484,10 +485,10 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testUpdateUserStatement).
+				ExpectPrepare(userStmtUpdate).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
 			repo.Shutdown()
@@ -512,7 +513,7 @@ func TestUserRepository(t *testing.T) {
 				WillReturnRows(checkExistenceResult)
 
 			mock.
-				ExpectPrepare(testUpdateUserStatement).
+				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
 				WithArgs(
 					testUserModel.Username,
@@ -526,7 +527,7 @@ func TestUserRepository(t *testing.T) {
 					testUserModel.ID).
 				WillReturnError(errors.New(""))
 
-			repo := new(UserMySQLRepo)
+			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 			err := repo.Update(testUserModel)
 			repo.Shutdown()
