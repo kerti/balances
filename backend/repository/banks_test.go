@@ -46,8 +46,8 @@ var (
 )
 
 var (
-	banksTestAccountID1, _ = uuid.NewV7()
-	// banksTestAccountID2, _    = uuid.NewV7()
+	banksTestAccountID1, _    = uuid.NewV7()
+	banksTestAccountID2, _    = uuid.NewV7()
 	banksTestBankAccountModel = model.BankAccount{
 		ID:                banksTestAccountID1,
 		AccountName:       "Savings Account",
@@ -65,7 +65,7 @@ var (
 
 func TestBanksRepository(t *testing.T) {
 
-	t.Run("create", func(t *testing.T) {
+	t.Run("createBankAccount", func(t *testing.T) {
 
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
@@ -392,6 +392,105 @@ func TestBanksRepository(t *testing.T) {
 
 			assert.Nil(t, errMockExpectationsMet)
 		})
+	})
+
+	t.Run("resolveBankAccountByIDs", func(t *testing.T) {
+
+		t.Run("normalNoID", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveByIDs([]uuid.UUID{})
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("normalSingleID", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			ids := []uuid.UUID{banksTestAccountID1}
+
+			result := sqlmock.
+				NewRows([]string{"entity_id"}).
+				AddRow(banksTestAccountID1.String())
+
+			mock.ExpectQuery(repository.QuerySelectBankAccount + " WHERE bank_accounts.entity_id IN (?)").
+				WithArgs(banksTestAccountID1).
+				WillReturnRows(result)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("normalMultipleIDs", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			ids := []uuid.UUID{banksTestAccountID1, banksTestAccountID2}
+
+			result := sqlmock.
+				NewRows([]string{"entity_id"}).
+				AddRow(banksTestAccountID1.String()).
+				AddRow(banksTestAccountID2.String())
+
+			mock.ExpectQuery(repository.QuerySelectBankAccount+" WHERE bank_accounts.entity_id IN (?, ?)").
+				WithArgs(banksTestAccountID1, banksTestAccountID2).
+				WillReturnRows(result)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("errorExecutingSelect", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			ids := []uuid.UUID{banksTestAccountID1, banksTestAccountID2}
+
+			mock.ExpectQuery(repository.QuerySelectBankAccount+" WHERE bank_accounts.entity_id IN (?, ?)").
+				WithArgs(banksTestAccountID1, banksTestAccountID2).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveByIDs(ids)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
 	})
 
 }
