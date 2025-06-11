@@ -24,18 +24,18 @@ var (
 )
 
 var (
-	testNow       = time.Now()
-	testID1, _    = uuid.NewV7()
-	testID2, _    = uuid.NewV7()
-	testUserID, _ = uuid.NewV7()
-	testUserModel = model.User{
-		ID:        testID1,
+	userTestNow       = time.Now()
+	userTestID1, _    = uuid.NewV7()
+	userTestID2, _    = uuid.NewV7()
+	userTestUserID, _ = uuid.NewV7()
+	testUserModel     = model.User{
+		ID:        userTestID1,
 		Username:  "username",
 		Email:     "email@example.com",
 		Password:  "password",
 		Name:      "John Doe",
-		Created:   testNow,
-		CreatedBy: testUserID,
+		Created:   userTestNow,
+		CreatedBy: userTestUserID,
 	}
 )
 
@@ -52,12 +52,12 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(result)
 
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
-			_, err := repo.ExistsByID(testID1)
+			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -72,12 +72,12 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
 			repo := new(UserMySQLRepo)
 			repo.DB = &db
-			_, err := repo.ExistsByID(testID1)
+			_, err := repo.ExistsByID(userTestID1)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -109,15 +109,15 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normalSingleID", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{testID1}
+			ids := []uuid.UUID{userTestID1}
 
 			result := sqlmock.
 				NewRows([]string{"entity_id"}).
-				AddRow(testID1.String())
+				AddRow(userTestID1.String())
 
 			mock.
 				ExpectQuery(querySelectUser + " WHERE users.entity_id IN (?)").
-				WithArgs(testID1).
+				WithArgs(userTestID1).
 				WillReturnRows(result)
 
 			repo := new(UserMySQLRepo)
@@ -135,16 +135,16 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normalMultipleID", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{testID1, testID2}
+			ids := []uuid.UUID{userTestID1, userTestID2}
 
 			result := sqlmock.
 				NewRows([]string{"entity_id"}).
-				AddRow(testID1.String()).
-				AddRow(testID2.String())
+				AddRow(userTestID1.String()).
+				AddRow(userTestID2.String())
 
 			mock.
 				ExpectQuery(querySelectUser+" WHERE users.entity_id IN (?, ?)").
-				WithArgs(testID1, testID2).
+				WithArgs(userTestID1, userTestID2).
 				WillReturnRows(result)
 
 			repo := new(UserMySQLRepo)
@@ -162,11 +162,11 @@ func TestUserRepository(t *testing.T) {
 		t.Run("errorExecutingSelect", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{testID1}
+			ids := []uuid.UUID{userTestID1}
 
 			mock.
 				ExpectQuery(querySelectUser + " WHERE users.entity_id IN (?)").
-				WithArgs(testID1).
+				WithArgs(userTestID1).
 				WillReturnError(errors.New(""))
 
 			repo := new(UserMySQLRepo)
@@ -239,7 +239,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
@@ -274,7 +274,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
 			repo := new(UserMySQLRepo)
@@ -298,7 +298,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			repo := new(UserMySQLRepo)
@@ -324,7 +324,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
@@ -352,7 +352,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
@@ -395,7 +395,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
@@ -430,7 +430,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnError(errors.New(""))
 
 			repo := new(UserMySQLRepo)
@@ -454,7 +454,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			repo := new(UserMySQLRepo)
@@ -480,7 +480,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
@@ -508,7 +508,7 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM users WHERE users.entity_id = ?").
-				WithArgs(testID1.String()).
+				WithArgs(userTestID1.String()).
 				WillReturnRows(checkExistenceResult)
 
 			mock.
