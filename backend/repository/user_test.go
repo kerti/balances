@@ -29,7 +29,7 @@ var (
 	userTestID1, _    = uuid.NewV7()
 	userTestID2, _    = uuid.NewV7()
 	userTestUserID, _ = uuid.NewV7()
-	testUserModel     = model.User{
+	userTestModel     = model.User{
 		ID:        userTestID1,
 		Username:  "username",
 		Email:     "email@example.com",
@@ -60,20 +60,20 @@ func TestUserRepository(t *testing.T) {
 				ExpectPrepare(userStmtInsert).
 				ExpectExec().
 				WithArgs(
-					testUserModel.ID,
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
+					userTestModel.ID,
+					userTestModel.Username,
+					userTestModel.Email,
+					userTestModel.Password,
+					userTestModel.Name,
+					userTestModel.Created,
+					userTestModel.CreatedBy,
 					nil,
 					nil).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -93,7 +93,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -117,7 +117,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -147,7 +147,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -173,20 +173,20 @@ func TestUserRepository(t *testing.T) {
 				ExpectPrepare(userStmtInsert).
 				ExpectExec().
 				WithArgs(
-					testUserModel.ID,
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
+					userTestModel.ID,
+					userTestModel.Username,
+					userTestModel.Email,
+					userTestModel.Password,
+					userTestModel.Name,
+					userTestModel.Created,
+					userTestModel.CreatedBy,
 					nil,
 					nil).
 				WillReturnError(errors.New(""))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Create(testUserModel)
+			err := repo.Create(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -345,15 +345,15 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			result := sqlmock.NewRows([]string{"email"}).AddRow(testUserModel.Email)
+			result := sqlmock.NewRows([]string{"email"}).AddRow(userTestModel.Email)
 			mock.
 				ExpectQuery(repository.QuerySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
-				WithArgs(testUserModel.Email, testUserModel.Email).
+				WithArgs(userTestModel.Email, userTestModel.Email).
 				WillReturnRows(result)
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			_, err := repo.ResolveByIdentity(testUserModel.Email)
+			_, err := repo.ResolveByIdentity(userTestModel.Email)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -368,12 +368,12 @@ func TestUserRepository(t *testing.T) {
 
 			mock.
 				ExpectQuery(repository.QuerySelectUser+" WHERE users.username = ? OR users.email = ? LIMIT 1").
-				WithArgs(testUserModel.Email, testUserModel.Email).
+				WithArgs(userTestModel.Email, userTestModel.Email).
 				WillReturnError(errors.New(""))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			_, err := repo.ResolveByIdentity(testUserModel.Email)
+			_, err := repo.ResolveByIdentity(userTestModel.Email)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -405,15 +405,15 @@ func TestUserRepository(t *testing.T) {
 				"updated",
 				"updated_by",
 			}).AddRow(
-				testUserModel.ID,
-				testUserModel.Username,
-				testUserModel.Email,
-				testUserModel.Password,
-				testUserModel.Name,
-				testUserModel.Created,
-				testUserModel.CreatedBy,
-				testUserModel.Updated,
-				testUserModel.UpdatedBy,
+				userTestModel.ID,
+				userTestModel.Username,
+				userTestModel.Email,
+				userTestModel.Password,
+				userTestModel.Name,
+				userTestModel.Created,
+				userTestModel.CreatedBy,
+				userTestModel.Updated,
+				userTestModel.UpdatedBy,
 			)
 
 			mock.
@@ -461,20 +461,20 @@ func TestUserRepository(t *testing.T) {
 				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
 				WithArgs(
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
+					userTestModel.Username,
+					userTestModel.Email,
+					userTestModel.Password,
+					userTestModel.Name,
+					userTestModel.Created,
+					userTestModel.CreatedBy,
 					nil,
 					nil,
-					testUserModel.ID).
+					userTestModel.ID).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Update(testUserModel)
+			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -494,7 +494,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Update(testUserModel)
+			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -518,7 +518,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Update(testUserModel)
+			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -548,7 +548,7 @@ func TestUserRepository(t *testing.T) {
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Update(testUserModel)
+			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -574,20 +574,20 @@ func TestUserRepository(t *testing.T) {
 				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
 				WithArgs(
-					testUserModel.Username,
-					testUserModel.Email,
-					testUserModel.Password,
-					testUserModel.Name,
-					testUserModel.Created,
-					testUserModel.CreatedBy,
+					userTestModel.Username,
+					userTestModel.Email,
+					userTestModel.Password,
+					userTestModel.Name,
+					userTestModel.Created,
+					userTestModel.CreatedBy,
 					nil,
 					nil,
-					testUserModel.ID).
+					userTestModel.ID).
 				WillReturnError(errors.New(""))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
-			err := repo.Update(testUserModel)
+			err := repo.Update(userTestModel)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
