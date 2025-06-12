@@ -422,24 +422,8 @@ func TestUserRepository(t *testing.T) {
 			countResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(1)
 			dataResult := sqlmock.NewRows([]string{
 				"entity_id",
-				"username",
-				"email",
-				"password",
-				"name",
-				"created",
-				"created_by",
-				"updated",
-				"updated_by",
 			}).AddRow(
 				userTestModel.ID,
-				userTestModel.Username,
-				userTestModel.Email,
-				userTestModel.Password,
-				userTestModel.Name,
-				userTestModel.Created,
-				userTestModel.CreatedBy,
-				userTestModel.Updated,
-				userTestModel.UpdatedBy,
 			)
 
 			mock.
@@ -468,6 +452,7 @@ func TestUserRepository(t *testing.T) {
 
 			assert.Nil(t, errMockExpectationsMet)
 		})
+
 	})
 
 	t.Run("update", func(t *testing.T) {
