@@ -663,6 +663,74 @@ func TestBanksRepository(t *testing.T) {
 			assert.Nil(t, errMockExpectationsMet)
 		})
 
+		t.Run("failOnExecAccountUpdate", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			checkExistenceResult := sqlmock.
+				NewRows([]string{"COUNT"}).
+				AddRow(false)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
+				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
+				WillReturnRows(checkExistenceResult)
+
+			mock.ExpectBegin()
+
+			mock.
+				ExpectPrepare(bankAccountBalancesStmtInsert).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountBalanceModel2.ID,
+					banksTestBankAccountBalanceModel2.BankAccountID,
+					banksTestBankAccountBalanceModel2.Date,
+					banksTestBankAccountBalanceModel2.Balance,
+					banksTestBankAccountBalanceModel2.Created,
+					banksTestBankAccountBalanceModel2.CreatedBy,
+					nil,
+					nil,
+					nil,
+					nil,
+				).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.
+				ExpectPrepare(bankAccountsStmtUpdate).
+				ExpectExec().
+				WithArgs(
+					banksTestBankAccountModel.AccountName,
+					banksTestBankAccountModel.BankName,
+					banksTestBankAccountModel.AccountHolderName,
+					banksTestBankAccountModel.AccountNumber,
+					banksTestBankAccountModel.LastBalance,
+					banksTestBankAccountModel.LastBalanceDate,
+					banksTestBankAccountModel.Status,
+					banksTestBankAccountModel.Created,
+					banksTestBankAccountModel.CreatedBy,
+					banksTestBankAccountModel.Updated,
+					banksTestBankAccountModel.UpdatedBy,
+					banksTestBankAccountModel.Deleted,
+					banksTestBankAccountModel.DeletedBy,
+					banksTestBankAccountModel.ID,
+				).
+				WillReturnError(errors.New(""))
+
+			mock.ExpectRollback()
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			err := repo.CreateBalance(banksTestBankAccountBalanceModel2, &banksTestBankAccountModel)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
 	})
 
 	t.Run("existsBankAccountByID", func(t *testing.T) {
