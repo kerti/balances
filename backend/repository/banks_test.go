@@ -639,11 +639,7 @@ func TestBanksRepository(t *testing.T) {
 			likeKeyword := "%example%"
 
 			countResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(1)
-			dataResult := sqlmock.NewRows([]string{
-				"entity_id",
-			}).AddRow(
-				banksTestAccountID1,
-			)
+			dataResult := sqlmock.NewRows([]string{"entity_id"}).AddRow(banksTestAccountID1)
 
 			mock.
 				ExpectQuery(repository.QuerySelectBankAccount+"WHERE (((((bank_accounts.account_name LIKE ?) OR (bank_accounts.bank_name LIKE ?)) OR (bank_accounts.account_number LIKE ?)) OR (bank_accounts.account_holder_name LIKE ?))) AND bank_accounts.deleted IS NULL LIMIT ? OFFSET ?").
@@ -666,6 +662,69 @@ func TestBanksRepository(t *testing.T) {
 			repo.Shutdown()
 
 			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("errorOnSelect", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			keyword := "example"
+			likeKeyword := "%example%"
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccount+"WHERE (((((bank_accounts.account_name LIKE ?) OR (bank_accounts.bank_name LIKE ?)) OR (bank_accounts.account_number LIKE ?)) OR (bank_accounts.account_holder_name LIKE ?))) AND bank_accounts.deleted IS NULL LIMIT ? OFFSET ?").
+				WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			testFilter := model.BankAccountFilterInput{}
+			testFilter.Keyword = &keyword
+
+			repo.Startup()
+			_, _, err := repo.ResolveByFilter(testFilter.ToFilter())
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("errorOnCount", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			keyword := "example"
+			likeKeyword := "%example%"
+
+			dataResult := sqlmock.NewRows([]string{"entity_id"}).AddRow(banksTestAccountID1)
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccount+"WHERE (((((bank_accounts.account_name LIKE ?) OR (bank_accounts.bank_name LIKE ?)) OR (bank_accounts.account_number LIKE ?)) OR (bank_accounts.account_holder_name LIKE ?))) AND bank_accounts.deleted IS NULL LIMIT ? OFFSET ?").
+				WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
+				WillReturnRows(dataResult)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) FROM bank_accounts WHERE (((((bank_accounts.account_name LIKE ?) OR (bank_accounts.bank_name LIKE ?)) OR (bank_accounts.account_number LIKE ?)) OR (bank_accounts.account_holder_name LIKE ?))) AND bank_accounts.deleted IS NULL").
+				WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			testFilter := model.BankAccountFilterInput{}
+			testFilter.Keyword = &keyword
+
+			repo.Startup()
+			_, _, err := repo.ResolveByFilter(testFilter.ToFilter())
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
 
 			errMockExpectationsMet := mock.ExpectationsWereMet()
 
@@ -810,6 +869,65 @@ func TestBanksRepository(t *testing.T) {
 			assert.Nil(t, errMockExpectationsMet)
 		})
 
+		t.Run("errorOnSelect", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE ((bank_account_balances.bank_account_entity_id IN (?))) AND bank_account_balances.deleted IS NULL LIMIT ? OFFSET ?").
+				WithArgs(banksTestAccountID1, 10, 0).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			testFilter := model.BankAccountBalanceFilterInput{}
+			testFilter.BankAccountIDs = &[]uuid.UUID{banksTestAccountID1}
+
+			repo.Startup()
+			_, _, err := repo.ResolveBalancesByFilter(testFilter.ToFilter())
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("errorOnCount", func(t *testing.T) {
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			dataResult := sqlmock.
+				NewRows([]string{"entity_id"}).
+				AddRow(banksTestAccountBalanceID1)
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE ((bank_account_balances.bank_account_entity_id IN (?))) AND bank_account_balances.deleted IS NULL LIMIT ? OFFSET ?").
+				WithArgs(banksTestAccountID1, 10, 0).
+				WillReturnRows(dataResult)
+
+			mock.
+				ExpectQuery("SELECT COUNT(entity_id) FROM bank_account_balances WHERE ((bank_account_balances.bank_account_entity_id IN (?))) AND bank_account_balances.deleted IS NULL").
+				WithArgs(banksTestAccountID1).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			testFilter := model.BankAccountBalanceFilterInput{}
+			testFilter.BankAccountIDs = &[]uuid.UUID{banksTestAccountID1}
+
+			repo.Startup()
+			_, _, err := repo.ResolveBalancesByFilter(testFilter.ToFilter())
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
 	})
 
 	t.Run("resolveBankAccountLastBalancesByBankAccountID", func(t *testing.T) {
@@ -836,6 +954,47 @@ func TestBanksRepository(t *testing.T) {
 			repo.Shutdown()
 
 			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("countZero", func(t *testing.T) {
+			count := 0
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveLastBalancesByBankAccountID(banksTestAccountID1, count)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+		t.Run("failOnSelect", func(t *testing.T) {
+			count := 2
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?").
+				WithArgs(banksTestAccountID1, count).
+				WillReturnError(errors.New(""))
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveLastBalancesByBankAccountID(banksTestAccountID1, count)
+			repo.Shutdown()
+
+			assert.NotNil(t, err)
 
 			errMockExpectationsMet := mock.ExpectationsWereMet()
 
