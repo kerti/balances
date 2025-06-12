@@ -812,4 +812,36 @@ func TestBanksRepository(t *testing.T) {
 
 	})
 
+	t.Run("resolveBankAccountLastBalancesByBankAccountID", func(t *testing.T) {
+
+		t.Run("normal", func(t *testing.T) {
+			count := 2
+			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
+
+			result := sqlmock.
+				NewRows([]string{"entity_id"}).
+				AddRow(banksTestAccountBalanceID2).
+				AddRow(banksTestAccountBalanceID1)
+
+			mock.
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?").
+				WithArgs(banksTestAccountID1, count).
+				WillReturnRows(result)
+
+			repo := new(repository.BankAccountMySQLRepo)
+			repo.DB = &db
+
+			repo.Startup()
+			_, err := repo.ResolveLastBalancesByBankAccountID(banksTestAccountID1, count)
+			repo.Shutdown()
+
+			assert.Nil(t, err)
+
+			errMockExpectationsMet := mock.ExpectationsWereMet()
+
+			assert.Nil(t, errMockExpectationsMet)
+		})
+
+	})
+
 }
