@@ -124,7 +124,6 @@ const (
 	QueryUpdateBankAccountBalance = `
 		UPDATE bank_account_balances
 		SET
-			entity_id = :entity_id,
 			bank_account_entity_id = :bank_account_entity_id,
 			date = :date,
 			balance = :balance,

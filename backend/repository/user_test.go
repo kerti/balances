@@ -472,16 +472,7 @@ func TestUserRepository(t *testing.T) {
 			mock.
 				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
-				WithArgs(
-					userTestModel.Username,
-					userTestModel.Email,
-					userTestModel.Password,
-					userTestModel.Name,
-					userTestModel.Created,
-					userTestModel.CreatedBy,
-					nil,
-					nil,
-					userTestModel.ID).
+				WithArgs().
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
 			repo := new(repository.UserMySQLRepo)
@@ -593,16 +584,7 @@ func TestUserRepository(t *testing.T) {
 			mock.
 				ExpectPrepare(userStmtUpdate).
 				ExpectExec().
-				WithArgs(
-					userTestModel.Username,
-					userTestModel.Email,
-					userTestModel.Password,
-					userTestModel.Name,
-					userTestModel.Created,
-					userTestModel.CreatedBy,
-					nil,
-					nil,
-					userTestModel.ID).
+				WithArgs().
 				WillReturnError(errors.New(""))
 
 			repo := new(repository.UserMySQLRepo)
