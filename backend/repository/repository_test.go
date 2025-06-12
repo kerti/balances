@@ -19,3 +19,11 @@ func getMockedDriver(matcher sqlmock.QueryMatcher) (database.MySQL, sqlmock.Sqlm
 	db.DB = mockSqlxDB
 	return db, mock
 }
+
+func getExistsResult(result bool) *sqlmock.Rows {
+	return sqlmock.NewRows([]string{"COUNT"}).AddRow(result)
+}
+
+func getCountResult(count int) *sqlmock.Rows {
+	return sqlmock.NewRows([]string{"COUNT"}).AddRow(count)
+}

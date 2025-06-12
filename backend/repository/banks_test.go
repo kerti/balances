@@ -91,14 +91,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -181,14 +177,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("alreadyExists", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -209,14 +201,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnPrepareBankAccountStatement", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -243,14 +231,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExecBankAccountStatement", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -294,14 +278,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnPrepareBankAccountBalanceStatement", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -349,14 +329,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExecBankAccountBalanceStatement", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -421,14 +397,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -489,14 +461,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normalNoAccountUpdate", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -559,14 +527,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("alreadyExists", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -585,14 +549,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnPrepare", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -619,14 +579,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExec", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -666,14 +622,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExecAccountUpdate", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestBankAccountBalanceModel2.ID.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			mock.ExpectBegin()
 
@@ -738,14 +690,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			result := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(result)
+				WillReturnRows(getExistsResult(true))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -790,14 +738,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			result := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1.String()).
-				WillReturnRows(result)
+				WillReturnRows(getExistsResult(true))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -944,7 +888,6 @@ func TestBanksRepository(t *testing.T) {
 			keyword := "example"
 			likeKeyword := "%example%"
 
-			countResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(1)
 			dataResult := sqlmock.NewRows([]string{"entity_id"}).AddRow(banksTestAccountID1)
 
 			mock.
@@ -955,7 +898,7 @@ func TestBanksRepository(t *testing.T) {
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) FROM bank_accounts WHERE (((((bank_accounts.account_name LIKE ?) OR (bank_accounts.bank_name LIKE ?)) OR (bank_accounts.account_number LIKE ?)) OR (bank_accounts.account_holder_name LIKE ?))) AND bank_accounts.deleted IS NULL").
 				WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword).
-				WillReturnRows(countResult)
+				WillReturnRows(getCountResult(1))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -1143,7 +1086,6 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			countResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(1)
 			dataResult := sqlmock.
 				NewRows([]string{"entity_id"}).
 				AddRow(banksTestAccountBalanceID1)
@@ -1156,7 +1098,7 @@ func TestBanksRepository(t *testing.T) {
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) FROM bank_account_balances WHERE ((bank_account_balances.bank_account_entity_id IN (?))) AND bank_account_balances.deleted IS NULL").
 				WithArgs(banksTestAccountID1).
-				WillReturnRows(countResult)
+				WillReturnRows(getCountResult(1))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -1314,14 +1256,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1387,14 +1325,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("doesNotExist", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -1413,14 +1347,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnPrepare", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1447,14 +1377,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExec", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.
-				NewRows([]string{"COUNT"}).
-				AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_accounts WHERE bank_accounts.entity_id = ?").
 				WithArgs(banksTestAccountID1.String()).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1502,12 +1428,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normal", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1542,12 +1466,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("normalNoAccountUpdate", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1598,12 +1520,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("doesNotExist", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(false)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(false))
 
 			repo := new(repository.BankAccountMySQLRepo)
 			repo.DB = &db
@@ -1622,12 +1542,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnPrepare", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1654,12 +1572,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExec", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
@@ -1688,12 +1604,10 @@ func TestBanksRepository(t *testing.T) {
 		t.Run("failOnExecAccountUpdate", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			checkExistenceResult := sqlmock.NewRows([]string{"COUNT"}).AddRow(true)
-
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) > 0 FROM bank_account_balances WHERE bank_account_balances.entity_id = ?").
 				WithArgs(banksTestAccountBalanceID1).
-				WillReturnRows(checkExistenceResult)
+				WillReturnRows(getExistsResult(true))
 
 			mock.ExpectBegin()
 
