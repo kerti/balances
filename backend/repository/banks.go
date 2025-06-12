@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	querySelectBankAccount = `
+	QuerySelectBankAccount = `
 		SELECT
 			bank_accounts.entity_id,
 			bank_accounts.account_name,
@@ -30,7 +30,7 @@ const (
 		FROM
 			bank_accounts `
 
-	querySelectBankAccountBalance = `
+	QuerySelectBankAccountBalance = `
 		SELECT
 			bank_account_balances.entity_id,
 			bank_account_balances.bank_account_entity_id,
@@ -45,7 +45,7 @@ const (
 		FROM
 			bank_account_balances `
 
-	queryInsertBankAccount = `
+	QueryInsertBankAccount = `
 		INSERT INTO bank_accounts (
 			entity_id,
 			account_name,
@@ -78,7 +78,7 @@ const (
 			:deleted_by
 		)`
 
-	queryInsertBankAccountBalance = `
+	QueryInsertBankAccountBalance = `
 		INSERT INTO bank_account_balances (
 			entity_id,
 			bank_account_entity_id,
@@ -103,7 +103,7 @@ const (
 			:deleted_by
 		)`
 
-	queryUpdateBankAccount = `
+	QueryUpdateBankAccount = `
 		UPDATE bank_accounts
 		SET
 			account_name = :account_name,
@@ -121,10 +121,9 @@ const (
 			deleted_by = :deleted_by
 		WHERE entity_id = :entity_id`
 
-	queryUpdateBankAccountBalance = `
+	QueryUpdateBankAccountBalance = `
 		UPDATE bank_account_balances
 		SET
-			entity_id = :entity_id,
 			bank_account_entity_id = :bank_account_entity_id,
 			date = :date,
 			balance = :balance,
@@ -199,7 +198,7 @@ func (r *BankAccountMySQLRepo) ResolveByIDs(ids []uuid.UUID) (bankAccounts []mod
 		return
 	}
 
-	query, args, err := r.DB.In(querySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(QuerySelectBankAccount+" WHERE bank_accounts.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -213,13 +212,13 @@ func (r *BankAccountMySQLRepo) ResolveByIDs(ids []uuid.UUID) (bankAccounts []mod
 	return
 }
 
-// ResolveBalancesByIDs resoloves Bank Account Balances by their IDs
+// ResolveBalancesByIDs resolves Bank Account Balances by their IDs
 func (r *BankAccountMySQLRepo) ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error) {
 	if len(ids) == 0 {
 		return
 	}
 
-	query, args, err := r.DB.In(querySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
+	query, args, err := r.DB.In(QuerySelectBankAccountBalance+" WHERE bank_account_balances.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -242,7 +241,7 @@ func (r *BankAccountMySQLRepo) ResolveByFilter(filter filter.Filter) (bankAccoun
 
 	filterArgs := filter.GetArgs(true)
 	query, args, err := r.DB.In(
-		querySelectBankAccount+filterQueryString+filter.Pagination.ToQueryString(),
+		QuerySelectBankAccount+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -284,7 +283,7 @@ func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (ba
 
 	filterArgs := filter.GetArgs(true)
 	query, args, err := r.DB.In(
-		querySelectBankAccountBalance+filterQueryString+filter.Pagination.ToQueryString(),
+		QuerySelectBankAccountBalance+filterQueryString+filter.Pagination.ToQueryString(),
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
@@ -331,7 +330,7 @@ func (r *BankAccountMySQLRepo) ResolveLastBalancesByBankAccountID(id uuid.UUID, 
 
 	whereClause := " WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?"
 	query, args, err := r.DB.In(
-		querySelectBankAccountBalance+whereClause, id, count)
+		QuerySelectBankAccountBalance+whereClause, id, count)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return
@@ -461,7 +460,7 @@ func (r *BankAccountMySQLRepo) UpdateBalance(bankAccountBalance model.BankAccoun
 }
 
 func (r *BankAccountMySQLRepo) txCreateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
-	stmt, err := tx.PrepareNamed(queryInsertBankAccount)
+	stmt, err := tx.PrepareNamed(QueryInsertBankAccount)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err
@@ -477,7 +476,7 @@ func (r *BankAccountMySQLRepo) txCreateBankAccount(tx *sqlx.Tx, bankAccount mode
 }
 
 func (r *BankAccountMySQLRepo) txCreateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
-	stmt, err := tx.PrepareNamed(queryInsertBankAccountBalance)
+	stmt, err := tx.PrepareNamed(QueryInsertBankAccountBalance)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err
@@ -493,7 +492,7 @@ func (r *BankAccountMySQLRepo) txCreateBankAccountBalance(tx *sqlx.Tx, bankAccou
 }
 
 func (r *BankAccountMySQLRepo) txUpdateBankAccount(tx *sqlx.Tx, bankAccount model.BankAccount) error {
-	stmt, err := tx.PrepareNamed(queryUpdateBankAccount)
+	stmt, err := tx.PrepareNamed(QueryUpdateBankAccount)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err
@@ -509,7 +508,7 @@ func (r *BankAccountMySQLRepo) txUpdateBankAccount(tx *sqlx.Tx, bankAccount mode
 }
 
 func (r *BankAccountMySQLRepo) txUpdateBankAccountBalance(tx *sqlx.Tx, bankAccountBalance model.BankAccountBalance) error {
-	stmt, err := tx.PrepareNamed(queryUpdateBankAccountBalance)
+	stmt, err := tx.PrepareNamed(QueryUpdateBankAccountBalance)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err

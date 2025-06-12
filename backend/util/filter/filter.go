@@ -332,7 +332,7 @@ func (f *Filter) ToQueryString() (string, error) {
 			clauseStr = fmt.Sprintf(" %s.%s IS NULL ", f.TableName, f.DeletedColumn)
 		}
 	}
-	return " WHERE " + clauseStr, nil
+	return " WHERE " + clauseStr + " ", nil
 }
 
 // BaseFilterInput is the base type for all filter inputs
