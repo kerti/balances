@@ -601,7 +601,7 @@ func TestBanksRepository(t *testing.T) {
 			repo.DB = &db
 
 			repo.Startup()
-			_, err := repo.ExistsByID(banksTestAccountBalanceID1)
+			_, err := repo.ExistsBalanceByID(banksTestAccountBalanceID1)
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -623,7 +623,7 @@ func TestBanksRepository(t *testing.T) {
 			repo.DB = &db
 
 			repo.Startup()
-			_, err := repo.ExistsByID(banksTestAccountBalanceID1)
+			_, err := repo.ExistsBalanceByID(banksTestAccountBalanceID1)
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
