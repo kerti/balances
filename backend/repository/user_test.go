@@ -262,22 +262,16 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normalSingleID", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{userTestID1}
-
-			result := sqlmock.
-				NewRows([]string{"entity_id"}).
-				AddRow(userTestID1.String())
-
 			mock.
 				ExpectQuery(repository.QuerySelectUser + " WHERE users.entity_id IN (?)").
 				WithArgs(userTestID1).
-				WillReturnRows(result)
+				WillReturnRows(getSingleEntityIDResult(userTestID1))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
 			repo.Startup()
-			_, err := repo.ResolveByIDs(ids)
+			_, err := repo.ResolveByIDs([]uuid.UUID{userTestID1})
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -290,23 +284,16 @@ func TestUserRepository(t *testing.T) {
 		t.Run("normalMultipleID", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{userTestID1, userTestID2}
-
-			result := sqlmock.
-				NewRows([]string{"entity_id"}).
-				AddRow(userTestID1.String()).
-				AddRow(userTestID2.String())
-
 			mock.
 				ExpectQuery(repository.QuerySelectUser+" WHERE users.entity_id IN (?, ?)").
 				WithArgs(userTestID1, userTestID2).
-				WillReturnRows(result)
+				WillReturnRows(getMultiEntityIDResult([]uuid.UUID{userTestID1, userTestID2}))
 
 			repo := new(repository.UserMySQLRepo)
 			repo.DB = &db
 
 			repo.Startup()
-			_, err := repo.ResolveByIDs(ids)
+			_, err := repo.ResolveByIDs([]uuid.UUID{userTestID1, userTestID2})
 			repo.Shutdown()
 
 			assert.Nil(t, err)
@@ -319,8 +306,6 @@ func TestUserRepository(t *testing.T) {
 		t.Run("errorExecutingSelect", func(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
-			ids := []uuid.UUID{userTestID1}
-
 			mock.
 				ExpectQuery(repository.QuerySelectUser + " WHERE users.entity_id IN (?)").
 				WithArgs(userTestID1).
@@ -330,7 +315,7 @@ func TestUserRepository(t *testing.T) {
 			repo.DB = &db
 
 			repo.Startup()
-			_, err := repo.ResolveByIDs(ids)
+			_, err := repo.ResolveByIDs([]uuid.UUID{userTestID1})
 			repo.Shutdown()
 
 			assert.NotNil(t, err)
@@ -399,12 +384,10 @@ func TestUserRepository(t *testing.T) {
 			keyword := "example"
 			likeKeyword := "%example%"
 
-			dataResult := sqlmock.NewRows([]string{"entity_id"}).AddRow(userTestModel.ID)
-
 			mock.
 				ExpectQuery(repository.QuerySelectUser+" WHERE (((users.username LIKE ?) OR (users.email LIKE ?)) OR (users.name LIKE ?)) LIMIT ? OFFSET ?").
 				WithArgs(likeKeyword, likeKeyword, likeKeyword, 10, 0).
-				WillReturnRows(dataResult)
+				WillReturnRows(getSingleEntityIDResult(userTestID1))
 
 			mock.
 				ExpectQuery("SELECT COUNT(entity_id) FROM users WHERE (((users.username LIKE ?) OR (users.email LIKE ?)) OR (users.name LIKE ?))").
