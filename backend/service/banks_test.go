@@ -38,7 +38,7 @@ func (t *bankAccountsServiceTestSuite) TearDownTest() {
 
 func (t *bankAccountsServiceTestSuite) TestResolveByID() {
 
-	t.Run("Exists", func() {
+	t.Run("TestExistsNoBalance", func() {
 		testID, _ := uuid.NewV7()
 		nilCacheTime := cachetime.NCacheTime{}
 		bankAccounts := []model.BankAccount{
@@ -50,6 +50,38 @@ func (t *bankAccountsServiceTestSuite) TestResolveByID() {
 		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testID}).Return(bankAccounts, nil)
 
 		_, err := t.svc.GetByID(testID, false, nilCacheTime, nilCacheTime, nil)
+
+		assert.NoError(t.T(), err, "should not error")
+	})
+
+	t.Run("TestExistsWithBalance", func() {
+		testID, _ := uuid.NewV7()
+		testBalanceID1, _ := uuid.NewV7()
+		testBalanceID2, _ := uuid.NewV7()
+		nilCacheTime := cachetime.NCacheTime{}
+
+		bankAccounts := []model.BankAccount{
+			{
+				ID: testID,
+			},
+		}
+		bankAccountBalances := []model.BankAccountBalance{
+			{
+				ID: testBalanceID1,
+			},
+			{
+				ID: testBalanceID2,
+			},
+		}
+		balanceFilterInput := model.BankAccountBalanceFilterInput{
+			BankAccountIDs: &[]uuid.UUID{testID},
+		}
+		pageInfo := model.PageInfoOutput{}
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testID}).Return(bankAccounts, nil)
+		t.mockRepo.EXPECT().ResolveBalancesByFilter(balanceFilterInput.ToFilter()).Return(bankAccountBalances, pageInfo, nil)
+
+		_, err := t.svc.GetByID(testID, true, nilCacheTime, nilCacheTime, nil)
 
 		assert.NoError(t.T(), err, "should not error")
 	})
