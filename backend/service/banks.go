@@ -108,10 +108,6 @@ func (s *BankAccountImpl) Update(input model.BankAccountInput, userID uuid.UUID)
 
 	bankAccount := bankAccounts[0]
 
-	if bankAccount.Deleted.Valid {
-		return nil, failure.OperationNotPermitted("update", "Bank Account", "it is deleted")
-	}
-
 	err = bankAccount.Update(input, userID)
 	if err != nil {
 		return nil, err

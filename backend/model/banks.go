@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/nuuid"
 )
@@ -136,6 +137,10 @@ func (b *BankAccount) AttachBalances(balances []BankAccountBalance) BankAccount 
 
 // Update performs an update on a Bank Account
 func (b *BankAccount) Update(input BankAccountInput, userID uuid.UUID) error {
+	if b.Deleted.Valid || b.DeletedBy.Valid {
+		return failure.OperationNotPermitted("update", "Bank Account", "already deleted")
+	}
+
 	now := time.Now()
 
 	b.AccountName = input.AccountName
@@ -145,8 +150,6 @@ func (b *BankAccount) Update(input BankAccountInput, userID uuid.UUID) error {
 	b.Status = input.Status
 	b.Updated = null.TimeFrom(now)
 	b.UpdatedBy = nuuid.From(userID)
-
-	// TODO: Validate ?
 
 	return nil
 }
