@@ -101,7 +101,7 @@ func (t *bankAccountsServiceTestSuite) TestCreate() {
 	})
 }
 
-func (t *bankAccountsServiceTestSuite) TestResolveByID() {
+func (t *bankAccountsServiceTestSuite) TestGetByID() {
 
 	testID, _ := uuid.NewV7()
 	testBalanceID1, _ := uuid.NewV7()
@@ -284,4 +284,29 @@ func (t *bankAccountsServiceTestSuite) TestResolveByID() {
 		assert.Contains(t.T(), err.Error(), "EntityNotFound")
 	})
 
+}
+
+func (t *bankAccountsServiceTestSuite) TestGetByFilter() {
+
+	bankAccount1 := model.BankAccount{}
+	bankAccount2 := model.BankAccount{}
+	bankAccountSlice := []model.BankAccount{bankAccount1, bankAccount2}
+	defaultPageInfo := model.PageInfoOutput{
+		Page:       1,
+		PageSize:   10,
+		TotalCount: 2,
+		PageCount:  1,
+	}
+
+	t.Run("EmptyFilter", func() {
+		filterInput := model.BankAccountFilterInput{}
+		filter := filterInput.ToFilter()
+
+		t.mockRepo.EXPECT().ResolveByFilter(filter).
+			Return(bankAccountSlice, defaultPageInfo, nil)
+
+		_, _, err := t.svc.GetByFilter(filterInput)
+
+		assert.NoError(t.T(), err)
+	})
 }
