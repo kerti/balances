@@ -61,18 +61,6 @@ const (
 		WHERE entity_id = :entity_id`
 )
 
-// User is the User repository interface
-type User interface {
-	Startup()
-	Shutdown()
-	ExistsByID(id uuid.UUID) (exists bool, err error)
-	ResolveByIDs(ids []uuid.UUID) (users []model.User, err error)
-	ResolveByIdentity(identity string) (user model.User, err error)
-	ResolveByFilter(filter filter.Filter) (users []model.User, pageInfo model.PageInfoOutput, err error)
-	Create(user model.User) error
-	Update(user model.User) error
-}
-
 // UserMySQLRepo is the repository for Users implemented with MySQL backend
 type UserMySQLRepo struct {
 	DB *database.MySQL `inject:"mysql"`

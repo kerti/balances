@@ -136,23 +136,6 @@ const (
 		WHERE entity_id = :entity_id`
 )
 
-// BankAccount is the Bank Account repository interface
-type BankAccount interface {
-	Startup()
-	Shutdown()
-	ExistsByID(id uuid.UUID) (exists bool, err error)
-	ExistsBalanceByID(id uuid.UUID) (exists bool, err error)
-	ResolveByIDs(ids []uuid.UUID) (bankAccounts []model.BankAccount, err error)
-	ResolveBalancesByIDs(ids []uuid.UUID) (bankAccountBalances []model.BankAccountBalance, err error)
-	ResolveByFilter(filter filter.Filter) (bankAccounts []model.BankAccount, pageInfo model.PageInfoOutput, err error)
-	ResolveBalancesByFilter(filter filter.Filter) (bankAccountBalances []model.BankAccountBalance, pageInfo model.PageInfoOutput, err error)
-	ResolveLastBalancesByBankAccountID(id uuid.UUID, count int) (bankAccountBalances []model.BankAccountBalance, err error)
-	Create(bankAccount model.BankAccount) error
-	Update(bankAccount model.BankAccount) error
-	CreateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error
-	UpdateBalance(bankAccountBalance model.BankAccountBalance, bankAccount *model.BankAccount) error
-}
-
 // BankAccountMySQLRepo is the repository for Bank Accounts implemented with MySQL backend
 type BankAccountMySQLRepo struct {
 	DB *database.MySQL `inject:"mysql"`

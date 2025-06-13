@@ -10,6 +10,7 @@ require (
 	github.com/facebookgo/inject v0.0.0-20180706035515-f23751cae28b
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/guregu/null v4.0.0+incompatible
