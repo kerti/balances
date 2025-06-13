@@ -309,4 +309,19 @@ func (t *bankAccountsServiceTestSuite) TestGetByFilter() {
 
 		assert.NoError(t.T(), err)
 	})
+
+	t.Run("WithKeyword", func() {
+		keyword := "example"
+		filterInput := model.BankAccountFilterInput{}
+		filterInput.Keyword = &keyword
+		filter := filterInput.ToFilter()
+
+		t.mockRepo.EXPECT().ResolveByFilter(filter).
+			Return(bankAccountSlice, defaultPageInfo, nil)
+
+		_, _, err := t.svc.GetByFilter(filterInput)
+
+		assert.NoError(t.T(), err)
+	})
+
 }
