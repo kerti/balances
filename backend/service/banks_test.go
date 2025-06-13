@@ -325,3 +325,57 @@ func (t *bankAccountsServiceTestSuite) TestGetByFilter() {
 	})
 
 }
+
+func (t *bankAccountsServiceTestSuite) TestUpdate() {
+
+	testUserID, _ := uuid.NewV7()
+	testOldUserID, _ := uuid.NewV7()
+	testBankAccountID, _ := uuid.NewV7()
+
+	testLastBalanceDate := time.Now().AddDate(0, 0, -2)
+	testLastBalance := float64(1000000)
+
+	testNewLastBalanceDate := time.Now()
+	testNewLastBalance := float64(1100000)
+
+	bankAccountInput := model.BankAccountInput{
+		ID:                testBankAccountID,
+		AccountName:       "Savings Account Updated",
+		BankName:          "First National Bank Updated",
+		AccountHolderName: "John Doe Updated",
+		AccountNumber:     "123-456-7890-updated",
+		LastBalance:       testNewLastBalance,
+		LastBalanceDate:   cachetime.CacheTime(testNewLastBalanceDate),
+		Status:            model.BankAccountStatusActive,
+		Balances:          []model.BankAccountBalanceInput{},
+	}
+
+	existingBankAccount := model.BankAccount{
+		ID:                testBankAccountID,
+		AccountName:       "Savings Account",
+		BankName:          "First National Bank",
+		AccountHolderName: "John Doe",
+		AccountNumber:     "123-456-7890",
+		LastBalance:       testLastBalance,
+		LastBalanceDate:   testLastBalanceDate,
+		Status:            model.BankAccountStatusActive,
+		Created:           time.Now().AddDate(0, 0, -1),
+		CreatedBy:         testOldUserID,
+	}
+
+	t.Run("normal", func() {
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
+			Return([]model.BankAccount{existingBankAccount}, nil)
+
+		t.mockRepo.EXPECT().Update(gomock.Any()).
+			Return(nil)
+
+		res, err := t.svc.Update(bankAccountInput, testUserID)
+
+		assert.NotNil(t.T(), res)
+		assert.NoError(t.T(), err)
+
+	})
+
+}
