@@ -13,7 +13,7 @@ import (
 type BankAccount interface {
 	Startup()
 	Shutdown()
-	Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error)
+	Create(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
 	GetByID(id uuid.UUID, withBalances bool, balanceStartDate, balanceEndDate cachetime.NCacheTime, pageSize *int) (*model.BankAccount, error)
 	GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error)
 	Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
@@ -41,10 +41,13 @@ func (s *BankAccountImpl) Shutdown() {
 }
 
 // Create creates a new Bank Account
-func (s *BankAccountImpl) Create(input model.BankAccountInput, userID uuid.UUID) (model.BankAccount, error) {
+func (s *BankAccountImpl) Create(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error) {
 	bankAccount := model.NewBankAccountFromInput(input, userID)
 	err := s.Repository.Create(bankAccount)
-	return bankAccount, err
+	if err != nil {
+		return nil, err
+	}
+	return &bankAccount, err
 }
 
 // GetByID fetches a Bank Account by its ID
