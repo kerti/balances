@@ -18,9 +18,10 @@ import (
 
 type bankAccountsServiceTestSuite struct {
 	suite.Suite
-	ctrl     *gomock.Controller
-	svc      service.BankAccount
-	mockRepo *mock_repository.MockBankAccount
+	ctrl       *gomock.Controller
+	svc        service.BankAccount
+	mockRepo   *mock_repository.MockBankAccount
+	testUserID uuid.UUID
 }
 
 func TestBankAccountsService(t *testing.T) {
@@ -33,12 +34,60 @@ func (t *bankAccountsServiceTestSuite) SetupTest() {
 	t.svc = &service.BankAccountImpl{
 		Repository: t.mockRepo,
 	}
+	t.testUserID, _ = uuid.NewV7()
 	t.svc.Startup()
 }
 
 func (t *bankAccountsServiceTestSuite) TearDownTest() {
 	t.svc.Shutdown()
 	t.ctrl.Finish()
+}
+
+func (t *bankAccountsServiceTestSuite) TestCreate() {
+
+	testID, _ := uuid.NewV7()
+	testBalanceID, _ := uuid.NewV7()
+	testLastBalanceDate := time.Now().AddDate(0, 0, -1)
+	testLastBalance := float64(1000000)
+
+	testBankAccountBalanceInput := model.BankAccountBalanceInput{
+		ID:            testBalanceID,
+		BankAccountID: testID,
+		Date:          cachetime.CacheTime(testLastBalanceDate),
+		Balance:       testLastBalance,
+	}
+
+	testBankAccountInput := model.BankAccountInput{
+		ID:                testID,
+		AccountName:       "Savings Account",
+		BankName:          "First National Bank",
+		AccountHolderName: "John Doe",
+		AccountNumber:     "123-456-7890",
+		LastBalance:       testLastBalance,
+		LastBalanceDate:   cachetime.CacheTime(testLastBalanceDate),
+		Status:            model.BankAccountStatusActive,
+		Balances:          []model.BankAccountBalanceInput{testBankAccountBalanceInput},
+	}
+
+	testBankAccount := model.NewBankAccountFromInput(testBankAccountInput, t.testUserID)
+
+	t.Run("normal", func() {
+		t.mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
+
+		res, err := t.svc.Create(testBankAccountInput, t.testUserID)
+
+		assert.NoError(t.T(), err, "should not error")
+		assert.Equal(t.T(), testBankAccount.AccountName, res.AccountName)
+		assert.Equal(t.T(), testBankAccount.BankName, res.BankName)
+		assert.Equal(t.T(), testBankAccount.AccountHolderName, res.AccountHolderName)
+		assert.Equal(t.T(), testBankAccount.AccountNumber, res.AccountNumber)
+		assert.Equal(t.T(), testBankAccount.LastBalance, res.LastBalance)
+		assert.Equal(t.T(), testBankAccount.LastBalanceDate, res.LastBalanceDate)
+		assert.Equal(t.T(), testBankAccount.Status, res.Status)
+		assert.Len(t.T(), res.Balances, len(testBankAccount.Balances))
+		assert.Equal(t.T(), testBankAccount.Balances[0].Date, res.Balances[0].Date)
+		assert.Equal(t.T(), testBankAccount.Balances[0].Balance, res.Balances[0].Balance)
+	})
 }
 
 func (t *bankAccountsServiceTestSuite) TestResolveByID() {
