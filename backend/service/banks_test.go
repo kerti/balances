@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -32,9 +33,11 @@ func (t *bankAccountsServiceTestSuite) SetupTest() {
 	t.svc = &service.BankAccountImpl{
 		Repository: t.mockRepo,
 	}
+	t.svc.Startup()
 }
 
 func (t *bankAccountsServiceTestSuite) TearDownTest() {
+	t.svc.Shutdown()
 	t.ctrl.Finish()
 }
 
@@ -167,8 +170,46 @@ func (t *bankAccountsServiceTestSuite) TestResolveByID() {
 				assert.NoError(t.T(), err, "should not error")
 			})
 
+			t.Run("ErrorResolvingBalances", func() {
+				errMsg := "error resolving balances"
+				balanceFilterInput := model.BankAccountBalanceFilterInput{
+					BankAccountIDs: &[]uuid.UUID{testID},
+				}
+
+				t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testID}).
+					Return(resolvedBankAccountSlice, nil)
+				t.mockRepo.EXPECT().ResolveBalancesByFilter(balanceFilterInput.ToFilter()).
+					Return([]model.BankAccountBalance{}, model.PageInfoOutput{}, errors.New(errMsg))
+
+				_, err := t.svc.GetByID(testID, true, nilCacheTime, nilCacheTime, nil)
+
+				assert.Error(t.T(), err, "should return error")
+				assert.Contains(t.T(), err.Error(), errMsg)
+			})
+
 		})
 
+	})
+
+	t.Run("ErrorResolvingByID", func() {
+		errMsg := "repo failed resolving by IDs"
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testID}).
+			Return(nil, errors.New(errMsg))
+
+		_, err := t.svc.GetByID(testID, false, nilCacheTime, nilCacheTime, nil)
+
+		assert.Error(t.T(), err, "should return error")
+		assert.Equal(t.T(), err.Error(), errMsg)
+	})
+
+	t.Run("NotExists", func() {
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testID}).
+			Return([]model.BankAccount{}, nil)
+
+		_, err := t.svc.GetByID(testID, false, nilCacheTime, nilCacheTime, nil)
+
+		assert.Error(t.T(), err, "should return error")
+		assert.Contains(t.T(), err.Error(), "EntityNotFound")
 	})
 
 }
