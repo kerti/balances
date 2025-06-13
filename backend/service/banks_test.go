@@ -12,6 +12,7 @@ import (
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
+	"github.com/kerti/balances/backend/util/nuuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -71,7 +72,7 @@ func (t *bankAccountsServiceTestSuite) TestCreate() {
 
 	testBankAccount := model.NewBankAccountFromInput(testBankAccountInput, t.testUserID)
 
-	t.Run("normal", func() {
+	t.Run("Normal", func() {
 		t.mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
 		res, err := t.svc.Create(testBankAccountInput, t.testUserID)
@@ -89,7 +90,7 @@ func (t *bankAccountsServiceTestSuite) TestCreate() {
 		assert.Equal(t.T(), testBankAccount.Balances[0].Balance, res.Balances[0].Balance)
 	})
 
-	t.Run("repoFailToCreate", func() {
+	t.Run("RepoFailToCreate", func() {
 		errMsg := "failed to create bank account"
 		t.mockRepo.EXPECT().Create(gomock.Any()).Return(errors.New(errMsg))
 
@@ -363,7 +364,22 @@ func (t *bankAccountsServiceTestSuite) TestUpdate() {
 		CreatedBy:         testOldUserID,
 	}
 
-	t.Run("normal", func() {
+	deletedBankAccount := model.BankAccount{
+		ID:                testBankAccountID,
+		AccountName:       "Savings Account",
+		BankName:          "First National Bank",
+		AccountHolderName: "John Doe",
+		AccountNumber:     "123-456-7890",
+		LastBalance:       testLastBalance,
+		LastBalanceDate:   testLastBalanceDate,
+		Status:            model.BankAccountStatusActive,
+		Created:           time.Now().AddDate(0, 0, -2),
+		CreatedBy:         testOldUserID,
+		Deleted:           null.TimeFrom(time.Now().AddDate(0, 0, -1)),
+		DeletedBy:         nuuid.From(testOldUserID),
+	}
+
+	t.Run("Normal", func() {
 
 		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
 			Return([]model.BankAccount{existingBankAccount}, nil)
@@ -375,6 +391,66 @@ func (t *bankAccountsServiceTestSuite) TestUpdate() {
 
 		assert.NotNil(t.T(), res)
 		assert.NoError(t.T(), err)
+
+	})
+
+	t.Run("ErrorResolvingByIDs", func() {
+
+		errMsg := "query failed"
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
+			Return([]model.BankAccount{}, errors.New(errMsg))
+
+		res, err := t.svc.Update(bankAccountInput, testUserID)
+
+		assert.Nil(t.T(), res)
+		assert.Error(t.T(), err)
+		assert.Contains(t.T(), err.Error(), errMsg)
+
+	})
+
+	t.Run("AccountNotFound", func() {
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
+			Return([]model.BankAccount{}, nil)
+
+		res, err := t.svc.Update(bankAccountInput, testUserID)
+
+		assert.Nil(t.T(), res)
+		assert.Error(t.T(), err)
+		assert.Contains(t.T(), err.Error(), "EntityNotFound")
+
+	})
+
+	t.Run("AccountNotFound", func() {
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
+			Return([]model.BankAccount{deletedBankAccount}, nil)
+
+		res, err := t.svc.Update(bankAccountInput, testUserID)
+
+		assert.Nil(t.T(), res)
+		assert.Error(t.T(), err)
+		assert.Contains(t.T(), err.Error(), "update")
+		assert.Contains(t.T(), err.Error(), "Bank Account")
+		assert.Contains(t.T(), err.Error(), "deleted")
+
+	})
+
+	t.Run("RepoFailToUpdate", func() {
+		errMsg := "failed to update"
+
+		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
+			Return([]model.BankAccount{existingBankAccount}, nil)
+
+		t.mockRepo.EXPECT().Update(gomock.Any()).
+			Return(errors.New(errMsg))
+
+		res, err := t.svc.Update(bankAccountInput, testUserID)
+
+		assert.Nil(t.T(), res)
+		assert.Error(t.T(), err)
+		assert.Contains(t.T(), err.Error(), errMsg)
 
 	})
 
