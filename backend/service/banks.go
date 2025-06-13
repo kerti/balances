@@ -1,6 +1,8 @@
 package service
 
 import (
+	"math"
+
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
@@ -121,7 +123,8 @@ func (s *BankAccountImpl) Update(input model.BankAccountInput, userID uuid.UUID)
 	return &bankAccount, err
 }
 
-// Delete deletes an existing Bank Account
+// Delete deletes an existing Bank Account. The method will find all the account's balances
+// and delete all of them also.
 func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error) {
 	bankAccounts, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
 	if err != nil {
@@ -134,9 +137,20 @@ func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAcc
 
 	bankAccount := bankAccounts[0]
 
-	if bankAccount.Deleted.Valid {
-		return nil, failure.OperationNotPermitted("delete", "Bank Account", "it is already deleted")
+	filter := model.BankAccountBalanceFilterInput{}
+	filter.BankAccountIDs = &[]uuid.UUID{bankAccount.ID}
+
+	page := 1
+	pageSize := math.MaxInt
+
+	filter.Page = &(page)
+	filter.PageSize = &pageSize
+
+	balances, _, err := s.Repository.ResolveBalancesByFilter(filter.ToFilter())
+	if err != nil {
+		return nil, err
 	}
+	bankAccount.Balances = balances
 
 	err = bankAccount.Delete(userID)
 	if err != nil {
