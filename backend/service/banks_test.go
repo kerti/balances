@@ -106,6 +106,14 @@ func (t *bankAccountsServiceTestSuite) getNewBankAccount(id nuuid.NUUID, balance
 	return acc
 }
 
+func (t *bankAccountsServiceTestSuite) getBankAccountSlice(count int) (res []model.BankAccount) {
+	for range count {
+		id, _ := uuid.NewV7()
+		res = append(res, t.getNewBankAccount(nuuid.From(id), nil))
+	}
+	return
+}
+
 func (t *bankAccountsServiceTestSuite) getNewBankAccountBalance(id nuuid.NUUID, bankAccountID nuuid.NUUID, balance float64, date time.Time) model.BankAccountBalance {
 	bal := model.BankAccountBalance{}
 
@@ -127,6 +135,15 @@ func (t *bankAccountsServiceTestSuite) getNewBankAccountBalance(id nuuid.NUUID, 
 	bal.Date = date
 
 	return bal
+}
+
+func (t *bankAccountsServiceTestSuite) getDefaultPageInfo() model.PageInfoOutput {
+	return model.PageInfoOutput{
+		Page:       1,
+		PageSize:   10,
+		TotalCount: 1,
+		PageCount:  1,
+	}
 }
 
 func (t *bankAccountsServiceTestSuite) TestCreate_Normal() {
@@ -176,7 +193,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_NoFilter()
 	balanceFilterInput := model.BankAccountBalanceFilterInput{
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 	}
-	pageInfo := model.PageInfoOutput{}
+	pageInfo := t.getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
@@ -202,7 +219,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithStartD
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 		StartDate:      yesterday,
 	}
-	pageInfo := model.PageInfoOutput{}
+	pageInfo := t.getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
@@ -228,7 +245,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithEndDat
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 		EndDate:        today,
 	}
-	pageInfo := model.PageInfoOutput{}
+	pageInfo := t.getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balanceSlice := []model.BankAccountBalance{
@@ -256,7 +273,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithBothDa
 		StartDate:      yesterday,
 		EndDate:        today,
 	}
-	pageInfo := model.PageInfoOutput{}
+	pageInfo := t.getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
@@ -332,7 +349,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorR
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
 		Return(resolvedBankAccountSlice, nil)
 	t.mockRepo.EXPECT().ResolveBalancesByFilter(balanceFilterInput.ToFilter()).
-		Return([]model.BankAccountBalance{}, model.PageInfoOutput{}, errors.New(errMsg))
+		Return([]model.BankAccountBalance{}, t.getDefaultPageInfo(), errors.New(errMsg))
 
 	res, err := t.svc.GetByID(t.testBankAccountID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
 
@@ -362,44 +379,30 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_NotExists() {
 	assert.Contains(t.T(), err.Error(), "EntityNotFound")
 }
 
-func (t *bankAccountsServiceTestSuite) TestGetByFilter() {
+func (t *bankAccountsServiceTestSuite) TestGetByFilter_EmptyFilter() {
+	filterInput := model.BankAccountFilterInput{}
+	filter := filterInput.ToFilter()
 
-	bankAccount1 := model.BankAccount{}
-	bankAccount2 := model.BankAccount{}
-	bankAccountSlice := []model.BankAccount{bankAccount1, bankAccount2}
-	defaultPageInfo := model.PageInfoOutput{
-		Page:       1,
-		PageSize:   10,
-		TotalCount: 2,
-		PageCount:  1,
-	}
+	t.mockRepo.EXPECT().ResolveByFilter(filter).
+		Return(t.getBankAccountSlice(2), t.getDefaultPageInfo(), nil)
 
-	t.Run("EmptyFilter", func() {
-		filterInput := model.BankAccountFilterInput{}
-		filter := filterInput.ToFilter()
+	_, _, err := t.svc.GetByFilter(filterInput)
 
-		t.mockRepo.EXPECT().ResolveByFilter(filter).
-			Return(bankAccountSlice, defaultPageInfo, nil)
+	assert.NoError(t.T(), err)
+}
 
-		_, _, err := t.svc.GetByFilter(filterInput)
+func (t *bankAccountsServiceTestSuite) TestGetByFilter_WithKeyword() {
+	keyword := "example"
+	filterInput := model.BankAccountFilterInput{}
+	filterInput.Keyword = &keyword
+	filter := filterInput.ToFilter()
 
-		assert.NoError(t.T(), err)
-	})
+	t.mockRepo.EXPECT().ResolveByFilter(filter).
+		Return(t.getBankAccountSlice(2), t.getDefaultPageInfo(), nil)
 
-	t.Run("WithKeyword", func() {
-		keyword := "example"
-		filterInput := model.BankAccountFilterInput{}
-		filterInput.Keyword = &keyword
-		filter := filterInput.ToFilter()
+	_, _, err := t.svc.GetByFilter(filterInput)
 
-		t.mockRepo.EXPECT().ResolveByFilter(filter).
-			Return(bankAccountSlice, defaultPageInfo, nil)
-
-		_, _, err := t.svc.GetByFilter(filterInput)
-
-		assert.NoError(t.T(), err)
-	})
-
+	assert.NoError(t.T(), err)
 }
 
 func (t *bankAccountsServiceTestSuite) TestUpdate() {
@@ -612,7 +615,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete() {
 					testNonLastBankAccountBalance,
 					testLastBankAccountBalance,
 				},
-				model.PageInfoOutput{},
+				t.getDefaultPageInfo(),
 				nil).Times(2)
 
 		t.mockRepo.EXPECT().Update(gomock.Any()).Return(nil)
@@ -681,7 +684,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete() {
 					testDeletedNonLastBankAccountBalance,
 					testLastBankAccountBalance,
 				},
-				model.PageInfoOutput{},
+				t.getDefaultPageInfo(),
 				nil)
 
 		res, err := t.svc.Delete(testBankAccountID, testUserID)
