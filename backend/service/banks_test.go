@@ -405,133 +405,74 @@ func (t *bankAccountsServiceTestSuite) TestGetByFilter_WithKeyword() {
 	assert.NoError(t.T(), err)
 }
 
-func (t *bankAccountsServiceTestSuite) TestUpdate() {
+func (t *bankAccountsServiceTestSuite) TestUpdate_Normal() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)}, nil)
 
-	testUserID, _ := uuid.NewV7()
-	testOldUserID, _ := uuid.NewV7()
-	testBankAccountID, _ := uuid.NewV7()
+	t.mockRepo.EXPECT().Update(gomock.Any()).
+		Return(nil)
 
-	testLastBalanceDate := time.Now().AddDate(0, 0, -2)
-	testLastBalance := float64(1000000)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
 
-	testNewLastBalanceDate := time.Now()
-	testNewLastBalance := float64(1100000)
+	assert.NotNil(t.T(), res)
+	assert.NoError(t.T(), err)
+}
 
-	bankAccountInput := model.BankAccountInput{
-		ID:                testBankAccountID,
-		AccountName:       "Savings Account Updated",
-		BankName:          "First National Bank Updated",
-		AccountHolderName: "John Doe Updated",
-		AccountNumber:     "123-456-7890-updated",
-		LastBalance:       testNewLastBalance,
-		LastBalanceDate:   cachetime.CacheTime(testNewLastBalanceDate),
-		Status:            model.BankAccountStatusActive,
-		Balances:          []model.BankAccountBalanceInput{},
-	}
+func (t *bankAccountsServiceTestSuite) TestUpdate_ErrorResolvingByIDs() {
+	errMsg := "query failed"
 
-	existingBankAccount := model.BankAccount{
-		ID:                testBankAccountID,
-		AccountName:       "Savings Account",
-		BankName:          "First National Bank",
-		AccountHolderName: "John Doe",
-		AccountNumber:     "123-456-7890",
-		LastBalance:       testLastBalance,
-		LastBalanceDate:   testLastBalanceDate,
-		Status:            model.BankAccountStatusActive,
-		Created:           time.Now().AddDate(0, 0, -1),
-		CreatedBy:         testOldUserID,
-	}
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, errors.New(errMsg))
 
-	deletedBankAccount := model.BankAccount{
-		ID:                testBankAccountID,
-		AccountName:       "Savings Account",
-		BankName:          "First National Bank",
-		AccountHolderName: "John Doe",
-		AccountNumber:     "123-456-7890",
-		LastBalance:       testLastBalance,
-		LastBalanceDate:   testLastBalanceDate,
-		Status:            model.BankAccountStatusActive,
-		Created:           time.Now().AddDate(0, 0, -2),
-		CreatedBy:         testOldUserID,
-		Deleted:           null.TimeFrom(time.Now().AddDate(0, 0, -1)),
-		DeletedBy:         nuuid.From(testOldUserID),
-	}
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
 
-	t.Run("Normal", func() {
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
 
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{existingBankAccount}, nil)
+func (t *bankAccountsServiceTestSuite) TestUpdate_AccountNotFound() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, nil)
 
-		t.mockRepo.EXPECT().Update(gomock.Any()).
-			Return(nil)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
 
-		res, err := t.svc.Update(bankAccountInput, testUserID)
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+}
 
-		assert.NotNil(t.T(), res)
-		assert.NoError(t.T(), err)
+func (t *bankAccountsServiceTestSuite) TestUpdate_AccountDeleted() {
+	bankAccountInput := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil)
+	deletedBankAccount := model.NewBankAccountFromInput(bankAccountInput, t.testUserID)
+	deletedBankAccount.Delete(t.testUserID)
 
-	})
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{deletedBankAccount}, nil)
 
-	t.Run("ErrorResolvingByIDs", func() {
+	res, err := t.svc.Update(bankAccountInput, t.testUserID)
 
-		errMsg := "query failed"
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "update")
+	assert.Contains(t.T(), err.Error(), "Bank Account")
+	assert.Contains(t.T(), err.Error(), "deleted")
+}
 
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{}, errors.New(errMsg))
+func (t *bankAccountsServiceTestSuite) TestUpdate_RepoFailToUpdate() {
+	errMsg := "failed to update"
 
-		res, err := t.svc.Update(bankAccountInput, testUserID)
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)}, nil)
 
-		assert.Nil(t.T(), res)
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), errMsg)
+	t.mockRepo.EXPECT().Update(gomock.Any()).
+		Return(errors.New(errMsg))
 
-	})
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
 
-	t.Run("AccountNotFound", func() {
-
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{}, nil)
-
-		res, err := t.svc.Update(bankAccountInput, testUserID)
-
-		assert.Nil(t.T(), res)
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), "EntityNotFound")
-
-	})
-
-	t.Run("AccountDeleted", func() {
-
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{deletedBankAccount}, nil)
-
-		res, err := t.svc.Update(bankAccountInput, testUserID)
-
-		assert.Nil(t.T(), res)
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), "update")
-		assert.Contains(t.T(), err.Error(), "Bank Account")
-		assert.Contains(t.T(), err.Error(), "deleted")
-
-	})
-
-	t.Run("RepoFailToUpdate", func() {
-		errMsg := "failed to update"
-
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{existingBankAccount}, nil)
-
-		t.mockRepo.EXPECT().Update(gomock.Any()).
-			Return(errors.New(errMsg))
-
-		res, err := t.svc.Update(bankAccountInput, testUserID)
-
-		assert.Nil(t.T(), res)
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), errMsg)
-
-	})
-
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
 func (t *bankAccountsServiceTestSuite) TestDelete() {
