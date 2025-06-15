@@ -475,165 +475,124 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_RepoFailToUpdate() {
 	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
-func (t *bankAccountsServiceTestSuite) TestDelete() {
+func (t *bankAccountsServiceTestSuite) TestDelete_Normal() {
+	balanceSlice := []model.BankAccountBalance{}
 
-	testUserID, _ := uuid.NewV7()
-	testBankAccountID, _ := uuid.NewV7()
-	testBankAccountBalanceID1, _ := uuid.NewV7()
-	testBankAccountBalanceID2, _ := uuid.NewV7()
+	balanceSlice = append(
+		balanceSlice,
+		t.getNewBankAccountBalance(
+			nuuid.NUUID{},
+			nuuid.From(t.testBankAccountID),
+			float64(10000),
+			time.Now().AddDate(0, 0, -1)))
 
-	lastBalance := float64(1000000)
-	lastBalanceDate := time.Now()
+	balanceSlice = append(
+		balanceSlice,
+		t.getNewBankAccountBalance(
+			nuuid.NUUID{},
+			nuuid.From(t.testBankAccountID),
+			float64(12000),
+			time.Now()))
 
-	nonLastBalance := float64(900000)
-	nonLastBalanceDate := time.Now().AddDate(0, 0, -1)
+	testBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), &balanceSlice)
 
-	testLastBankAccountBalance := model.BankAccountBalance{
-		ID:            testBankAccountBalanceID1,
-		BankAccountID: testBankAccountID,
-		Date:          lastBalanceDate,
-		Balance:       lastBalance,
-		Created:       time.Now().AddDate(0, 0, -1),
-		CreatedBy:     testUserID,
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testBankAccount}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
+		Return(balanceSlice, t.getDefaultPageInfo(), nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).Return(nil)
+
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
+
+	assert.NoError(t.T(), err)
+
+	assert.NotNil(t.T(), res)
+	assert.True(t.T(), res.Deleted.Valid)
+	assert.True(t.T(), res.DeletedBy.Valid)
+
+	assert.Equal(t.T(), 2, len(res.Balances))
+	for _, resBalance := range res.Balances {
+		assert.True(t.T(), resBalance.Deleted.Valid)
+		assert.True(t.T(), resBalance.DeletedBy.Valid)
 	}
+}
 
-	testNonLastBankAccountBalance := model.BankAccountBalance{
-		ID:            testBankAccountBalanceID2,
-		BankAccountID: testBankAccountID,
-		Date:          nonLastBalanceDate,
-		Balance:       nonLastBalance,
-		Created:       time.Now().AddDate(0, 0, -1),
-		CreatedBy:     testUserID,
-	}
+func (t *bankAccountsServiceTestSuite) TestDelete_ErrorResolvingByIDs() {
+	errMsg := "failed resolving by IDs"
 
-	testDeletedNonLastBankAccountBalance := model.BankAccountBalance{
-		ID:            testBankAccountBalanceID2,
-		BankAccountID: testBankAccountID,
-		Date:          nonLastBalanceDate,
-		Balance:       nonLastBalance,
-		Created:       time.Now().AddDate(0, 0, -1),
-		CreatedBy:     testUserID,
-		Deleted:       null.TimeFrom(time.Now()),
-		DeletedBy:     nuuid.From(testUserID),
-	}
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, errors.New(errMsg))
 
-	testBankAccount := model.BankAccount{
-		ID:                testBankAccountID,
-		AccountName:       "Savings Account",
-		BankName:          "First National Bank",
-		AccountHolderName: "John Doe",
-		AccountNumber:     "123-456-7890",
-		LastBalance:       lastBalance,
-		LastBalanceDate:   lastBalanceDate,
-		Status:            model.BankAccountStatusActive,
-		Created:           time.Now().AddDate(0, 0, -1),
-		CreatedBy:         testUserID,
-	}
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
 
-	testDeletedBankAccount := model.BankAccount{
-		ID:                testBankAccountID,
-		AccountName:       "Savings Account",
-		BankName:          "First National Bank",
-		AccountHolderName: "John Doe",
-		AccountNumber:     "123-456-7890",
-		LastBalance:       lastBalance,
-		LastBalanceDate:   lastBalanceDate,
-		Status:            model.BankAccountStatusActive,
-		Created:           time.Now().AddDate(0, 0, -1),
-		CreatedBy:         testUserID,
-		Deleted:           null.TimeFrom(time.Now()),
-		DeletedBy:         nuuid.From(testUserID),
-	}
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
 
-	t.Run("Normal", func() {
+func (t *bankAccountsServiceTestSuite) TestDelete_AccountNotFound() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, nil)
 
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{testBankAccount}, nil)
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
 
-		t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
-			Return(
-				[]model.BankAccountBalance{
-					testNonLastBankAccountBalance,
-					testLastBankAccountBalance,
-				},
-				t.getDefaultPageInfo(),
-				nil).Times(2)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
 
-		t.mockRepo.EXPECT().Update(gomock.Any()).Return(nil)
+func (t *bankAccountsServiceTestSuite) TestDelete_AccountAlreadyDeleted() {
+	testDeletedBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	testDeletedBankAccount.Deleted = null.TimeFrom(time.Now())
+	testDeletedBankAccount.DeletedBy = nuuid.From(t.testUserID)
 
-		res, err := t.svc.Delete(testBankAccountID, testUserID)
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testDeletedBankAccount}, nil)
 
-		assert.NoError(t.T(), err)
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
 
-		assert.NotNil(t.T(), res)
-		assert.True(t.T(), res.Deleted.Valid)
-		assert.True(t.T(), res.DeletedBy.Valid)
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "delete")
+	assert.Contains(t.T(), err.Error(), "Bank Account")
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
 
-		assert.Equal(t.T(), 2, len(res.Balances))
-		for _, resBalance := range res.Balances {
-			assert.True(t.T(), resBalance.Deleted.Valid)
-			assert.True(t.T(), resBalance.DeletedBy.Valid)
-		}
-	})
+func (t *bankAccountsServiceTestSuite) TestDelete_AccountBalanceAlreadyDeleted() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)}, nil)
 
-	t.Run("ErrorResolvingByIDs", func() {
-		errMsg := "failed resolving by IDs"
+	testDeletedNonLastBankAccountBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(10000),
+		time.Now().AddDate(0, 0, -1))
 
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{}, errors.New(errMsg))
+	testDeletedNonLastBankAccountBalance.Deleted = null.TimeFrom(time.Now())
+	testDeletedNonLastBankAccountBalance.DeletedBy = nuuid.From(t.testUserID)
 
-		res, err := t.svc.Delete(testBankAccountID, testUserID)
+	testLastBankAccountBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(12000),
+		time.Now())
 
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), errMsg)
-		assert.Nil(t.T(), res)
-	})
+	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
+		Return(
+			[]model.BankAccountBalance{
+				testDeletedNonLastBankAccountBalance,
+				testLastBankAccountBalance,
+			},
+			t.getDefaultPageInfo(),
+			nil)
 
-	t.Run("AccountNotFound", func() {
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{}, nil)
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
 
-		res, err := t.svc.Delete(testBankAccountID, testUserID)
-
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), "EntityNotFound")
-		assert.Nil(t.T(), res)
-	})
-
-	t.Run("AccountAlreadyDeleted", func() {
-
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{testDeletedBankAccount}, nil)
-
-		res, err := t.svc.Delete(testBankAccountID, testUserID)
-
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), "delete")
-		assert.Contains(t.T(), err.Error(), "Bank Account")
-		assert.Contains(t.T(), err.Error(), "deleted")
-		assert.Nil(t.T(), res)
-	})
-
-	t.Run("AccountBalanceAlreadyDeleted", func() {
-
-		t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{testBankAccountID}).
-			Return([]model.BankAccount{testBankAccount}, nil)
-
-		t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
-			Return(
-				[]model.BankAccountBalance{
-					testDeletedNonLastBankAccountBalance,
-					testLastBankAccountBalance,
-				},
-				t.getDefaultPageInfo(),
-				nil)
-
-		res, err := t.svc.Delete(testBankAccountID, testUserID)
-
-		assert.Error(t.T(), err)
-		assert.Contains(t.T(), err.Error(), "delete")
-		assert.Contains(t.T(), err.Error(), "Bank Account Balance")
-		assert.Contains(t.T(), err.Error(), "deleted")
-		assert.Nil(t.T(), res)
-	})
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "delete")
+	assert.Contains(t.T(), err.Error(), "Bank Account Balance")
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
 }

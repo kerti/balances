@@ -137,20 +137,23 @@ func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAcc
 
 	bankAccount := bankAccounts[0]
 
-	filter := model.BankAccountBalanceFilterInput{}
-	filter.BankAccountIDs = &[]uuid.UUID{bankAccount.ID}
+	// pre-validate to save one database call
+	if !bankAccount.Deleted.Valid && !bankAccount.DeletedBy.Valid {
+		filter := model.BankAccountBalanceFilterInput{}
+		filter.BankAccountIDs = &[]uuid.UUID{bankAccount.ID}
 
-	page := 1
-	pageSize := math.MaxInt
+		page := 1
+		pageSize := math.MaxInt
 
-	filter.Page = &(page)
-	filter.PageSize = &pageSize
+		filter.Page = &page
+		filter.PageSize = &pageSize
 
-	balances, _, err := s.Repository.ResolveBalancesByFilter(filter.ToFilter())
-	if err != nil {
-		return nil, err
+		balances, _, err := s.Repository.ResolveBalancesByFilter(filter.ToFilter())
+		if err != nil {
+			return nil, err
+		}
+		bankAccount.Balances = balances
 	}
-	bankAccount.Balances = balances
 
 	err = bankAccount.Delete(userID)
 	if err != nil {
