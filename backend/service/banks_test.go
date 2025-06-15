@@ -358,7 +358,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorR
 	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
-func (t *bankAccountsServiceTestSuite) TestGetByID_ErrorResolvingByID() {
+func (t *bankAccountsServiceTestSuite) TestGetByID_RepoErrorResolvingByID() {
 	errMsg := "repo failed resolving by IDs"
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
 		Return(nil, errors.New(errMsg))
@@ -418,7 +418,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_Normal() {
 	assert.NoError(t.T(), err)
 }
 
-func (t *bankAccountsServiceTestSuite) TestUpdate_ErrorResolvingByIDs() {
+func (t *bankAccountsServiceTestSuite) TestUpdate_RepoErrorResolvingByIDs() {
 	errMsg := "query failed"
 
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
@@ -459,7 +459,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_AccountDeleted() {
 	assert.Contains(t.T(), err.Error(), "deleted")
 }
 
-func (t *bankAccountsServiceTestSuite) TestUpdate_RepoFailToUpdate() {
+func (t *bankAccountsServiceTestSuite) TestUpdate_RepoErrorUpdating() {
 	errMsg := "failed to update"
 
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
@@ -519,7 +519,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete_Normal() {
 	}
 }
 
-func (t *bankAccountsServiceTestSuite) TestDelete_ErrorResolvingByIDs() {
+func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorResolvingByIDs() {
 	errMsg := "failed resolving by IDs"
 
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
@@ -529,6 +529,25 @@ func (t *bankAccountsServiceTestSuite) TestDelete_ErrorResolvingByIDs() {
 
 	assert.Error(t.T(), err)
 	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorResolvingBalancesByFilter() {
+	errMsg := "failed resolving account balances"
+
+	testBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testBankAccount}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
+		Return([]model.BankAccountBalance{}, model.PageInfoOutput{}, errors.New(errMsg))
+
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
 	assert.Nil(t.T(), res)
 }
 
@@ -594,5 +613,43 @@ func (t *bankAccountsServiceTestSuite) TestDelete_AccountBalanceAlreadyDeleted()
 	assert.Contains(t.T(), err.Error(), "delete")
 	assert.Contains(t.T(), err.Error(), "Bank Account Balance")
 	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorUpdating() {
+	errMsg := "failed updating bank account"
+	balanceSlice := []model.BankAccountBalance{}
+
+	balanceSlice = append(
+		balanceSlice,
+		t.getNewBankAccountBalance(
+			nuuid.NUUID{},
+			nuuid.From(t.testBankAccountID),
+			float64(10000),
+			time.Now().AddDate(0, 0, -1)))
+
+	balanceSlice = append(
+		balanceSlice,
+		t.getNewBankAccountBalance(
+			nuuid.NUUID{},
+			nuuid.From(t.testBankAccountID),
+			float64(12000),
+			time.Now()))
+
+	testBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), &balanceSlice)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testBankAccount}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
+		Return(balanceSlice, t.getDefaultPageInfo(), nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).Return(errors.New(errMsg))
+
+	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
 	assert.Nil(t.T(), res)
 }
