@@ -714,16 +714,91 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalance() {
 			nil)
 
 	t.mockRepo.EXPECT().CreateBalance(
-		// the account balance
 		accountBalanceMatcher{testBalance},
-		// the account
-		accountPointerMatcher{testAccountAfterUpdate},
-	).Return(nil)
+		accountPointerMatcher{testAccountAfterUpdate}).
+		Return(nil)
 
 	res, err := t.svc.CreateBalance(testInput, t.testUserID)
 
 	assert.NoError(t.T(), err)
 	assert.NotNil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_NotLastBalance() {
+	testBalanceDate := time.Now().AddDate(0, 0, -12)
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+	testBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate,
+	)
+
+	testAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	testAccountToUpdate.LastBalance = float64(900)
+	testAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 1).
+		Return(
+			[]model.BankAccountBalance{
+				t.getNewBankAccountBalance(
+					nuuid.NUUID{},
+					nuuid.From(t.testBankAccountID),
+					float64(900),
+					time.Now().AddDate(0, 0, -1))},
+			nil)
+
+	t.mockRepo.EXPECT().CreateBalance(accountBalanceMatcher{testBalance}, nil).
+		Return(nil)
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedResolvingByIDs() {
+	errMsg := "failed to resolve bank accounts by IDs"
+	testBalanceDate := time.Now()
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, errors.New(errMsg))
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_BankAccountNotFound() {
+	testBalanceDate := time.Now()
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, nil)
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
 }
 
 //// matchers
