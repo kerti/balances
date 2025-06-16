@@ -8,6 +8,7 @@ class LoginPage {
      */
     constructor(page) {
         this.page = page
+        this.frmLogin = page.getByTestId('frmLogin_form')
         this.txtUsername = page.getByTestId('frmLogin_txtUsername')
         this.txtPassword = page.getByTestId('frmLogin_txtPassword')
         this.btnLogin = page.getByTestId('frmLogin_btnLogin')
@@ -16,6 +17,7 @@ class LoginPage {
 
     async login(username, password) {
         await this.page.goto('/login')
+        await expect(this.frmLogin).toBeVisible()
         await this.txtUsername.click()
         await this.txtUsername.fill(username)
         await this.txtPassword.click()
