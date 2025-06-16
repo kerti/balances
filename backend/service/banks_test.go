@@ -801,6 +801,49 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_BankAccountNotFo
 	assert.Nil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_BankAccountDeleted() {
+	testBalanceDate := time.Now()
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+
+	deletedAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	deletedAccount.Deleted = null.TimeFrom(time.Now())
+	deletedAccount.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{deletedAccount}, nil)
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_BankAccountInactive() {
+	testBalanceDate := time.Now()
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+
+	deletedAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	deletedAccount.Status = model.BankAccountStatusInactive
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{deletedAccount}, nil)
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "inactive")
+	assert.Nil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
