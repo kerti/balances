@@ -981,6 +981,25 @@ func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_BalanceNotFound() {
 	assert.Nil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestGetBalanceByFilter_Normal() {
+	filter := model.BankAccountBalanceFilterInput{}
+	t.mockRepo.EXPECT().ResolveBalancesByFilter(filter.ToFilter()).
+		Return([]model.BankAccountBalance{
+			t.getNewBankAccountBalance(
+				nuuid.From(t.testBankAccountBalanceID),
+				nuuid.From(t.testBankAccountBalanceID),
+				float64(1000),
+				time.Now())},
+			t.getDefaultPageInfo(),
+			nil)
+
+	res, pageInfo, err := t.svc.GetBalancesByFilter(filter)
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+	assert.Equal(t.T(), pageInfo.TotalCount, 1)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
