@@ -114,6 +114,29 @@ func (t *bankAccountsServiceTestSuite) getBankAccountSlice(count int) (res []mod
 	return
 }
 
+func (t *bankAccountsServiceTestSuite) getNewBankAccountBalanceInput(id nuuid.NUUID, bankAccountID nuuid.NUUID, balance float64, date time.Time) model.BankAccountBalanceInput {
+	bal := model.BankAccountBalanceInput{}
+
+	if id.Valid {
+		bal.ID = id.UUID
+	} else {
+		newID, _ := uuid.NewV7()
+		bal.ID = newID
+	}
+
+	if bankAccountID.Valid {
+		bal.BankAccountID = bankAccountID.UUID
+	} else {
+		newAccID, _ := uuid.NewV7()
+		bal.BankAccountID = newAccID
+	}
+
+	bal.Balance = balance
+	bal.Date = cachetime.CacheTime(date)
+
+	return bal
+}
+
 func (t *bankAccountsServiceTestSuite) getNewBankAccountBalance(id nuuid.NUUID, bankAccountID nuuid.NUUID, balance float64, date time.Time) model.BankAccountBalance {
 	bal := model.BankAccountBalance{}
 
@@ -653,3 +676,42 @@ func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorUpdating() {
 
 	assert.Nil(t.T(), res)
 }
+
+// func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalance() {
+// 	testBalanceDate := time.Now()
+// 	testInput := t.getNewBankAccountBalanceInput(
+// 		nuuid.NUUID{},
+// 		nuuid.From(t.testBankAccountID),
+// 		float64(1000),
+// 		testBalanceDate)
+
+// 	testAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+// 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+// 		Return([]model.BankAccount{testAccount}, nil)
+
+// 	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 1).
+// 		Return(
+// 			[]model.BankAccountBalance{
+// 				t.getNewBankAccountBalance(
+// 					nuuid.NUUID{},
+// 					nuuid.From(t.testBankAccountID),
+// 					float64(900),
+// 					time.Now().AddDate(0, 0, -1))},
+// 			nil)
+
+// 	t.mockRepo.EXPECT().CreateBalance(
+// 		// the account balance
+// 		gomock.Matches(func(b model.BankAccountBalance) bool {
+// 			balanceMatches := b.Balance == testInput.Balance
+// 			dateMatches := b.Date == time.Time(testInput.Date)
+// 			return balanceMatches && dateMatches
+// 		}),
+// 		// the account
+// 		gomock.Any(),
+// 	).Return(nil)
+
+// 	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+// 	assert.NoError(t.T(), err)
+// 	assert.NotNil(t.T(), res)
+// }
