@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -677,41 +678,106 @@ func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorUpdating() {
 	assert.Nil(t.T(), res)
 }
 
-// func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalance() {
-// 	testBalanceDate := time.Now()
-// 	testInput := t.getNewBankAccountBalanceInput(
-// 		nuuid.NUUID{},
-// 		nuuid.From(t.testBankAccountID),
-// 		float64(1000),
-// 		testBalanceDate)
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalance() {
+	testBalanceDate := time.Now()
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate)
+	testBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(1234.56),
+		testBalanceDate,
+	)
 
-// 	testAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
-// 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
-// 		Return([]model.BankAccount{testAccount}, nil)
+	testAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	testAccountToUpdate.LastBalance = float64(900)
+	testAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
 
-// 	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 1).
-// 		Return(
-// 			[]model.BankAccountBalance{
-// 				t.getNewBankAccountBalance(
-// 					nuuid.NUUID{},
-// 					nuuid.From(t.testBankAccountID),
-// 					float64(900),
-// 					time.Now().AddDate(0, 0, -1))},
-// 			nil)
+	testAccountAfterUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	testAccountAfterUpdate.LastBalance = testBalance.Balance
+	testAccountAfterUpdate.LastBalanceDate = testBalance.Date
 
-// 	t.mockRepo.EXPECT().CreateBalance(
-// 		// the account balance
-// 		gomock.Matches(func(b model.BankAccountBalance) bool {
-// 			balanceMatches := b.Balance == testInput.Balance
-// 			dateMatches := b.Date == time.Time(testInput.Date)
-// 			return balanceMatches && dateMatches
-// 		}),
-// 		// the account
-// 		gomock.Any(),
-// 	).Return(nil)
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{testAccountToUpdate}, nil)
 
-// 	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 1).
+		Return(
+			[]model.BankAccountBalance{
+				t.getNewBankAccountBalance(
+					nuuid.NUUID{},
+					nuuid.From(t.testBankAccountID),
+					float64(900),
+					time.Now().AddDate(0, 0, -1))},
+			nil)
 
-// 	assert.NoError(t.T(), err)
-// 	assert.NotNil(t.T(), res)
-// }
+	t.mockRepo.EXPECT().CreateBalance(
+		// the account balance
+		accountBalanceMatcher{testBalance},
+		// the account
+		accountPointerMatcher{testAccountAfterUpdate},
+	).Return(nil)
+
+	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+//// matchers
+
+type accountPointerMatcher struct {
+	expected model.BankAccount
+}
+
+func (m accountPointerMatcher) Matches(x interface{}) bool {
+	actual, ok := x.(*model.BankAccount)
+	if !ok {
+		return false
+	}
+
+	return actual.AccountName == m.expected.AccountName &&
+		actual.BankName == m.expected.BankName &&
+		actual.AccountHolderName == m.expected.AccountHolderName &&
+		actual.AccountNumber == m.expected.AccountNumber &&
+		actual.LastBalance == m.expected.LastBalance &&
+		actual.LastBalanceDate.Equal(m.expected.LastBalanceDate) &&
+		actual.Status == m.expected.Status
+}
+
+func (m accountPointerMatcher) String() string {
+	return fmt.Sprintf(
+		"is BankAccount with AccountName=%s, BankName=%s, AccountHolderName=%s, AccountNumber=%s, LastBalance=%.2f, LastBalanceDate=%v, Status=%s",
+		m.expected.AccountName,
+		m.expected.BankName,
+		m.expected.AccountHolderName,
+		m.expected.AccountNumber,
+		m.expected.LastBalance,
+		m.expected.LastBalanceDate,
+		m.expected.Status)
+}
+
+type accountBalanceMatcher struct {
+	expected model.BankAccountBalance
+}
+
+func (m accountBalanceMatcher) Matches(x interface{}) bool {
+	actual, ok := x.(model.BankAccountBalance)
+	if !ok {
+		return false
+	}
+
+	return actual.Date.Equal(m.expected.Date) &&
+		actual.Balance == m.expected.Balance &&
+		actual.BankAccountID == m.expected.BankAccountID
+}
+
+func (m accountBalanceMatcher) String() string {
+	return fmt.Sprintf(
+		"is BankAccountBalance with Balance=%.2f, Date=%v, BankAccountID=%v",
+		m.expected.Balance,
+		m.expected.Date,
+		m.expected.BankAccountID)
+}
