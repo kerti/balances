@@ -9,7 +9,9 @@ const authStore = useAuthStore()
 <template>
   <div class="navbar bg-base-100 shadow-none">
     <div class="flex-1">
-      <div class="text-xl font-bold">{{ routes.meta.pageTitle }}</div>
+      <div class="text-xl font-bold" data-testid="divHeader_divPageTitle">
+        {{ routes.meta.pageTitle }}
+      </div>
     </div>
     <div class="flex-none">
       <div class="dropdown dropdown-end pr-3">

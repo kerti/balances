@@ -111,7 +111,9 @@ function handleLogout() {
     </li>
     <li></li>
     <li>
-      <a href="#" @click="handleLogout">Logout</a>
+      <a href="#" @click="handleLogout" data-testid="divSidebar_btnLogout"
+        >Logout</a
+      >
     </li>
   </ul>
 </template>

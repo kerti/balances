@@ -214,16 +214,16 @@ const deleteBankAccount = async () => {
                 </td>
                 <td>
                   <div class="flex items-center gap-3">
-                    <button class="btn btn-neutral tooltip" data-tip="Edit">
-                      <router-link
-                        :to="{
-                          name: 'assets.bankaccount.detail',
-                          params: { id: account.id },
-                        }"
-                      >
+                    <router-link
+                      :to="{
+                        name: 'assets.bankaccount.detail',
+                        params: { id: account.id },
+                      }"
+                    >
+                      <button class="btn btn-neutral tooltip" data-tip="Edit">
                         <font-awesome-icon :icon="['fas', 'edit']" />
-                      </router-link>
-                    </button>
+                      </button>
+                    </router-link>
                     <button
                       class="btn btn-neutral tooltip"
                       data-tip="Delete"

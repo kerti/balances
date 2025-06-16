@@ -41,34 +41,48 @@ async function authenticate(event) {
 
 <template>
   <div class="flex items-center justify-center min-h-screen bg-base-100">
-    <form v-on:submit="authenticate">
+    <form v-on:submit="authenticate" data-testid="frmLogin_form">
       <fieldset
         class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
       >
         <legend class="fieldset-legend">Login</legend>
 
-        <label class="label">Username</label>
+        <label class="label" for="username">Username</label>
         <input
           type="text"
           class="input"
           placeholder="username"
           autocomplete="username"
+          id="username"
+          data-testid="frmLogin_txtUsername"
           :value="username"
           @input="updateUsername"
         />
 
-        <label class="label">Password</label>
+        <label class="label" for="password">Password</label>
         <input
           type="password"
           class="input"
           placeholder="password"
           autocomplete="current-password"
+          id="password"
+          data-testid="frmLogin_txtPassword"
           :value="password"
           @input="updatePassword"
         />
-        <button type="submit" class="btn btn-primary mt-4">Login</button>
+        <button
+          type="submit"
+          class="btn btn-primary mt-4"
+          data-testid="frmLogin_btnLogin"
+        >
+          Login
+        </button>
 
-        <div v-if="errorMessage" class="text-error mt-2">
+        <div
+          v-if="errorMessage"
+          class="text-secondary-content mt-2 font-bold"
+          data-testid="frmLogin_divErrorMessage"
+        >
           {{ errorMessage }}
         </div>
       </fieldset>
