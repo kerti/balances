@@ -968,6 +968,19 @@ func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_RepoFailedResolvingBal
 	assert.Nil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_BalanceNotFound() {
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return(
+			[]model.BankAccountBalance{},
+			nil)
+
+	res, err := t.svc.GetBalanceByID(t.testBankAccountBalanceID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
