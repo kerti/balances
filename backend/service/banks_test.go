@@ -20,11 +20,12 @@ import (
 
 type bankAccountsServiceTestSuite struct {
 	suite.Suite
-	ctrl              *gomock.Controller
-	svc               service.BankAccount
-	mockRepo          *mock_repository.MockBankAccount
-	testUserID        uuid.UUID
-	testBankAccountID uuid.UUID
+	ctrl                     *gomock.Controller
+	svc                      service.BankAccount
+	mockRepo                 *mock_repository.MockBankAccount
+	testUserID               uuid.UUID
+	testBankAccountID        uuid.UUID
+	testBankAccountBalanceID uuid.UUID
 }
 
 func TestBankAccountsService(t *testing.T) {
@@ -931,6 +932,36 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedCreati
 		Return(errors.New(errMsg))
 
 	res, err := t.svc.CreateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_Normal() {
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return(
+			[]model.BankAccountBalance{t.getNewBankAccountBalance(
+				nuuid.From(t.testBankAccountBalanceID),
+				nuuid.From(t.testBankAccountID),
+				float64(1000),
+				time.Now())},
+			nil)
+
+	res, err := t.svc.GetBalanceByID(t.testBankAccountBalanceID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_RepoFailedResolvingBalance() {
+	errMsg := "failed to resolva bank account balances"
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return(
+			[]model.BankAccountBalance{},
+			errors.New(errMsg))
+
+	res, err := t.svc.GetBalanceByID(t.testBankAccountBalanceID)
 
 	assert.Error(t.T(), err)
 	assert.Contains(t.T(), err.Error(), errMsg)
