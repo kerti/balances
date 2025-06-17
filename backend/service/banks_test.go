@@ -1334,6 +1334,56 @@ func (t *bankAccountsServiceTestSuite) TestUpdateBalance_LastBalanceNotFound() {
 	assert.Nil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_RepoFailedUpdatingBalance() {
+	errMsg := "failed updating bank account balance"
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	bankAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	bankAccountToUpdate.LastBalance = float64(900)
+	bankAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+
+	balanceToUpdate := t.getNewBankAccountBalance(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		bankAccountToUpdate.LastBalance,
+		bankAccountToUpdate.LastBalanceDate)
+
+	updatedBalance := t.getNewBankAccountBalance(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		testInput.Balance,
+		testInput.Date.Time())
+
+	updatedBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	updatedBankAccount.LastBalance = updatedBalance.Balance
+	updatedBankAccount.LastBalanceDate = updatedBalance.Date
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{bankAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{balanceToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 1).
+		Return([]model.BankAccountBalance{balanceToUpdate}, nil)
+
+	t.mockRepo.EXPECT().UpdateBalance(
+		accountBalanceMatcher{updatedBalance},
+		accountPointerMatcher{updatedBankAccount}).
+		Return(errors.New(errMsg))
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
