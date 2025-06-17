@@ -1478,6 +1478,51 @@ func (t *bankAccountsServiceTestSuite) TestDeleteBalance_Normal_NonLastBalance()
 	assert.NotNil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestDeleteBalance_RepoFailedResolvingBalanceByIDs() {
+	errMsg := "failed resolving bank account balances by IDs"
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{}, errors.New(errMsg))
+
+	res, err := t.svc.DeleteBalance(t.testBankAccountBalanceID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestDeleteBalance_BalanceNotFound() {
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{}, nil)
+
+	res, err := t.svc.DeleteBalance(t.testBankAccountBalanceID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestDeleteBalance_BalanceAlreadyDeleted() {
+
+	lastBalance := t.getNewBankAccountBalance(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(123),
+		time.Now())
+	lastBalance.Deleted = null.TimeFrom(time.Now())
+	lastBalance.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{lastBalance}, nil)
+
+	res, err := t.svc.DeleteBalance(t.testBankAccountBalanceID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "Bank Account Balance")
+	assert.Contains(t.T(), err.Error(), "already deleted")
+	assert.Nil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
