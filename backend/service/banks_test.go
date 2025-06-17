@@ -1093,6 +1093,143 @@ func (t *bankAccountsServiceTestSuite) TestUpdateBalance_Normal_NonLastBalance()
 	assert.NotNil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_RepoFailedResolvingByIDs() {
+	errMsg := "failed resolving bank accounts by IDs"
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, errors.New(errMsg))
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_BankAccountNotFound() {
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{}, nil)
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "Bank Account")
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_BankAccountDeleted() {
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	bankAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	bankAccountToUpdate.LastBalance = float64(900)
+	bankAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+	bankAccountToUpdate.Deleted = null.TimeFrom(time.Now())
+	bankAccountToUpdate.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{bankAccountToUpdate}, nil)
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_BankAccountInactive() {
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	bankAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	bankAccountToUpdate.LastBalance = float64(900)
+	bankAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+	bankAccountToUpdate.Status = model.BankAccountStatusInactive
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{bankAccountToUpdate}, nil)
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "inactive")
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_RepoFailedResolvingBalances() {
+	errMsg := "failed resolving bank account balances"
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	bankAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	bankAccountToUpdate.LastBalance = float64(900)
+	bankAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{bankAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{}, errors.New(errMsg))
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestUpdateBalance_BalanceNotFound() {
+	testInput := t.getNewBankAccountBalanceInput(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(1000),
+		time.Now(),
+	)
+
+	bankAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	bankAccountToUpdate.LastBalance = float64(900)
+	bankAccountToUpdate.LastBalanceDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return([]model.BankAccount{bankAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{}, nil)
+
+	res, err := t.svc.UpdateBalance(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "Bank Account Balance")
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {
