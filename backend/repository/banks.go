@@ -311,7 +311,7 @@ func (r *BankAccountMySQLRepo) ResolveLastBalancesByBankAccountID(id uuid.UUID, 
 		return
 	}
 
-	whereClause := " WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?"
+	whereClause := " WHERE bank_account_balances.bank_account_entity_id = ? AND bank_account_balances.deleted IS NULL AND bank_account_balances.deleted_by IS NULL ORDER BY bank_account_balances.date DESC LIMIT ?"
 	query, args, err := r.DB.In(
 		QuerySelectBankAccountBalance+whereClause, id, count)
 	if err != nil {
