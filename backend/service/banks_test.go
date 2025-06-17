@@ -1384,6 +1384,100 @@ func (t *bankAccountsServiceTestSuite) TestUpdateBalance_RepoFailedUpdatingBalan
 	assert.Nil(t.T(), res)
 }
 
+func (t *bankAccountsServiceTestSuite) TestDeleteBalance_Normal_LastBalance() {
+
+	lastBalance := t.getNewBankAccountBalance(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(123),
+		time.Now())
+
+	secondToLastBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(456),
+		time.Now().AddDate(0, 0, -12))
+
+	deletedLastBalance := t.getNewBankAccountBalance(
+		nuuid.From(lastBalance.ID),
+		nuuid.From(lastBalance.BankAccountID),
+		lastBalance.Balance,
+		lastBalance.Date)
+	deletedLastBalance.Deleted = null.TimeFrom(time.Now())
+	deletedLastBalance.DeletedBy = nuuid.From(t.testUserID)
+
+	updatedBankAccount := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
+	updatedBankAccount.LastBalance = secondToLastBalance.Balance
+	updatedBankAccount.LastBalanceDate = secondToLastBalance.Date
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{lastBalance}, nil)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return(
+			[]model.BankAccount{t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)},
+			nil,
+		)
+
+	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 2).
+		Return([]model.BankAccountBalance{lastBalance, secondToLastBalance}, nil)
+
+	t.mockRepo.EXPECT().UpdateBalance(
+		accountBalanceMatcher{deletedLastBalance},
+		accountPointerMatcher{updatedBankAccount}).
+		Return(nil)
+
+	res, err := t.svc.DeleteBalance(t.testBankAccountBalanceID, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *bankAccountsServiceTestSuite) TestDeleteBalance_Normal_NonLastBalance() {
+
+	lastBalance := t.getNewBankAccountBalance(
+		nuuid.NUUID{},
+		nuuid.From(t.testBankAccountID),
+		float64(123),
+		time.Now())
+
+	secondToLastBalance := t.getNewBankAccountBalance(
+		nuuid.From(t.testBankAccountBalanceID),
+		nuuid.From(t.testBankAccountID),
+		float64(456),
+		time.Now().AddDate(0, 0, -12))
+
+	deletedNonLastBalance := t.getNewBankAccountBalance(
+		nuuid.From(secondToLastBalance.ID),
+		nuuid.From(secondToLastBalance.BankAccountID),
+		secondToLastBalance.Balance,
+		secondToLastBalance.Date)
+	deletedNonLastBalance.Deleted = null.TimeFrom(time.Now())
+	deletedNonLastBalance.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
+		Return([]model.BankAccountBalance{secondToLastBalance}, nil)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
+		Return(
+			[]model.BankAccount{t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)},
+			nil,
+		)
+
+	t.mockRepo.EXPECT().ResolveLastBalancesByBankAccountID(t.testBankAccountID, 2).
+		Return([]model.BankAccountBalance{lastBalance, secondToLastBalance}, nil)
+
+	t.mockRepo.EXPECT().UpdateBalance(
+		accountBalanceMatcher{deletedNonLastBalance},
+		nil).
+		Return(nil)
+
+	res, err := t.svc.DeleteBalance(t.testBankAccountBalanceID, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
 //// matchers
 
 type accountPointerMatcher struct {

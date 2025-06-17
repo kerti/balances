@@ -1145,7 +1145,7 @@ func TestBanksRepository(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
 			mock.
-				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?").
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? AND bank_account_balances.deleted IS NULL AND bank_account_balances.deleted_by IS NULL ORDER BY bank_account_balances.date DESC LIMIT ?").
 				WithArgs(banksTestAccountID1, 2).
 				WillReturnRows(getMultiEntityIDResult([]uuid.UUID{banksTestAccountBalanceID2, banksTestAccountBalanceID1}))
 
@@ -1186,7 +1186,7 @@ func TestBanksRepository(t *testing.T) {
 			db, mock := getMockedDriver(sqlmock.QueryMatcherEqual)
 
 			mock.
-				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? ORDER BY bank_account_balances.date DESC LIMIT ?").
+				ExpectQuery(repository.QuerySelectBankAccountBalance+"WHERE bank_account_balances.bank_account_entity_id = ? AND bank_account_balances.deleted IS NULL AND bank_account_balances.deleted_by IS NULL ORDER BY bank_account_balances.date DESC LIMIT ?").
 				WithArgs(banksTestAccountID1, count).
 				WillReturnError(errors.New(""))
 
