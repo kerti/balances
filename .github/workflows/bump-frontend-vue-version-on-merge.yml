@@ -1,12 +1,15 @@
 name: Bump FE Vue Version on Merge to Master
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - master
 
 jobs:
   bump-and-merge:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -15,30 +18,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Exit if commit is from github-actions or has [skip ci]
-        run: |
-          echo "Actor: ${{ github.actor }}"
-          echo "Commit Message: $(git log -1 --pretty=format:%s)"
-          
-          if [[ "${{ github.actor }}" == "github-actions" ]]; then
-            echo "This was triggered by github-actions bot. Skipping to avoid CI loop."
-            exit 0
-          fi
-
-          if git log -1 --pretty=format:%s | grep -qi '\[skip ci\]'; then
-            echo "Commit contains [skip ci]. Skipping to avoid CI loop."
-            exit 0
-          fi
-
-      - name: Check if frontend/vue changed
+      - name: Check if frontend/vue changed in this PR
         id: changes
         run: |
-          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep "^frontend/vue/" || echo "nochanges" > .nochanges
+          git fetch origin master
+          git diff --name-only origin/master...HEAD | grep "^frontend/vue/" || echo "nochanges" > .nochanges
 
-      - name: Skip if no changes
+      - name: Exit if no frontend/vue changes
         run: |
           if [ -f .nochanges ]; then
-            echo "No changes in frontend/vue. Skipping."
+            echo "No changes in frontend/vue. Skipping version bump."
             exit 0
           fi
 
