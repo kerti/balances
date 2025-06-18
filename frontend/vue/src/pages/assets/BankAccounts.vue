@@ -136,22 +136,22 @@ const deleteBankAccount = async () => {
     <div class="card bg-base-100 shadow-md">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="card-title">List of Accounts</h2>
-          <div class="form-control flex gap-3">
-            <input
-              type="text"
-              v-model="bankAccountsStore.lvFilter"
-              placeholder="Search accounts..."
-              class="input input-bordered w-64"
-            />
+          <div class="flex gap-3">
+            <h2 class="card-title">List of Accounts</h2>
             <button
-              class="btn btn-neutral btn-circle tooltip"
-              data-tip="Add New Bank Account"
+              class="btn btn-neutral btn-xs"
               v-on:click="showAddBankAccountDialog()"
             >
               <font-awesome-icon :icon="['fas', 'plus']" />
+              New Account
             </button>
           </div>
+          <input
+            type="text"
+            v-model="bankAccountsStore.lvFilter"
+            placeholder="Search accounts..."
+            class="input input-bordered w-64"
+          />
         </div>
         <div class="overflow-x-auto h-88">
           <table class="table table-zebra w-full table-pin-rows">
@@ -173,7 +173,12 @@ const deleteBankAccount = async () => {
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.accountName }}</div>
+                      <div
+                        class="font-bold"
+                        :class="{ 'opacity-50': account.status == 'inactive' }"
+                      >
+                        {{ account.accountName }}
+                      </div>
                       <div class="text-sm opacity-50">
                         {{ account.accountHolderName }}
                       </div>
@@ -183,7 +188,12 @@ const deleteBankAccount = async () => {
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">{{ account.bankName }}</div>
+                      <div
+                        class="font-bold"
+                        :class="{ 'opacity-50': account.status == 'inactive' }"
+                      >
+                        {{ account.bankName }}
+                      </div>
                       <div class="text-sm opacity-50">
                         # {{ account.accountNumber }}
                       </div>
@@ -193,7 +203,10 @@ const deleteBankAccount = async () => {
                 <td class="text-right">
                   <div class="items-end">
                     <div>
-                      <div class="font-bold">
+                      <div
+                        class="font-bold"
+                        :class="{ 'opacity-50': account.status == 'inactive' }"
+                      >
                         {{ numUtils.numericToMoney(account.lastBalance) }}
                       </div>
                       <div class="text-sm opacity-50">
@@ -207,9 +220,11 @@ const deleteBankAccount = async () => {
                 </td>
                 <td>
                   <div>
-                    <span class="badge badge-sm badge-neutral">{{
-                      account.status
-                    }}</span>
+                    <span
+                      class="badge badge-sm badge-neutral"
+                      :class="{ 'opacity-50': account.status == 'inactive' }"
+                      >{{ account.status }}</span
+                    >
                   </div>
                 </td>
                 <td>
@@ -220,12 +235,15 @@ const deleteBankAccount = async () => {
                         params: { id: account.id },
                       }"
                     >
-                      <button class="btn btn-neutral tooltip" data-tip="Edit">
+                      <button
+                        class="btn btn-neutral btn-sm tooltip"
+                        data-tip="Edit"
+                      >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                     </router-link>
                     <button
-                      class="btn btn-neutral tooltip"
+                      class="btn btn-neutral btn-sm tooltip"
                       data-tip="Delete"
                       v-on:click="showDeleteBankAccountConfirmation(account.id)"
                     >

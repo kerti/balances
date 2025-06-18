@@ -227,12 +227,9 @@ const deleteBalance = async () => {
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">Balance History</h2>
-            <button
-              class="btn btn-neutral btn-circle tooltip"
-              data-tip="Add New Balance"
-              v-on:click="showEditor()"
-            >
+            <button class="btn btn-neutral btn-xs" v-on:click="showEditor()">
               <font-awesome-icon :icon="['fas', 'plus']" />
+              Add New Balance
             </button>
           </div>
           <div class="overflow-x-auto h-64">
@@ -257,14 +254,14 @@ const deleteBalance = async () => {
                   <td>
                     <div class="flex items-center gap-3">
                       <button
-                        class="btn btn-neutral tooltip"
+                        class="btn btn-neutral btn-sm tooltip"
                         data-tip="Edit"
                         v-on:click="showEditor(balance.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                       <button
-                        class="btn btn-neutral tooltip"
+                        class="btn btn-neutral btn-sm tooltip"
                         data-tip="Delete"
                         v-on:click="showBalanceDeleteConfirmaton(balance.id)"
                       >
