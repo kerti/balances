@@ -278,7 +278,7 @@ const deleteBankAccount = async () => {
       <h3 class="text-lg font-bold pb-5">Add New Bank Account</h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
-          <label class="label">Account Name</label>
+          <label class="label">Account Name*</label>
           <input
             v-model="bankAccountsStore.lvAddBankAccount.accountName"
             type="text"
@@ -286,7 +286,7 @@ const deleteBankAccount = async () => {
           />
         </div>
         <div>
-          <label class="label">Bank Name</label>
+          <label class="label">Bank Name*</label>
           <input
             v-model="bankAccountsStore.lvAddBankAccount.bankName"
             type="text"
@@ -294,7 +294,7 @@ const deleteBankAccount = async () => {
           />
         </div>
         <div>
-          <label class="label">Account Holder Name</label>
+          <label class="label">Account Holder Name*</label>
           <input
             v-model="bankAccountsStore.lvAddBankAccount.accountHolderName"
             type="text"
@@ -302,7 +302,7 @@ const deleteBankAccount = async () => {
           />
         </div>
         <div>
-          <label class="label">Account Number</label>
+          <label class="label">Account Number*</label>
           <input
             v-model="bankAccountsStore.lvAddBankAccount.accountNumber"
             type="text"
@@ -310,7 +310,7 @@ const deleteBankAccount = async () => {
           />
         </div>
         <div>
-          <label class="label">Initial Balance</label>
+          <label class="label">Initial Balance*</label>
           <input
             v-model="bankAccountsStore.lvAddBankAccount.lastBalance"
             type="text"
@@ -318,7 +318,7 @@ const deleteBankAccount = async () => {
           />
         </div>
         <div>
-          <label class="label">Initial Balance Date</label>
+          <label class="label">Initial Balance Date*</label>
           <DatePicker
             v-model:date="bankAccountsStore.lvAddBankAccount.lastBalanceDate"
             placeholder="pick a date"
