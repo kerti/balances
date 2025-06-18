@@ -37,55 +37,68 @@ async function authenticate(event) {
     }
   }
 }
+
+const version = __APP_VERSION__
 </script>
 
 <template>
   <div class="flex items-center justify-center min-h-screen bg-base-100">
-    <form v-on:submit="authenticate" data-testid="frmLogin_form">
-      <fieldset
-        class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+    <div class="grid grid-cols-2 p-2 gap-3">
+      <div
+        class="card bg-base-100 shadow-sm w-96 flex items-center justify-center"
       >
-        <legend class="fieldset-legend">Login</legend>
-
-        <label class="label" for="username">Username</label>
-        <input
-          type="text"
-          class="input"
-          placeholder="username"
-          autocomplete="username"
-          id="username"
-          data-testid="frmLogin_txtUsername"
-          :value="username"
-          @input="updateUsername"
-        />
-
-        <label class="label" for="password">Password</label>
-        <input
-          type="password"
-          class="input"
-          placeholder="password"
-          autocomplete="current-password"
-          id="password"
-          data-testid="frmLogin_txtPassword"
-          :value="password"
-          @input="updatePassword"
-        />
-        <button
-          type="submit"
-          class="btn btn-primary mt-4"
-          data-testid="frmLogin_btnLogin"
-        >
-          Login
-        </button>
-
-        <div
-          v-if="errorMessage"
-          class="text-secondary-content mt-2 font-bold"
-          data-testid="frmLogin_divErrorMessage"
-        >
-          {{ errorMessage }}
+        <div>
+          <h1 class="text-3xl">Balances</h1>
+          <p>Your personal finance, simplified.</p>
+          <p class="text-xs opacity-50 pt-15">version {{ version }}</p>
         </div>
-      </fieldset>
-    </form>
+      </div>
+      <form v-on:submit="authenticate" data-testid="frmLogin_form">
+        <fieldset
+          class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+        >
+          <legend class="fieldset-legend">Login</legend>
+
+          <label class="label" for="username">Username</label>
+          <input
+            type="text"
+            class="input"
+            placeholder="username"
+            autocomplete="username"
+            id="username"
+            data-testid="frmLogin_txtUsername"
+            :value="username"
+            @input="updateUsername"
+          />
+
+          <label class="label" for="password">Password</label>
+          <input
+            type="password"
+            class="input"
+            placeholder="password"
+            autocomplete="current-password"
+            id="password"
+            data-testid="frmLogin_txtPassword"
+            :value="password"
+            @input="updatePassword"
+          />
+          <button
+            type="submit"
+            class="btn btn-primary mt-4"
+            data-testid="frmLogin_btnLogin"
+          >
+            Login
+          </button>
+
+          <div
+            v-if="errorMessage"
+            class="text-secondary-content mt-2 font-bold"
+            data-testid="frmLogin_divErrorMessage"
+          >
+            {{ errorMessage }}
+          </div>
+        </fieldset>
+      </form>
+    </div>
   </div>
 </template>
