@@ -161,7 +161,7 @@ const deleteBalance = async () => {
           <h2 class="card-title">Account Details</h2>
           <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="label">Account Name</label>
+              <label class="label">Account Name*</label>
               <input
                 v-model="bankAccountsStore.dvAccount.accountName"
                 type="text"
@@ -169,7 +169,7 @@ const deleteBalance = async () => {
               />
             </div>
             <div>
-              <label class="label">Bank Name</label>
+              <label class="label">Bank Name*</label>
               <input
                 v-model="bankAccountsStore.dvAccount.bankName"
                 type="text"
@@ -177,7 +177,7 @@ const deleteBalance = async () => {
               />
             </div>
             <div>
-              <label class="label">Account Holder Name</label>
+              <label class="label">Account Holder Name*</label>
               <input
                 v-model="bankAccountsStore.dvAccount.accountHolderName"
                 type="text"
@@ -185,7 +185,7 @@ const deleteBalance = async () => {
               />
             </div>
             <div>
-              <label class="label">Account Number</label>
+              <label class="label">Account Number*</label>
               <input
                 v-model="bankAccountsStore.dvAccount.accountNumber"
                 type="text"
@@ -193,7 +193,7 @@ const deleteBalance = async () => {
               />
             </div>
             <div>
-              <label class="label">Status</label>
+              <label class="label">Status*</label>
               <select
                 v-model="bankAccountsStore.dvAccount.status"
                 class="select select-bordered w-full"
@@ -227,12 +227,9 @@ const deleteBalance = async () => {
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">Balance History</h2>
-            <button
-              class="btn btn-neutral btn-circle tooltip"
-              data-tip="Add New Balance"
-              v-on:click="showEditor()"
-            >
+            <button class="btn btn-neutral btn-xs" v-on:click="showEditor()">
               <font-awesome-icon :icon="['fas', 'plus']" />
+              Add New Balance
             </button>
           </div>
           <div class="overflow-x-auto h-64">
@@ -257,14 +254,14 @@ const deleteBalance = async () => {
                   <td>
                     <div class="flex items-center gap-3">
                       <button
-                        class="btn btn-neutral tooltip"
+                        class="btn btn-neutral btn-sm tooltip"
                         data-tip="Edit"
                         v-on:click="showEditor(balance.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                       <button
-                        class="btn btn-neutral tooltip"
+                        class="btn btn-neutral btn-sm tooltip"
                         data-tip="Delete"
                         v-on:click="showBalanceDeleteConfirmaton(balance.id)"
                       >
@@ -302,7 +299,7 @@ const deleteBalance = async () => {
       </h3>
       <form class="grid grid-cols-1 gap-4">
         <div>
-          <label class="label">Balance</label>
+          <label class="label">Balance*</label>
           <input
             v-model="bankAccountsStore.dvEditBankAccountBalance.balance"
             type="text"
@@ -310,7 +307,7 @@ const deleteBalance = async () => {
           />
         </div>
         <div>
-          <label class="label">Date</label>
+          <label class="label">Date*</label>
           <DatePicker
             v-model:date="bankAccountsStore.dvEditBankAccountBalance.date"
             placeholder="pick a date"
