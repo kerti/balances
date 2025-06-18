@@ -1,0 +1,69 @@
+name: Bump Frontend Vue Version and Sync to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bump-and-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if frontend/vue changed
+        id: changes
+        run: |
+          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep "^frontend/vue/" || echo "nochanges" > .nochanges
+
+      - name: Skip if no changes
+        run: |
+          if [ -f .nochanges ]; then
+            echo "No changes in frontend/vue. Skipping."
+            exit 0
+          fi
+
+      - name: Set version
+        id: version
+        run: |
+          DATE=$(date -u +'%Y.%m.%d')
+          HASH=$(git rev-parse --short=7 HEAD)
+          VERSION="$DATE-$HASH-alpha"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Update version in package.json
+        run: |
+          jq --arg v "$VERSION" '.version = $v' frontend/vue/package.json > tmp.json && mv tmp.json frontend/vue/package.json
+
+      - name: Push to version-sync branch
+        env:
+          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout -B version-sync
+          git remote set-url origin https://x-access-token:$TOKEN@github.com/${{ github.repository }}
+          git add frontend/vue/package.json
+          git commit -m "chore: bump version to $VERSION [skip ci]"
+          git push origin version-sync --force
+
+      - name: Create or update PR to master
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          gh pr create --base master --head version-sync --title "chore: sync version bump $VERSION" --body "Auto-syncing version bump to master" || \
+          gh pr edit $(gh pr list --head version-sync --json number -q '.[0].number') --title "chore: sync version bump $VERSION" --body "Auto-syncing version bump to master"
+
+      - name: Auto-merge PR
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --head version-sync --json number -q '.[0].number')
+          gh pr merge $PR_NUMBER --merge --delete-branch
