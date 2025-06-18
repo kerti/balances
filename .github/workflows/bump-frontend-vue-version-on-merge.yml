@@ -15,21 +15,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Exit if version-sync branch or skip-ci commit
+      - name: Exit if commit is from github-actions or has [skip ci]
         run: |
-          echo "GITHUB_REF: $GITHUB_REF"
-          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "Actor: ${{ github.actor }}"
+          echo "Commit Message: $(git log -1 --pretty=format:%s)"
           
-          if [[ "$GITHUB_REF" == "refs/heads/version-sync" ]]; then
-            echo "This is a push to version-sync branch. Skipping."
+          if [[ "${{ github.actor }}" == "github-actions" ]]; then
+            echo "This was triggered by github-actions bot. Skipping to avoid CI loop."
             exit 0
           fi
 
-          COMMIT_MSG=$(git log -1 --pretty=format:%s)
-          echo "Last commit message: $COMMIT_MSG"
-
-          if echo "$COMMIT_MSG" | grep -qi '\[skip ci\]'; then
-            echo "Found [skip ci] in commit message. Skipping."
+          if git log -1 --pretty=format:%s | grep -qi '\[skip ci\]'; then
+            echo "Commit contains [skip ci]. Skipping to avoid CI loop."
             exit 0
           fi
 
