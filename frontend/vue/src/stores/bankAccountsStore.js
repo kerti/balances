@@ -121,7 +121,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         } else {
             toast.showToast('Failed to delete account: ' + res.error.message, 'error')
             return {
-                error: result.error
+                error: res.error
             }
         }
     }
@@ -202,7 +202,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         } else {
             toast.showToast('Failed to create balance: ' + res.error.message, 'error')
             return {
-                error: result.error
+                error: res.error
             }
         }
     }
@@ -250,7 +250,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         } else {
             toast.showToast('Failed to save balance: ' + res.error.message, 'error')
             return {
-                error: result.error
+                error: res.error
             }
         }
     }
@@ -264,7 +264,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         } else {
             toast.showToast('Failed to delete balance: ' + res.error.message, 'error')
             return {
-                error: result.error
+                error: res.error
             }
         }
     }
