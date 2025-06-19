@@ -18,9 +18,9 @@ var failureStatusMap = map[failure.Code]int{
 
 // BaseResponse is the base object of all responses
 type BaseResponse struct {
-	Data    *interface{} `json:"data,omitempty"`
-	Error   *string      `json:"error,omitempty"`
-	Message *string      `json:"message,omitempty"`
+	Data    *interface{}     `json:"data,omitempty"`
+	Error   *failure.Failure `json:"error,omitempty"`
+	Message *string          `json:"message,omitempty"`
 }
 
 // RespondWithNoContent sends a response without any content
@@ -40,13 +40,17 @@ func RespondWithJSON(w http.ResponseWriter, code int, jsonPayload interface{}) {
 
 // RespondWithError sends a response with an error message
 func RespondWithError(w http.ResponseWriter, err error) {
-	code := failure.GetCode(err)
-	status, ok := failureStatusMap[code]
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		errAsFailure = &failure.Failure{}
+		errAsFailure.Code = failure.CodeInternalError
+		errAsFailure.Message = err.Error()
+	}
+	status, ok := failureStatusMap[errAsFailure.Code]
 	if !ok {
 		status = http.StatusInternalServerError
 	}
-	errMsg := err.Error()
-	respond(w, status, BaseResponse{Error: &errMsg})
+	respond(w, status, BaseResponse{Error: errAsFailure})
 }
 
 // RespondWithPreparingShutdown sends a default response for when the server is preparing to shut down

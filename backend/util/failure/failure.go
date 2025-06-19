@@ -4,13 +4,27 @@ import "fmt"
 
 // Failure is a wrapper for error messages and codes
 type Failure struct {
-	Code    Code   `json:"code"`
-	Message string `json:"message"`
+	Code      Code    `json:"code"`
+	Operation *string `json:"operation,omitempty"`
+	Entity    *string `json:"entity,omitempty"`
+	Message   string  `json:"message"`
 }
 
 // Error returns the error code and message in a formatted string
 func (e *Failure) Error() string {
-	return fmt.Sprintf("%s: %s", e.Code, e.Message)
+	if e.Operation != nil {
+		if e.Entity != nil {
+			return fmt.Sprintf("[%s] %s on %s: %s", e.Code, *e.Operation, *e.Entity, e.Message)
+		} else {
+			return fmt.Sprintf("[%s] %s: %s", e.Code, *e.Operation, e.Message)
+		}
+	} else {
+		if e.Entity != nil {
+			return fmt.Sprintf("[%s] %s: %s", e.Code, *e.Entity, e.Message)
+		} else {
+			return fmt.Sprintf("%s: %s", e.Code, e.Message)
+		}
+	}
 }
 
 // BadRequest returns a new Failure with code for bad requests
@@ -63,15 +77,18 @@ func Unimplemented(methodName string) error {
 func EntityNotFound(entityName string) error {
 	return &Failure{
 		Code:    CodeEntityNotFound,
-		Message: entityName,
+		Entity:  &entityName,
+		Message: "Record not found.",
 	}
 }
 
 // OperationNotPermitted returns a new Failure with code for operation not permitted
 func OperationNotPermitted(operationName string, entityName string, message string) error {
 	return &Failure{
-		Code:    CodeOperationNotPermitted,
-		Message: fmt.Sprintf("%s on %s: %s", operationName, entityName, message),
+		Code:      CodeOperationNotPermitted,
+		Operation: &operationName,
+		Entity:    &entityName,
+		Message:   message,
 	}
 }
 
