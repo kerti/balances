@@ -105,7 +105,7 @@ onUnmounted(() => bankAccountsStore.lvDehydrate())
 
 const createBankAccount = async () => {
   const res = await bankAccountsStore.createBankAccount()
-  if (!res.errorMessage) {
+  if (!res.error) {
     lvAddBankAccountDialog.close()
     bankAccountsStore.resetLVAddBankAccountDialog()
   }
@@ -123,7 +123,7 @@ const cancelDeleteBankAccount = () => {
 
 const deleteBankAccount = async () => {
   const res = await bankAccountsStore.deleteBankAccount()
-  if (!res.errorMessage) {
+  if (!res.error) {
     lvDeleteBankAccountDialog.close()
     bankAccountsStore.resetLVDeleteBankAccountDialog()
   }

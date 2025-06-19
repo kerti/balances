@@ -31,11 +31,11 @@ export function useBankAccountsService() {
 
         const result = await createBankAccountWithAPI(payload)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -45,12 +45,12 @@ export function useBankAccountsService() {
         // get the account data
         const accounts = await searchBankAccountsFromAPI(filter, pageSize)
 
-        if (!accounts.errorMessage) {
+        if (!accounts.error) {
 
             // then get the balances data
             const bankAccountIds = accounts.data.items.map(account => account.id)
             const balances = await searchBankAccountBalancesFromAPI(bankAccountIds, balancesStartDate, balancesEndDate, 99999, 1)
-            if (!balances.errorMessage) {
+            if (!balances.error) {
                 return accounts.data.items.map(account => {
                     account.balances = balances.data.items.filter(function (bal) {
                         return bal.bankAccountId == account.id
@@ -59,13 +59,13 @@ export function useBankAccountsService() {
                 })
             } else {
                 return {
-                    errorMessage: balances.errorMessage,
+                    error: result.error
                 }
             }
 
         } else {
             return {
-                errorMessage: accounts.errorMessage,
+                error: result.error
             }
         }
     }
@@ -74,12 +74,12 @@ export function useBankAccountsService() {
     async function getBankAccount(id, balanceStartDate, balanceEndDate, pageSize) {
         const account = await getBankAccountFromAPI(id, balanceStartDate, balanceEndDate, pageSize)
 
-        if (!account.errorMessage) {
+        if (!account.error) {
             account.data.balances.sort((a, b) => a.date - b.date)
             return account.data
         } else {
             return {
-                errorMessage: account.errorMessage
+                error: result.error
             }
         }
     }
@@ -97,11 +97,11 @@ export function useBankAccountsService() {
 
         const result = await updateBankAccountWithAPI(payload)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -110,11 +110,11 @@ export function useBankAccountsService() {
     async function deleteBankAccount(id) {
         const result = await deleteBankAccountWithAPI(id)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -131,11 +131,11 @@ export function useBankAccountsService() {
 
         const result = await createBankAccountBalanceWithAPI(payload)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -144,11 +144,11 @@ export function useBankAccountsService() {
     async function getBankAccountBalance(id) {
         const accountBalance = await getBankAccountBalanceFromAPI(id)
 
-        if (!accountBalance.errorMessage) {
+        if (!accountBalance.error) {
             return accountBalance.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -164,11 +164,11 @@ export function useBankAccountsService() {
 
         const result = await updateAccountBalanceWithAPI(payload)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }
@@ -177,11 +177,11 @@ export function useBankAccountsService() {
     async function deleteBankAccountBalance(id) {
         const result = await deleteBankAccountBalanceWithAPI(id)
 
-        if (!result.errorMessage) {
+        if (!result.error) {
             return result.data
         } else {
             return {
-                errorMessage: result.errorMessage
+                error: result.error
             }
         }
     }

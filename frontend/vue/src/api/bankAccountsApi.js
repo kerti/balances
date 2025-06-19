@@ -18,7 +18,7 @@ export async function createBankAccountWithAPI(account) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -33,7 +33,7 @@ export async function searchBankAccountsFromAPI(filter, pageSize) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -56,7 +56,7 @@ export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, p
         return data
     } catch (errror) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -68,7 +68,7 @@ export async function updateBankAccountWithAPI(account) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -80,7 +80,7 @@ export async function deleteBankAccountWithAPI(id) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -98,7 +98,7 @@ export async function createBankAccountBalanceWithAPI(accountBalance) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -116,7 +116,7 @@ export async function searchBankAccountBalancesFromAPI(bankAccountIds, startDate
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -128,7 +128,7 @@ export async function getBankAccountBalanceFromAPI(id) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -140,7 +140,7 @@ export async function updateAccountBalanceWithAPI(accountBalance) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -152,7 +152,7 @@ export async function deleteBankAccountBalanceWithAPI(id) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }

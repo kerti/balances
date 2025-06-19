@@ -13,7 +13,7 @@ const {
 export function useAuthService() {
     async function authenticate(username, password) {
         const result = await authenticateFromAPI(username, password)
-        if (!result.errorMessage) {
+        if (!result.error) {
             setAuthTokenToCookie(result.data.token)
             setUserDataToCookie(result.data.user)
         } else {
@@ -24,7 +24,7 @@ export function useAuthService() {
 
     async function refreshToken() {
         const result = await refreshTokenFromAPI()
-        if (!result.errorMessage) {
+        if (!result.error) {
             setAuthTokenToCookie(result.data.token)
         } else {
             deauthenticate()

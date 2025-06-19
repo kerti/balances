@@ -6,7 +6,7 @@ export async function getServerHealthFromAPI() {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 

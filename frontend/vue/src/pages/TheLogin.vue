@@ -23,13 +23,13 @@ async function authenticate(event) {
 
   const result = await authStore.authenticate(username.value, password.value)
 
-  const success = !result.errorMessage
+  const success = !result.error
 
   if (success) {
     errorMessage.value = ""
     router.push("/")
   } else {
-    if (result.errorMessage.includes("Network Error")) {
+    if (result.error.message.includes("Network Error")) {
       errorMessage.value =
         "Our systems are experiencing disruptions, please try again later."
     } else {

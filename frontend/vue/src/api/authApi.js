@@ -11,7 +11,7 @@ export async function authenticateFromAPI(username, password) {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }
@@ -22,7 +22,7 @@ export async function refreshTokenFromAPI() {
         return data
     } catch (error) {
         return {
-            errorMessage: 'API - ' + error.message
+            error: error
         }
     }
 }

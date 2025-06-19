@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     async function authenticate(uname, password) {
         const authenticationResult = await authService.authenticate(uname, password)
-        if (!authenticationResult.errorMessage) {
+        if (!authenticationResult.error) {
             isLoggedIn.value = true
             user.value = authenticationResult.data.user
         }
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     async function refreshToken() {
         const refreshResult = await authService.refreshToken()
-        if (refreshResult.errorMessage) {
+        if (refreshResult.error) {
             deauthenticate()
         }
     }
