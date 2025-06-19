@@ -123,12 +123,12 @@ const resetBalanceForm = () => {
 const saveBalance = async () => {
   if (bankAccountsStore.dvBalanceEditorMode == "Edit") {
     const res = await bankAccountsStore.updateBankAccountBalance()
-    if (!res.errorMessage) {
+    if (!res.error) {
       balanceEditor.close()
     }
   } else if (bankAccountsStore.dvBalanceEditorMode == "Add") {
     const res = await bankAccountsStore.createBankAccountBalance()
-    if (!res.errorMessage) {
+    if (!res.error) {
       balanceEditor.close()
     }
   }
@@ -145,7 +145,7 @@ const cancelBalanceDelete = () => {
 
 const deleteBalance = async () => {
   const res = await bankAccountsStore.deleteBankAccountBalance()
-  if (!res.errorMessage) {
+  if (!res.error) {
     bdConfirm.close()
   }
 }

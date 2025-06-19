@@ -87,14 +87,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             lastBalanceDate: lvAddBankAccount.value.lastBalanceDate,
             status: lvAddBankAccount.value.status,
         })
-        if (!res.errorMessage) {
+        if (!res.error) {
             filterBankAccounts()
             toast.showToast('Account created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create account: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to create account: ' + res.error.message, 'error')
             return {
-                errorMessage: res.errorMessage
+                error: res.error
             }
         }
     }
@@ -114,14 +114,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function deleteBankAccount() {
         const res = await svc.deleteBankAccount(lvDeleteBankAccount.value.id)
-        if (!res.errorMessage) {
+        if (!res.error) {
             filterBankAccounts()
             toast.showToast('Account deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete account: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to delete account: ' + res.error.message, 'error')
             return {
-                errorMessage: res.errorMessage
+                error: res.error
             }
         }
     }
@@ -195,14 +195,14 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             date: dvEditBankAccountBalance.value.date,
             balance: dvEditBankAccountBalance.value.balance
         })
-        if (!res.errorMessage) {
+        if (!res.error) {
             getBankAccountForDV()
             toast.showToast('Balance created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create balance: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to create balance: ' + res.error.message, 'error')
             return {
-                errorMessage: res.errorMessage
+                error: res.error
             }
         }
     }
@@ -228,7 +228,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     async function updateBankAccount() {
         const res = await svc.updateBankAccount(dvAccount.value)
-        if (!res.errorMessage) {
+        if (!res.error) {
             // preserve balances records not fetched during bank account update
             res.balances = JSON.parse(JSON.stringify(dvAccountCache.value.balances))
             // then sync the store to the latest data from update
@@ -236,35 +236,35 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
             dvAccountCache.value = JSON.parse(JSON.stringify(res))
             toast.showToast('Account updated!', 'success')
         } else {
-            toast.showToast('Failed to save account: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to save account: ' + res.error.message, 'error')
         }
     }
 
     async function updateBankAccountBalance() {
         const res = await svc.updateBankAccountBalance(dvEditBankAccountBalance.value)
-        if (!res.errorMessage) {
+        if (!res.error) {
             getBankAccountForDV()
             getBankAccountBalanceById(res.id)
             toast.showToast('Balance updated!', 'success')
             return res
         } else {
-            toast.showToast('Failed to save balance: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to save balance: ' + res.error.message, 'error')
             return {
-                errorMessage: res.errorMessage
+                error: res.error
             }
         }
     }
 
     async function deleteBankAccountBalance() {
         const res = await svc.deleteBankAccountBalance(dvEditBankAccountBalance.value.id)
-        if (!res.errorMessage) {
+        if (!res.error) {
             getBankAccountForDV()
             toast.showToast('Balance deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete balance: ' + res.errorMessage, 'error')
+            toast.showToast('Failed to delete balance: ' + res.error.message, 'error')
             return {
-                errorMessages: res.errorMessage
+                error: res.error
             }
         }
     }

@@ -116,9 +116,11 @@ func (r *UserMySQLRepo) ResolveByIdentity(identity string) (user model.User, err
 		identity,
 		identity,
 	)
+
 	if err != nil {
-		logger.ErrNoStack("%v", err)
+		logger.Warn("[userRepo] unsuccessful user resolution using identity: %s", identity)
 	}
+
 	return
 }
 
