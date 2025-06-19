@@ -22,12 +22,27 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
+        // logout immediately when unauthorized access detected
         if (error.response?.status === 401) {
             removeAuthTokenFromCookie()
             removeUserDataFromCookie()
         }
-        // show error message
-        return Promise.reject(error)
+        // refine the error object if possible and return it
+        if (error.response?.data.error) {
+            const respData = error.response?.data.error
+            let errObj = {}
+            errObj.code = respData.code
+            if (respData.operation) {
+                errObj.operation = respData.operation
+            }
+            if (respData.entity) {
+                errObj.entity = respData.entity
+            }
+            errObj.message = respData.message
+            return Promise.reject(errObj)
+        } else {
+            return Promise.reject(error)
+        }
     }
 )
 
