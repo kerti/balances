@@ -49,6 +49,8 @@ func (s *AuthImpl) Authenticate(basic string) (authInfo *model.AuthenticationInf
 
 	user, err := s.UserRepository.ResolveByIdentity(identity)
 	if err != nil {
+		logger.Warn("[authService] unsuccessful authentication for user by identity: %v", identity)
+		err = failure.EntityNotFound("Authorized User")
 		return nil, err
 	}
 
