@@ -54,3 +54,44 @@ VALUES
 ('74055928-5d27-484c-90e4-583ed3f9e977', '277a1795-d9e8-42f0-b343-a4658bd64ba4', timestamp(last_day(curdate() - interval 3 month) + interval 1 day - interval 7 hour - interval 1 minute), RAND()*(2500000-20)+20, 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
 ('a8ba1eec-38d4-42fb-848c-ba6474ba890b', '277a1795-d9e8-42f0-b343-a4658bd64ba4', timestamp(last_day(curdate() - interval 2 month) + interval 1 day - interval 7 hour - interval 1 minute), RAND()*(2500000-20)+20, 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
 ('ac17de77-34ef-47de-b11a-ab04ae65f7cd', '277a1795-d9e8-42f0-b343-a4658bd64ba4', timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 2000000, 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
+
+-- -- Vehicles and Vehicle Values
+
+DELETE FROM `vehicle_values`;
+DELETE FROM `vehicles`;
+
+INSERT INTO `vehicles`
+(`entity_id`, `name`, `make`, `model`, `year`, `type`, `title_holder`, `license_plate_number`, `purchase_date`, `initial_value`, `initial_value_date`, `current_value`, `current_value_date`, `annual_depreciation_percent`, `status`, `created_by`)
+VALUES
+('e932f0e7-6677-4f9d-969d-940be9e5f3c5', 'John''s Car', 'Hyundai', 'Palisade', 2024, 'car', 'John Fitzgerald Doe', 'TUNEMAN', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000, timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 12), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 3.50, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', 'Jane''s Car', 'Ford', 'Everest Titanium', 2024, 'truck', 'Jane Eleanor Doe', 'SKYBLUE', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000, timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 12), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 3.40, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
+
+INSERT INTO `vehicle_values`
+(`entity_id`, `vehicle_entity_id`, `date`, `value`, `created_by`)
+VALUES
+--  first vehicle
+('bc936054-d380-420a-a27a-5f58790b71e8', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 0), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('a12c9c3a-0b27-48e2-a6e3-2a268bd04d5c', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 11 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 1), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('754e5921-d489-4ffb-8d68-28ba0169f623', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 10 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 2), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('390b4463-d0fd-433a-b2e4-c58de3b384d7', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 9 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 3), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('020b16fc-cd8b-48e1-8cba-bdcfc8d6ea9e', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 8 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 4), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('215732a0-cd6e-46f4-acfc-e133ff8a5838', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 7 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 5), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('71f6a6c2-b80f-4c93-83d5-b7089391032c', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 6 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 6), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('498ed999-7af2-4b90-95e9-6454cb5e6c78', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 5 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 7), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('bae080cf-03f7-4302-b48d-fc79ab9d6fd1', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 4 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 8), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('6fcb1e6c-9fb5-4a0c-bc38-1f24fd130d56', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 3 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 9), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('2d727a3d-fb30-4a51-9a71-3002b300d983', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 2 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 10), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('c25869d4-9477-4b7d-83e6-0aa09433ec24', 'e932f0e7-6677-4f9d-969d-940be9e5f3c5', timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - 0.035), 11), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+-- second vehicle
+('f07207a8-d41a-44bc-878f-1455f30cc225', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 0), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('65485742-f931-4a67-9dbc-02580e54bd73', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 11 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 1), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('e7bcc2d9-e024-48a4-8cf0-4f2699edc1e2', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 10 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 2), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('f76a000e-fa1b-432a-9cf9-a61407fa305b', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 9 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 3), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('98f24526-994a-447f-b376-debd6b94b771', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 8 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 4), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('46b3a09c-34a9-473a-b24a-acee64cbfff0', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 7 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 5), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('b582c2c4-030d-49d3-ad2a-089d52ebcebc', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 6 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 6), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('63530c7c-738f-467e-be6a-cc6130ad5d2f', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 5 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 7), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('42268603-cc74-41e8-8dbf-25a6722d5c06', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 4 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 8), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('77c6f4db-8ead-4039-8180-f80486958e30', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 3 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 9), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('1aa1c88f-d214-47c5-95ea-1e90214d42a9', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 2 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 10), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('9f3a65f5-9c23-46e1-b08b-5fe02b0e4f76', '291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - 0.034), 11), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
