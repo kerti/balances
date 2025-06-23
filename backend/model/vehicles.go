@@ -81,6 +81,8 @@ const (
 const (
 	// VehicleValueColumnID represents the corresponding column in the Vehicle Value table
 	VehicleValueColumnID filter.Field = "vehicle_values.entity_id"
+	// VehicleValueColumnVehicleID represents the corresponding column in the Vehicle Value table
+	VehicleValueColumnVehicleID filter.Field = "vehicle_values.vehicle_entity_id"
 	// VehicleValueColumnDate represents the corresponding column in the Vehicle Value table
 	VehicleValueColumnDate filter.Field = "vehicle_values.date"
 	// VehicleValueColumnValue represents the corresponding column in the Vehicle Value table
@@ -123,6 +125,38 @@ type Vehicle struct {
 	Deleted                   null.Time      `db:"deleted"`
 	DeletedBy                 nuuid.NUUID    `db:"deleted_by" validate:"min=36,max=36"`
 	Values                    []VehicleValue `db:"-"`
+}
+
+// ToOutput converts a Vehicle to its JSON-compatible object representation
+func (v *Vehicle) ToOutput() VehicleOutput {
+	o := VehicleOutput{
+		ID:                        v.ID,
+		Type:                      v.Type,
+		TitleHolder:               v.TitleHolder,
+		LicensePlateNumber:        v.LicensePlateNumber,
+		PurchaseDate:              cachetime.CacheTime(v.PurchaseDate),
+		InitialValue:              v.InitialValue,
+		InitialValueDate:          cachetime.CacheTime(v.InitialValueDate),
+		CurrentValue:              v.CurrentValue,
+		CurrentValueDate:          cachetime.CacheTime(v.CurrentValueDate),
+		AnnualDepreciationPercent: v.AnnualDepreciationPercent,
+		Status:                    v.Status,
+		Created:                   cachetime.CacheTime(v.Created),
+		CreatedBy:                 v.CreatedBy,
+		Updated:                   cachetime.NCacheTime(v.Updated),
+		UpdatedBy:                 v.UpdatedBy,
+		Deleted:                   cachetime.NCacheTime(v.Deleted),
+		DeletedBy:                 v.DeletedBy,
+	}
+
+	vvOutput := make([]VehicleValueOutput, 0)
+	for _, vv := range v.Values {
+		vvOutput = append(vvOutput, vv.ToOutput())
+	}
+
+	o.Values = vvOutput
+
+	return o
 }
 
 // VehicleInput represents an input struct for Vehicle entity
@@ -185,6 +219,22 @@ type VehicleValue struct {
 	DeletedBy nuuid.NUUID `db:"deleted_by" validate:"min=36,max=36"`
 }
 
+// ToOutput converts a Vehicle Value to its JSON-compatible object representation
+func (vv *VehicleValue) ToOutput() VehicleValueOutput {
+	return VehicleValueOutput{
+		ID:        vv.ID,
+		VehicleID: vv.VehicleID,
+		Date:      cachetime.CacheTime(vv.Date),
+		Value:     vv.Value,
+		Created:   cachetime.CacheTime(vv.Created),
+		CreatedBy: vv.CreatedBy,
+		Updated:   cachetime.NCacheTime(vv.Updated),
+		UpdatedBy: vv.UpdatedBy,
+		Deleted:   cachetime.NCacheTime(vv.Deleted),
+		DeletedBy: vv.DeletedBy,
+	}
+}
+
 // VehicleValueInput represents an input struct for Vehicle Value entity
 type VehicleValueInput struct {
 	ID        uuid.UUID           `json:"id"`
@@ -210,4 +260,85 @@ type VehicleValueOutput struct {
 // VehicleFilterInput is the filter input object for Vehicles
 type VehicleFilterInput struct {
 	filter.BaseFilterInput
+}
+
+// ToFilter converts this entity-specific filter to a generic filter.Filter object
+func (f *VehicleFilterInput) ToFilter() filter.Filter {
+	keywordFields := []filter.Field{
+		VehicleColumnName,
+		VehicleColumnMake,
+		VehicleColumnModel,
+		VehicleColumnYear,
+		VehicleColumnType,
+		VehicleColumnTitleHolder,
+	}
+
+	return filter.Filter{
+		TableName:      "vehicles",
+		Clause:         f.BaseFilterInput.GetKeywordFilter(keywordFields, false),
+		IncludeDeleted: f.GetIncludeDeleted(),
+		Pagination:     f.BaseFilterInput.GetPagination(),
+	}
+}
+
+type VehicleValueFilterInput struct {
+	filter.BaseFilterInput
+	VehicleIDs *[]uuid.UUID         `json:"vehicleIDs,omitempty"`
+	StartDate  cachetime.NCacheTime `json:"startDate,omitempty"`
+	EndDate    cachetime.NCacheTime `json:"endDate,omitempty"`
+	ValueMin   *float64             `json:"valueMin,omitempty"`
+	ValueMax   *float64             `json:"valueMax,omitempty"`
+}
+
+// ToFilter converts this entity-specific filter to a generic filter.Filter object
+func (f *VehicleValueFilterInput) ToFilter() filter.Filter {
+	theFilter := filter.Filter{
+		TableName:      "vehicles",
+		IncludeDeleted: f.GetIncludeDeleted(),
+		Pagination:     f.BaseFilterInput.GetPagination(),
+	}
+
+	if f.VehicleIDs != nil {
+		if len(*f.VehicleIDs) > 0 {
+			theFilter.AddClause(filter.Clause{
+				Operand1: VehicleValueColumnVehicleID,
+				Operand2: *f.VehicleIDs,
+				Operator: filter.OperatorIn,
+			}, filter.OperatorAnd)
+		}
+	}
+
+	if f.StartDate.Valid {
+		theFilter.AddClause(filter.Clause{
+			Operand1: VehicleValueColumnDate,
+			Operand2: f.StartDate.Time,
+			Operator: filter.OperatorGreaterThanEqual,
+		}, filter.OperatorAnd)
+	}
+
+	if f.EndDate.Valid {
+		theFilter.AddClause(filter.Clause{
+			Operand1: VehicleValueColumnDate,
+			Operand2: f.EndDate.Time,
+			Operator: filter.OperatorLessThanEqual,
+		}, filter.OperatorAnd)
+	}
+
+	if f.ValueMin != nil {
+		theFilter.AddClause(filter.Clause{
+			Operand1: VehicleValueColumnValue,
+			Operand2: *f.ValueMin,
+			Operator: filter.OperatorGreaterThanEqual,
+		}, filter.OperatorAnd)
+	}
+
+	if f.ValueMax != nil {
+		theFilter.AddClause(filter.Clause{
+			Operand1: VehicleValueColumnValue,
+			Operand2: *f.ValueMax,
+			Operator: filter.OperatorLessThanEqual,
+		}, filter.OperatorAnd)
+	}
+
+	return theFilter
 }

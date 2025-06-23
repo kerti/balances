@@ -20,7 +20,7 @@ type Vehicle interface {
 	Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error)
 	CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.Vehicle, error)
 	GetValueByID(id uuid.UUID) (*model.VehicleValue, error)
-	GetValuesByFilter(input model.VehicleFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error)
+	GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error)
 	UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error)
 	DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.VehicleValue, error)
 }
@@ -77,7 +77,7 @@ func (s *VehicleImpl) GetValueByID(id uuid.UUID) (*model.VehicleValue, error) {
 }
 
 // GetValuesByFilter fetches a set of Vehicle Values by its filter
-func (s *VehicleImpl) GetValuesByFilter(input model.VehicleFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error) {
+func (s *VehicleImpl) GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error) {
 	return []model.VehicleValue{}, model.PageInfoOutput{}, failure.Unimplemented("service unimplemented for this method")
 }
 
