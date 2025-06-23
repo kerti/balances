@@ -111,7 +111,7 @@ type Vehicle struct {
 	Type                      VehicleType    `db:"type"`
 	TitleHolder               string         `db:"title_holder" validate:"max=255"`
 	LicensePlateNumber        string         `db:"license_plate_number" validate:"max=255"`
-	PurchaseDate              time.Time      `db:"purhcase_date"`
+	PurchaseDate              time.Time      `db:"purchase_date"`
 	InitialValue              float64        `db:"initial_value" validate:"min=0"`
 	InitialValueDate          time.Time      `db:"initial_value_date"`
 	CurrentValue              float64        `db:"current_value" validate:"min=0"`
@@ -127,10 +127,62 @@ type Vehicle struct {
 	Values                    []VehicleValue `db:"-"`
 }
 
+// NewVehicleFromInput creates a new Vehicle from its input object
+func NewVehicleFromInput(input VehicleInput, userID uuid.UUID) (v Vehicle) {
+	now := time.Now()
+	newUUID, _ := uuid.NewV7()
+
+	v = Vehicle{
+		ID:                        newUUID,
+		Name:                      input.Name,
+		Make:                      input.Make,
+		Model:                     input.Model,
+		Year:                      input.Year,
+		Type:                      input.Type,
+		TitleHolder:               input.TitleHolder,
+		LicensePlateNumber:        input.LicensePlateNumber,
+		PurchaseDate:              input.PurchaseDate.Time(),
+		InitialValue:              input.InitialValue,
+		InitialValueDate:          input.InitialValueDate.Time(),
+		CurrentValue:              input.CurrentValue,
+		CurrentValueDate:          input.CurrentValueDate.Time(),
+		AnnualDepreciationPercent: input.AnnualDepreciationPercent,
+		Status:                    input.Status,
+		Created:                   now,
+		CreatedBy:                 userID,
+	}
+
+	values := make([]VehicleValue, 0)
+
+	// add initial value as first value
+	values = append(values, NewVehicleValueFromInput(VehicleValueInput{
+		Date:  input.InitialValueDate,
+		Value: input.InitialValue,
+	}, v.ID, userID))
+
+	// add current value as second value if necessary
+	if input.CurrentValue != input.InitialValue || !input.CurrentValueDate.Time().Equal(input.InitialValueDate.Time()) {
+		values = append(values, NewVehicleValueFromInput(VehicleValueInput{
+			Date:  input.CurrentValueDate,
+			Value: input.CurrentValue,
+		}, v.ID, userID))
+	}
+
+	v.Values = values
+
+	// TODO: validate?
+
+	return
+}
+
 // ToOutput converts a Vehicle to its JSON-compatible object representation
 func (v *Vehicle) ToOutput() VehicleOutput {
 	o := VehicleOutput{
 		ID:                        v.ID,
+		Name:                      v.Name,
+		Make:                      v.Make,
+		Model:                     v.Model,
+		Year:                      v.Year,
 		Type:                      v.Type,
 		TitleHolder:               v.TitleHolder,
 		LicensePlateNumber:        v.LicensePlateNumber,
@@ -176,7 +228,6 @@ type VehicleInput struct {
 	CurrentValueDate          cachetime.CacheTime `json:"currentValueDate"`
 	AnnualDepreciationPercent float64             `json:"annualDepreciationPercent"`
 	Status                    VehicleStatus       `json:"status"`
-	Values                    []VehicleValueInput `json:"values"`
 }
 
 // VehicleOutput is the JSON-compatible object representation of Vehicle
@@ -217,6 +268,24 @@ type VehicleValue struct {
 	UpdatedBy nuuid.NUUID `db:"updated_by" validate:"min=36,max=36"`
 	Deleted   null.Time   `db:"deleted"`
 	DeletedBy nuuid.NUUID `db:"deleted_by" validate:"min=36,max=36"`
+}
+
+func NewVehicleValueFromInput(input VehicleValueInput, vehicleID uuid.UUID, userID uuid.UUID) (vv VehicleValue) {
+	now := time.Now()
+	newUUID, _ := uuid.NewV7()
+
+	vv = VehicleValue{
+		ID:        newUUID,
+		VehicleID: vehicleID,
+		Date:      input.Date.Time(),
+		Value:     input.Value,
+		Created:   now,
+		CreatedBy: userID,
+	}
+
+	// TODO: validate:
+
+	return
 }
 
 // ToOutput converts a Vehicle Value to its JSON-compatible object representation

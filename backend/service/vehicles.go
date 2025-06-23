@@ -42,7 +42,12 @@ func (s *VehicleImpl) Shutdown() {
 
 // Create creates a new Vehicle
 func (s *VehicleImpl) Create(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicle := model.NewVehicleFromInput(input, userID)
+	err := s.Repository.Create(vehicle)
+	if err != nil {
+		return nil, err
+	}
+	return &vehicle, err
 }
 
 // GetByID fetches a Vehicle by its ID

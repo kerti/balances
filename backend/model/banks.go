@@ -225,15 +225,14 @@ func (b *BankAccount) ToOutput() BankAccountOutput {
 
 // BankAccountInput represents an input struct for Bank Account entity
 type BankAccountInput struct {
-	ID                uuid.UUID                 `json:"id"`
-	AccountName       string                    `json:"accountName"`
-	BankName          string                    `json:"bankName"`
-	AccountHolderName string                    `json:"accountHolderName"`
-	AccountNumber     string                    `json:"accountNumber"`
-	LastBalance       float64                   `json:"lastBalance"`
-	LastBalanceDate   cachetime.CacheTime       `json:"lastBalanceDate"`
-	Status            BankAccountStatus         `json:"status"`
-	Balances          []BankAccountBalanceInput `json:"balances"`
+	ID                uuid.UUID           `json:"id"`
+	AccountName       string              `json:"accountName"`
+	BankName          string              `json:"bankName"`
+	AccountHolderName string              `json:"accountHolderName"`
+	AccountNumber     string              `json:"accountNumber"`
+	LastBalance       float64             `json:"lastBalance"`
+	LastBalanceDate   cachetime.CacheTime `json:"lastBalanceDate"`
+	Status            BankAccountStatus   `json:"status"`
 }
 
 // BankAccountOutput is the JSON-compatible object representation of Bank Account

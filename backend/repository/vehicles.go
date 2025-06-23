@@ -2,11 +2,86 @@ package repository
 
 import (
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/kerti/balances/backend/database"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/logger"
+)
+
+const (
+	QueryInsertVehicle = `
+		INSERT INTO vehicles (
+			entity_id,
+			name,
+			make,
+			model,
+			year,
+			type,
+			title_holder,
+			license_plate_number,
+			purchase_date,
+			initial_value,
+			initial_value_date,
+			current_value,
+			current_value_date,
+			annual_depreciation_percent,
+			status,
+			created,
+			created_by,
+			updated,
+			updated_by,
+			deleted,
+			deleted_by
+		) VALUES (
+			:entity_id,
+			:name,
+			:make,
+			:model,
+			:year,
+			:type,
+			:title_holder,
+			:license_plate_number,
+			:purchase_date,
+			:initial_value,
+			:initial_value_date,
+			:current_value,
+			:current_value_date,
+			:annual_depreciation_percent,
+			:status,
+			:created,
+			:created_by,
+			:updated,
+			:updated_by,
+			:deleted,
+			:deleted_by
+		)`
+
+	QueryInsertVehicleValue = `
+		INSERT INTO vehicle_values(
+			entity_id,
+			vehicle_entity_id,
+			date,
+			value,
+			created,
+			created_by,
+			updated,
+			updated_by,
+			deleted,
+			deleted_by
+		) VALUES (
+			:entity_id,
+			:vehicle_entity_id,
+			:date,
+			:value,
+			:created,
+			:created_by,
+			:updated,
+			:updated_by,
+			:deleted,
+			:deleted_by
+		)`
 )
 
 // VehicleMySQLRepo is the repository for Vehicles implemented with MySQL backend
@@ -26,7 +101,14 @@ func (r *VehicleMySQLRepo) Shutdown() {
 
 // ExistsByID checks the existence of a Vehicle by its ID
 func (r *VehicleMySQLRepo) ExistsByID(id uuid.UUID) (exists bool, err error) {
-	return false, failure.Unimplemented("repository unimplemented for this method")
+	err = r.DB.Get(
+		&exists,
+		"SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?",
+		id.String())
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+	}
+	return
 }
 
 // ExistsValueByID checks the existence of a Vehicle Value by its ID
@@ -61,7 +143,33 @@ func (r *VehicleMySQLRepo) ResolveLastValuesByVehicleID(id uuid.UUID, count int)
 
 // Create creates a Vehicle
 func (r *VehicleMySQLRepo) Create(vehicle model.Vehicle) error {
-	return failure.Unimplemented("repository unimplemented for this method")
+	exists, err := r.ExistsByID(vehicle.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	if exists {
+		err = failure.OperationNotPermitted("create", "Vehicle", "already exists")
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
+		if err := r.txCreateVehicle(tx, vehicle); err != nil {
+			e <- err
+			return
+		}
+
+		for _, value := range vehicle.Values {
+			if err := r.txCreateVehicleValue(tx, value); err != nil {
+				e <- err
+				return
+			}
+		}
+
+		e <- nil
+	})
 }
 
 // Update updates a Vehicle
@@ -77,4 +185,36 @@ func (r *VehicleMySQLRepo) CreateValue(vehicleValue model.VehicleValue, vehicle 
 // UpdateValue updates an existing Vehicle Value and optionally updates the Vehicle transactionally
 func (r *VehicleMySQLRepo) UpdateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
 	return failure.Unimplemented("repository unimplemented for this method")
+}
+
+func (r *VehicleMySQLRepo) txCreateVehicle(tx *sqlx.Tx, vehicle model.Vehicle) error {
+	stmt, err := tx.PrepareNamed(QueryInsertVehicle)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	_, err = stmt.Exec(vehicle)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *VehicleMySQLRepo) txCreateVehicleValue(tx *sqlx.Tx, vehicleValue model.VehicleValue) error {
+	stmt, err := tx.PrepareNamed(QueryInsertVehicleValue)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	_, err = stmt.Exec(vehicleValue)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return nil
 }
