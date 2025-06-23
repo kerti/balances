@@ -100,7 +100,6 @@ func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.RespondWithJSON(w, http.StatusCreated, user.ToOutput())
-	return
 }
 
 // HandleUpdateUser handles the request
@@ -126,5 +125,4 @@ func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.RespondWithJSON(w, http.StatusCreated, user.ToOutput())
-	return
 }

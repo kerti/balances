@@ -34,3 +34,20 @@ type User interface {
 	Create(user model.User) error
 	Update(user model.User) error
 }
+
+// Vehicle is the Vehicle repository interface
+type Vehicle interface {
+	Startup()
+	Shutdown()
+	ExistsByID(id uuid.UUID) (exists bool, err error)
+	ExistsValueByID(id uuid.UUID) (exists bool, err error)
+	ResolveByIDs(ids []uuid.UUID) (vehicles []model.Vehicle, err error)
+	ResolveValuesByIDs(ids []uuid.UUID) (vehicleValues []model.VehicleValue, err error)
+	ResolveByFilter(filter filter.Filter) (vehicles []model.Vehicle, pageInfo model.PageInfoOutput, err error)
+	ResolveValuesByFilter(filter filter.Filter) (vehicleValues []model.VehicleValue, pageInfo model.PageInfoOutput, err error)
+	ResolveLastValuesByVehicleID(id uuid.UUID, count int) (vehicleValues []model.VehicleValue, err error)
+	Create(vehicle model.Vehicle) error
+	Update(vehicle model.Vehicle) error
+	CreateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error
+	UpdateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error
+}

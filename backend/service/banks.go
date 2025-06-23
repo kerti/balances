@@ -32,7 +32,7 @@ type BankAccountImpl struct {
 	Repository repository.BankAccount `inject:"bankAccountRepository"`
 }
 
-// Startup perform startup functions
+// Startup performs startup functions
 func (s *BankAccountImpl) Startup() {
 	logger.Trace("Bank Account Service starting up...")
 }
