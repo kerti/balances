@@ -9,22 +9,6 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Vehicle is the service provider interface
-type Vehicle interface {
-	Startup()
-	Shutdown()
-	Create(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error)
-	GetByID(id uuid.UUID, withValues bool, valueStartDate, valueEndDate cachetime.NCacheTime, pageSize *int) (*model.Vehicle, error)
-	GetByFilter(input model.VehicleFilterInput) ([]model.Vehicle, model.PageInfoOutput, error)
-	Update(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error)
-	Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error)
-	CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.Vehicle, error)
-	GetValueByID(id uuid.UUID) (*model.VehicleValue, error)
-	GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error)
-	UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error)
-	DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.VehicleValue, error)
-}
-
 // VehicleImpl is the service provider implementation
 type VehicleImpl struct {
 	Repository repository.Vehicle `inject:"vehicleRepository"`
@@ -37,7 +21,7 @@ func (s *VehicleImpl) Startup() {
 
 // Shutdown cleans up everything and shuts down
 func (s *VehicleImpl) Shutdown() {
-	logger.Trace("Vehicle Service shuttinf down...")
+	logger.Trace("Vehicle Service shutting down...")
 }
 
 // Create creates a new Vehicle

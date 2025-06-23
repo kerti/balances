@@ -8,16 +8,6 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// User is the service provider interface
-type User interface {
-	Startup()
-	Shutdown()
-	GetByID(id uuid.UUID) (*model.User, error)
-	GetByFilter(input model.UserFilterInput) ([]model.User, model.PageInfoOutput, error)
-	Create(input model.UserInput, userID uuid.UUID) (model.User, error)
-	Update(input model.UserInput, userID uuid.UUID) (model.User, error)
-}
-
 // UserImpl is the service provider implementation
 type UserImpl struct {
 	Repository repository.User `inject:"userRepository"`

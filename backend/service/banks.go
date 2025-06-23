@@ -11,22 +11,6 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// BankAccount is the service provider interface
-type BankAccount interface {
-	Startup()
-	Shutdown()
-	Create(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
-	GetByID(id uuid.UUID, withBalances bool, balanceStartDate, balanceEndDate cachetime.NCacheTime, pageSize *int) (*model.BankAccount, error)
-	GetByFilter(input model.BankAccountFilterInput) ([]model.BankAccount, model.PageInfoOutput, error)
-	Update(input model.BankAccountInput, userID uuid.UUID) (*model.BankAccount, error)
-	Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAccount, error)
-	CreateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error)
-	GetBalanceByID(id uuid.UUID) (*model.BankAccountBalance, error)
-	GetBalancesByFilter(input model.BankAccountBalanceFilterInput) ([]model.BankAccountBalance, model.PageInfoOutput, error)
-	UpdateBalance(input model.BankAccountBalanceInput, userID uuid.UUID) (*model.BankAccountBalance, error)
-	DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.BankAccountBalance, error)
-}
-
 // BankAccountImpl is the service provider implementation
 type BankAccountImpl struct {
 	Repository repository.BankAccount `inject:"bankAccountRepository"`

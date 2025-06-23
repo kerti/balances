@@ -9,7 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/guregu/null"
-	mock_repository "github.com/kerti/balances/backend/mock"
+	mock_repository "github.com/kerti/balances/backend/mock/repository"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
