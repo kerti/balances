@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/kerti/balances/backend/handler"
 	"github.com/kerti/balances/backend/handler/response"
 	mock_service "github.com/kerti/balances/backend/mock/service"
@@ -53,15 +54,39 @@ func (t *vehicleHandlerTestSuite) TearDownTest() {
 	t.ctrl.Finish()
 }
 
-func (t *vehicleHandlerTestSuite) getNewRequestWithContext(input interface{}, method, path string) (recorder *httptest.ResponseRecorder, request *http.Request) {
-	jsonBody, err := json.Marshal(input)
-	if err != nil {
-		t.T().Fatal(err)
+func (t *vehicleHandlerTestSuite) getNewRequestWithContext(method, path string, input any) (recorder *httptest.ResponseRecorder, request *http.Request) {
+	var reqBody *bytes.Buffer
+	var req *http.Request
+
+	if method == http.MethodPost {
+		jsonBody, err := json.Marshal(input)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+
+		reqBody = bytes.NewBuffer(jsonBody)
+		req = httptest.NewRequest(method, path, reqBody)
+	} else {
+		req = httptest.NewRequest(method, path, nil)
 	}
 
-	reqBody := bytes.NewBuffer(jsonBody)
-	req := httptest.NewRequest(method, path, reqBody)
 	req.Header.Set("Content-Type", "application/json")
+
+	if method == http.MethodGet {
+		formParams, ok := (input).(map[string]string)
+		if !ok {
+			t.T().Fatal("failed reading form params")
+		}
+		for k, v := range formParams {
+			if k == "id" {
+				req = mux.SetURLVars(req, map[string]string{
+					"id": v,
+				})
+			} else {
+				req.Form.Add(k, v)
+			}
+		}
+	}
 
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ctxprops.PropUserID, &t.testUserID)
@@ -101,7 +126,7 @@ func (t *vehicleHandlerTestSuite) getNewVehicleInput(id nuuid.NUUID) model.Vehic
 	return veh
 }
 
-func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseRecorder, actual *model.VehicleOutput) {
+func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseRecorder, actual *model.VehicleOutput) *failure.Failure {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -109,38 +134,34 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseReco
 		t.T().Fatal(err)
 	}
 
-	// marshal the data to JSON
-	actualMap := (*response.Data).(map[string]interface{})
-	jsonBytes, err := json.Marshal(actualMap)
-	if err != nil {
-		t.T().Fatal(err)
+	if response.Data != nil {
+		// marshal the data to JSON
+		actualMap := (*response.Data).(map[string]any)
+		jsonBytes, err := json.Marshal(actualMap)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+		// unmarshal back to the expected object
+		err = json.Unmarshal(jsonBytes, actual)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+		return nil
 	}
 
-	// unmarshal back to the expected object
-	err = json.Unmarshal(jsonBytes, actual)
-	if err != nil {
-		t.T().Fatal(err)
-	}
-}
-
-func (t *vehicleHandlerTestSuite) parseOutputToError(rr *httptest.ResponseRecorder) (actual *failure.Failure) {
-	// read the response
-	var response response.BaseResponse
-	err := json.Unmarshal(rr.Body.Bytes(), &response)
-	if err != nil {
-		t.T().Fatal(err)
+	if response.Error != nil {
+		return response.Error
 	}
 
-	actual = response.Error
-	return
+	return nil
 }
 
 func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
-		input,
 		http.MethodPost,
 		"/vehicles",
+		input,
 	)
 
 	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
@@ -176,44 +197,92 @@ func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 }
 
 func (t *vehicleHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
-	input := time.Now()
+	input := "test"
 	rr, req := t.getNewRequestWithContext(
-		input,
 		http.MethodPost,
 		"/vehicles",
+		input,
 	)
 
 	t.handler.HandleCreateVehicle(rr, req)
 
-	actual := t.parseOutputToError(rr)
+	var actual *model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, actual)
 
-	assert.Equal(t.T(), failure.CodeBadRequest, actual.Code)
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
 	// TODO: specify this
-	assert.Nil(t.T(), actual.Entity)
-	assert.Contains(t.T(), actual.Message, "cannot unmarshal")
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
 	// TODO: specify this
-	assert.Nil(t.T(), actual.Operation)
+	assert.Nil(t.T(), err.Operation)
 }
 
 func (t *vehicleHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 	errMsg := "service failed creating vehicle"
 	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
-		input,
 		http.MethodPost,
 		"/vehicles",
+		input,
 	)
 
 	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
 
 	t.handler.HandleCreateVehicle(rr, req)
 
-	actual := t.parseOutputToError(rr)
+	var actual *model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, actual)
 
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
 	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
 	// TODO: specify this
-	assert.Nil(t.T(), actual.Entity)
-	assert.Contains(t.T(), actual.Message, errMsg)
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
 	// TODO: specify this
-	assert.Nil(t.T(), actual.Operation)
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal() {
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
+	expected := expectedResult.ToOutput()
+
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected.Name, actual.Name)
+	assert.Equal(t.T(), expected.Make, actual.Make)
+	assert.Equal(t.T(), expected.Model, actual.Model)
+	assert.Equal(t.T(), expected.Year, actual.Year)
+	assert.Equal(t.T(), expected.TitleHolder, actual.TitleHolder)
+	assert.Equal(t.T(), expected.LicensePlateNumber, actual.LicensePlateNumber)
+	assert.Equal(t.T(), expected.PurchaseDate.Time().Unix(), actual.PurchaseDate.Time().Unix())
+	assert.Equal(t.T(), expected.InitialValue, actual.InitialValue)
+	assert.Equal(t.T(), expected.InitialValueDate.Time().Unix(), actual.InitialValueDate.Time().Unix())
+	assert.Equal(t.T(), expected.CurrentValue, actual.CurrentValue)
+	assert.Equal(t.T(), expected.CurrentValueDate.Time().Unix(), actual.CurrentValueDate.Time().Unix())
+	assert.Equal(t.T(), expected.AnnualDepreciationPercent, actual.AnnualDepreciationPercent)
+	assert.Equal(t.T(), expected.Status, actual.Status)
+	assert.Equal(t.T(), expected.Created.Time().Unix(), actual.Created.Time().Unix())
+	assert.Equal(t.T(), expected.CreatedBy, actual.CreatedBy)
+	assert.Equal(t.T(), expected.Updated, actual.Updated)
+	assert.Equal(t.T(), expected.UpdatedBy, actual.UpdatedBy)
+	assert.Equal(t.T(), expected.Deleted, actual.Deleted)
+	assert.Equal(t.T(), expected.DeletedBy, actual.DeletedBy)
 }
