@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"testing"
 	"time"
 
@@ -58,6 +60,7 @@ func (t *vehicleHandlerTestSuite) getNewRequestWithContext(method, path string, 
 	var reqBody *bytes.Buffer
 	var req *http.Request
 
+	// Default: create request body or URL
 	if method == http.MethodPost {
 		jsonBody, err := json.Marshal(input)
 		if err != nil {
@@ -67,27 +70,38 @@ func (t *vehicleHandlerTestSuite) getNewRequestWithContext(method, path string, 
 		reqBody = bytes.NewBuffer(jsonBody)
 		req = httptest.NewRequest(method, path, reqBody)
 	} else {
-		req = httptest.NewRequest(method, path, nil)
+		// For GET: inject query params into URL
+		formParams, ok := input.(map[string]string)
+		if !ok {
+			t.T().Fatal("failed reading form params")
+		}
+
+		query := make(url.Values)
+		for k, v := range formParams {
+			if k != "id" {
+				query.Add(k, v)
+			}
+		}
+
+		// Append query to URL
+		fullPath := path
+		if encoded := query.Encode(); encoded != "" {
+			fullPath += "?" + encoded
+		}
+
+		req = httptest.NewRequest(method, fullPath, nil)
+
+		// Set route vars (e.g., /vehicles/{id})
+		if id, ok := formParams["id"]; ok {
+			req = mux.SetURLVars(req, map[string]string{
+				"id": id,
+			})
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
-	if method == http.MethodGet {
-		formParams, ok := (input).(map[string]string)
-		if !ok {
-			t.T().Fatal("failed reading form params")
-		}
-		for k, v := range formParams {
-			if k == "id" {
-				req = mux.SetURLVars(req, map[string]string{
-					"id": v,
-				})
-			} else {
-				req.Form.Add(k, v)
-			}
-		}
-	}
-
+	// Add context with user ID
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ctxprops.PropUserID, &t.testUserID)
 
@@ -245,7 +259,7 @@ func (t *vehicleHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 	assert.Nil(t.T(), err.Operation)
 }
 
-func (t *vehicleHandlerTestSuite) TestGetByID_Normal() {
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal_NoParams() {
 	formParams := make(map[string]string)
 	formParams["id"] = t.testVehicleID.String()
 	rr, req := t.getNewRequestWithContext(
@@ -285,4 +299,126 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal() {
 	assert.Equal(t.T(), expected.UpdatedBy, actual.UpdatedBy)
 	assert.Equal(t.T(), expected.Deleted, actual.Deleted)
 	assert.Equal(t.T(), expected.DeletedBy, actual.DeletedBy)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_FailedParsingID() {
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String() + "123"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String()+"123",
+		formParams,
+	)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValues() {
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	formParams["withValues"] = "true"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValueStartDate() {
+	startDate := time.Unix(0, time.Now().AddDate(0, 0, -1).UnixMilli()*int64(time.Millisecond))
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	formParams["valueStartDate"] = strconv.FormatInt(startDate.UnixMilli(), 10)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
+
+	var nStartDate cachetime.NCacheTime
+	nStartDate.Scan(startDate)
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, false, nStartDate, cachetime.NCacheTime{}, nil).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValueEndDate() {
+	endDate := time.Unix(0, time.Now().AddDate(0, 0, -1).UnixMilli()*int64(time.Millisecond))
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	formParams["valueEndDate"] = strconv.FormatInt(endDate.UnixMilli(), 10)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
+
+	var nEndDate cachetime.NCacheTime
+	nEndDate.Scan(endDate)
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, nEndDate, nil).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
+	pageSize := 10
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	formParams["pageSize"] = strconv.Itoa(pageSize)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, &pageSize).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, &actual)
+
+	assert.Nil(t.T(), err)
 }

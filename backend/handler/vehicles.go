@@ -94,7 +94,6 @@ func (h *VehicleImpl) HandleGetVehicleByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	vehicle, err := h.Service.GetByID(id, withValues, valueStartDate, valueEndDate, pageSize)
-
 	if err != nil {
 		response.RespondWithError(w, err)
 		return
