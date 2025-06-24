@@ -170,6 +170,55 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseReco
 	return nil
 }
 
+func (t *vehicleHandlerTestSuite) parseOutputToVehiclePage(rr *httptest.ResponseRecorder) (items []model.VehicleOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
+	// read the response
+	var response response.BaseResponse
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	if err != nil {
+		t.T().Fatal(err)
+	}
+
+	if response.Data != nil {
+		// marshal the data to JSON
+		actualMap := (*response.Data).(map[string]any)
+		jsonBytes, err := json.Marshal(actualMap)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+
+		// unmarshal back to the expected object
+		var actual model.PageOutput
+		err = json.Unmarshal(jsonBytes, &actual)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+
+		//convert interface{} to []model.VehicleOutput
+		actualSlice := (actual.Items).([]any)
+		for _, vehicleInterface := range actualSlice {
+			vehicleMap := (vehicleInterface).(map[string]any)
+			vehicleJsonBytes, err := json.Marshal(vehicleMap)
+			if err != nil {
+				t.T().Fatal(err)
+			}
+			var actualVehicle model.VehicleOutput
+			err = json.Unmarshal(vehicleJsonBytes, &actualVehicle)
+			if err != nil {
+				t.T().Fatal(err)
+			}
+			items = append(items, actualVehicle)
+		}
+
+		pageInfo = actual.PageInfo
+	}
+
+	if response.Error != nil {
+		fail = response.Error
+	}
+
+	return
+}
+
 func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
@@ -448,4 +497,84 @@ func (t *vehicleHandlerTestSuite) TestGetByID_ServiceFailedResolving() {
 	assert.Contains(t.T(), err.Message, errMsg)
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByFilter_Normal() {
+	keyword := "test keyword"
+	input := model.VehicleFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(http.MethodPost, "/vehicles/search", input)
+
+	expectedVehicles := []model.Vehicle{}
+	v1 := model.NewVehicleFromInput(t.getNewVehicleInput(nuuid.NUUID{}), t.testUserID)
+	v2 := model.NewVehicleFromInput(t.getNewVehicleInput(nuuid.NUUID{}), t.testUserID)
+	expectedVehicles = append(expectedVehicles, v1)
+	expectedVehicles = append(expectedVehicles, v2)
+	expectedPageInfo := model.PageInfoOutput{
+		Page:       1,
+		PageSize:   10,
+		TotalCount: 1,
+		PageCount:  1,
+	}
+
+	t.mockSvc.EXPECT().GetByFilter(input).Return(expectedVehicles, expectedPageInfo, nil)
+
+	t.handler.HandleGetVehicleByFilter(rr, req)
+
+	vehicles, pageInfo, err := t.parseOutputToVehiclePage(rr)
+
+	assert.Nil(t.T(), err)
+
+	assert.Equal(t.T(), len(expectedVehicles), len(vehicles))
+	assert.Equal(t.T(), expectedVehicles[0].ID, vehicles[0].ID)
+	assert.Equal(t.T(), expectedVehicles[1].ID, vehicles[1].ID)
+
+	assert.Equal(t.T(), 1, pageInfo.Page)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByFilter_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(http.MethodPost, "/vehicles/search", input)
+
+	t.handler.HandleGetVehicleByFilter(rr, req)
+
+	vehicles, pageInfo, err := t.parseOutputToVehiclePage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+
+	assert.Equal(t.T(), 0, len(vehicles))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() {
+	errMsg := "failed resolving vehicles by filter"
+	keyword := "test keyword"
+	input := model.VehicleFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(http.MethodPost, "/vehicles/search", input)
+
+	t.mockSvc.EXPECT().GetByFilter(input).Return([]model.Vehicle{}, model.PageInfoOutput{}, errors.New(errMsg))
+
+	t.handler.HandleGetVehicleByFilter(rr, req)
+
+	vehicles, pageInfo, err := t.parseOutputToVehiclePage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+
+	assert.Equal(t.T(), 0, len(vehicles))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
 }
