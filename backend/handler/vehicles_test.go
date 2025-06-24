@@ -156,7 +156,7 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseReco
 			t.T().Fatal(err)
 		}
 		// unmarshal back to the expected object
-		err = json.Unmarshal(jsonBytes, actual)
+		err = json.Unmarshal(jsonBytes, &actual)
 		if err != nil {
 			t.T().Fatal(err)
 		}
@@ -341,8 +341,8 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValues() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	var actual *model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, actual)
 
 	assert.Nil(t.T(), err)
 }
@@ -421,4 +421,31 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
 	err := t.parseOutputToVehicle(rr, &actual)
 
 	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetByID_ServiceFailedResolving() {
+	errMsg := "service failed resolving"
+	formParams := make(map[string]string)
+	formParams["id"] = t.testVehicleID.String()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testVehicleID.String(),
+		formParams,
+	)
+
+	t.mockSvc.EXPECT().GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleGetVehicleByID(rr, req)
+
+	var actual *model.VehicleOutput
+	err := t.parseOutputToVehicle(rr, actual)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
 }
