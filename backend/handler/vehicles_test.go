@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/util/cachetime"
 	"github.com/kerti/balances/backend/util/ctxprops"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/nuuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -121,6 +123,18 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseReco
 	}
 }
 
+func (t *vehicleHandlerTestSuite) parseOutputToError(rr *httptest.ResponseRecorder) (actual *failure.Failure) {
+	// read the response
+	var response response.BaseResponse
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	if err != nil {
+		t.T().Fatal(err)
+	}
+
+	actual = response.Error
+	return
+}
+
 func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
@@ -132,17 +146,13 @@ func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	expectedResult := model.NewVehicleFromInput(input, t.testUserID)
 	expected := expectedResult.ToOutput()
 
-	// EXPECTATIONS
 	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(&expectedResult, nil)
 
-	// TEST
 	t.handler.HandleCreateVehicle(rr, req)
 
-	// UNMARSHAL
 	var actual model.VehicleOutput
 	t.parseOutputToVehicle(rr, &actual)
 
-	// ASSERTIONS
 	assert.Equal(t.T(), http.StatusCreated, rr.Result().StatusCode)
 	assert.Equal(t.T(), expected.Name, actual.Name)
 	assert.Equal(t.T(), expected.Make, actual.Make)
@@ -163,4 +173,47 @@ func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	assert.False(t.T(), actual.UpdatedBy.Valid)
 	assert.False(t.T(), actual.Deleted.Valid)
 	assert.False(t.T(), actual.DeletedBy.Valid)
+}
+
+func (t *vehicleHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
+	input := time.Now()
+	rr, req := t.getNewRequestWithContext(
+		input,
+		http.MethodPost,
+		"/vehicles",
+	)
+
+	t.handler.HandleCreateVehicle(rr, req)
+
+	actual := t.parseOutputToError(rr)
+
+	assert.Equal(t.T(), failure.CodeBadRequest, actual.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), actual.Entity)
+	assert.Contains(t.T(), actual.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), actual.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestCreate_ServiceFailedCreating() {
+	errMsg := "service failed creating vehicle"
+	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		input,
+		http.MethodPost,
+		"/vehicles",
+	)
+
+	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleCreateVehicle(rr, req)
+
+	actual := t.parseOutputToError(rr)
+
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), actual.Entity)
+	assert.Contains(t.T(), actual.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), actual.Operation)
 }
