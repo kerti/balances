@@ -139,7 +139,7 @@ func (t *vehicleHandlerTestSuite) getNewVehicleInput(id nuuid.NUUID) model.Vehic
 	return veh
 }
 
-func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseRecorder, actual *model.VehicleOutput) *failure.Failure {
+func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseRecorder) (actual *model.VehicleOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -159,14 +159,14 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseReco
 		if err != nil {
 			t.T().Fatal(err)
 		}
-		return nil
+		return actual, nil
 	}
 
 	if response.Error != nil {
-		return response.Error
+		return nil, response.Error
 	}
 
-	return nil
+	return actual, nil
 }
 
 func (t *vehicleHandlerTestSuite) parseOutputToVehiclePage(rr *httptest.ResponseRecorder) (items []model.VehicleOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
@@ -235,10 +235,11 @@ func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 
 	t.handler.HandleCreateVehicle(rr, req)
 
-	var actual model.VehicleOutput
-	t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.Nil(t.T(), err)
 	assert.Equal(t.T(), http.StatusCreated, rr.Result().StatusCode)
+	assert.NotNil(t.T(), actual)
 	assert.Equal(t.T(), expected.Name, actual.Name)
 	assert.Equal(t.T(), expected.Make, actual.Make)
 	assert.Equal(t.T(), expected.Model, actual.Model)
@@ -272,8 +273,7 @@ func (t *vehicleHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
 
 	t.handler.HandleCreateVehicle(rr, req)
 
-	var actual *model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
 	assert.Nil(t.T(), actual)
 	assert.NotNil(t.T(), err)
@@ -300,8 +300,7 @@ func (t *vehicleHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 
 	t.handler.HandleCreateVehicle(rr, req)
 
-	var actual *model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
 	assert.Nil(t.T(), actual)
 	assert.NotNil(t.T(), err)
@@ -332,8 +331,7 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_NoParams() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
 	assert.Nil(t.T(), err)
 	assert.Equal(t.T(), expected.Name, actual.Name)
@@ -370,9 +368,9 @@ func (t *vehicleHandlerTestSuite) TestGetByID_FailedParsingID() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.Nil(t.T(), actual)
 	assert.NotNil(t.T(), err)
 	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
 	// TODO: specify this
@@ -400,9 +398,9 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValues() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual *model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.NotNil(t.T(), actual)
 	assert.Nil(t.T(), err)
 }
 
@@ -427,9 +425,9 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValueStartDate() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.NotNil(t.T(), actual)
 	assert.Nil(t.T(), err)
 }
 
@@ -454,9 +452,9 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithValueEndDate() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.NotNil(t.T(), actual)
 	assert.Nil(t.T(), err)
 }
 
@@ -479,9 +477,9 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.NotNil(t.T(), actual)
 	assert.Nil(t.T(), err)
 }
 
@@ -501,8 +499,7 @@ func (t *vehicleHandlerTestSuite) TestGetByID_ServiceFailedResolving() {
 
 	t.handler.HandleGetVehicleByID(rr, req)
 
-	var actual *model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
 	assert.Nil(t.T(), actual)
 	assert.NotNil(t.T(), err)
@@ -628,8 +625,108 @@ func (t *vehicleHandlerTestSuite) TestUpdate_Normal() {
 
 	t.handler.HandleUpdateVehicle(rr, req)
 
-	var actual model.VehicleOutput
-	err := t.parseOutputToVehicle(rr, &actual)
+	actual, err := t.parseOutputToVehicle(rr)
 
+	assert.NotNil(t.T(), actual)
 	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdate_FailedGettingIDFromRequest() {
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleID.String(),
+		input,
+		nil,
+		nuuid.NUUID{},
+	)
+
+	t.handler.HandleUpdateVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdate_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleID.String(),
+		input,
+		nil,
+		nuuid.From(t.testVehicleID),
+	)
+
+	t.handler.HandleUpdateVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdate_MismatchedID() {
+	input := t.getNewVehicleInput(nuuid.NUUID{})
+	newID, _ := uuid.NewV7()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleID.String(),
+		input,
+		nil,
+		nuuid.From(newID),
+	)
+
+	t.handler.HandleUpdateVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "id mismatch")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdate_ServiceFailedUpdating() {
+	errMsg := "failed updating vehicle"
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleID.String(),
+		input,
+		nil,
+		nuuid.From(t.testVehicleID),
+	)
+
+	t.mockSvc.EXPECT().Update(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleUpdateVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
 }
