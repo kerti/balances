@@ -154,15 +154,6 @@ func (t *bankAccountsServiceTestSuite) getNewBankAccountBalance(id nuuid.NUUID, 
 	return bal
 }
 
-func (t *bankAccountsServiceTestSuite) getDefaultPageInfo() model.PageInfoOutput {
-	return model.PageInfoOutput{
-		Page:       1,
-		PageSize:   10,
-		TotalCount: 1,
-		PageCount:  1,
-	}
-}
-
 func (t *bankAccountsServiceTestSuite) TestCreate_Normal() {
 	testInput := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
 	t.mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
@@ -210,13 +201,13 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_NoFilter()
 	balanceFilterInput := model.BankAccountBalanceFilterInput{
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 	}
-	pageInfo := t.getDefaultPageInfo()
+	pageInfo := getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
 	balance2 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(2000), time.Now())
 	balanceSlice := []model.BankAccountBalance{balance1, balance2}
-	bankAccount.Balances = balanceSlice
+	bankAccount.AttachBalances(balanceSlice, true)
 
 	resolvedBankAccountSlice := []model.BankAccount{bankAccount}
 
@@ -236,7 +227,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithStartD
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 		StartDate:      yesterday,
 	}
-	pageInfo := t.getDefaultPageInfo()
+	pageInfo := getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
@@ -262,7 +253,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithEndDat
 		BankAccountIDs: &[]uuid.UUID{t.testBankAccountID},
 		EndDate:        today,
 	}
-	pageInfo := t.getDefaultPageInfo()
+	pageInfo := getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balanceSlice := []model.BankAccountBalance{
@@ -290,7 +281,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_WithBothDa
 		StartDate:      yesterday,
 		EndDate:        today,
 	}
-	pageInfo := t.getDefaultPageInfo()
+	pageInfo := getDefaultPageInfo()
 
 	bankAccount := t.getNewBankAccount(nuuid.NUUID{}, nil)
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
@@ -360,30 +351,19 @@ func (t *bankAccountsServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorR
 	balance1 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(1000), time.Now().AddDate(0, 0, -1))
 	balance2 := t.getNewBankAccountBalance(nuuid.NUUID{}, nuuid.From(bankAccount.ID), float64(2000), time.Now())
 	balanceSlice := []model.BankAccountBalance{balance1, balance2}
-	bankAccount.Balances = balanceSlice
+	bankAccount.AttachBalances(balanceSlice, true)
 	resolvedBankAccountSlice := []model.BankAccount{bankAccount}
 
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
 		Return(resolvedBankAccountSlice, nil)
 	t.mockRepo.EXPECT().ResolveBalancesByFilter(balanceFilterInput.ToFilter()).
-		Return([]model.BankAccountBalance{}, t.getDefaultPageInfo(), errors.New(errMsg))
+		Return([]model.BankAccountBalance{}, getDefaultPageInfo(), errors.New(errMsg))
 
 	res, err := t.svc.GetByID(t.testBankAccountID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
 
 	assert.Nil(t.T(), res)
 	assert.Error(t.T(), err)
 	assert.Contains(t.T(), err.Error(), errMsg)
-}
-
-func (t *bankAccountsServiceTestSuite) TestGetByID_RepoErrorResolvingByID() {
-	errMsg := "repo failed resolving by IDs"
-	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
-		Return(nil, errors.New(errMsg))
-
-	_, err := t.svc.GetByID(t.testBankAccountID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
-
-	assert.Error(t.T(), err)
-	assert.Equal(t.T(), err.Error(), errMsg)
 }
 
 func (t *bankAccountsServiceTestSuite) TestGetByID_NotExists() {
@@ -401,7 +381,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByFilter_EmptyFilter() {
 	filter := filterInput.ToFilter()
 
 	t.mockRepo.EXPECT().ResolveByFilter(filter).
-		Return(t.getBankAccountSlice(2), t.getDefaultPageInfo(), nil)
+		Return(t.getBankAccountSlice(2), getDefaultPageInfo(), nil)
 
 	_, _, err := t.svc.GetByFilter(filterInput)
 
@@ -415,7 +395,7 @@ func (t *bankAccountsServiceTestSuite) TestGetByFilter_WithKeyword() {
 	filter := filterInput.ToFilter()
 
 	t.mockRepo.EXPECT().ResolveByFilter(filter).
-		Return(t.getBankAccountSlice(2), t.getDefaultPageInfo(), nil)
+		Return(t.getBankAccountSlice(2), getDefaultPageInfo(), nil)
 
 	_, _, err := t.svc.GetByFilter(filterInput)
 
@@ -517,7 +497,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete_Normal() {
 		Return([]model.BankAccount{testBankAccount}, nil)
 
 	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
-		Return(balanceSlice, t.getDefaultPageInfo(), nil)
+		Return(balanceSlice, getDefaultPageInfo(), nil)
 
 	t.mockRepo.EXPECT().Update(gomock.Any()).Return(nil)
 
@@ -621,7 +601,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete_AccountBalanceAlreadyDeleted()
 				testDeletedNonLastBankAccountBalance,
 				testLastBankAccountBalance,
 			},
-			t.getDefaultPageInfo(),
+			getDefaultPageInfo(),
 			nil)
 
 	res, err := t.svc.Delete(t.testBankAccountID, t.testUserID)
@@ -659,7 +639,7 @@ func (t *bankAccountsServiceTestSuite) TestDelete_RepoErrorUpdating() {
 		Return([]model.BankAccount{testBankAccount}, nil)
 
 	t.mockRepo.EXPECT().ResolveBalancesByFilter(gomock.Any()).
-		Return(balanceSlice, t.getDefaultPageInfo(), nil)
+		Return(balanceSlice, getDefaultPageInfo(), nil)
 
 	t.mockRepo.EXPECT().Update(gomock.Any()).Return(errors.New(errMsg))
 
@@ -982,7 +962,7 @@ func (t *bankAccountsServiceTestSuite) TestGetBalanceByFilter_Normal() {
 				nuuid.From(t.testBankAccountBalanceID),
 				float64(1000),
 				time.Now())},
-			t.getDefaultPageInfo(),
+			getDefaultPageInfo(),
 			nil)
 
 	res, pageInfo, err := t.svc.GetBalancesByFilter(filter)

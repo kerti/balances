@@ -175,6 +175,19 @@ func NewVehicleFromInput(input VehicleInput, userID uuid.UUID) (v Vehicle) {
 	return
 }
 
+// AttachValues attaches Vehicle Values to a Vehicle
+func (v *Vehicle) AttachValues(values []VehicleValue, clearBeforeAttach bool) {
+	if clearBeforeAttach {
+		v.Values = []VehicleValue{}
+	}
+
+	for _, value := range values {
+		if value.VehicleID == v.ID {
+			v.Values = append(v.Values, value)
+		}
+	}
+}
+
 // ToOutput converts a Vehicle to its JSON-compatible object representation
 func (v *Vehicle) ToOutput() VehicleOutput {
 	o := VehicleOutput{

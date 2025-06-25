@@ -70,7 +70,7 @@ func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceStartD
 		if err != nil {
 			return nil, err
 		}
-		bankAccount.AttachBalances(balances)
+		bankAccount.AttachBalances(balances, true)
 	}
 
 	return &bankAccount, nil
@@ -136,7 +136,7 @@ func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAcc
 		if err != nil {
 			return nil, err
 		}
-		bankAccount.Balances = balances
+		bankAccount.AttachBalances(balances, true)
 	}
 
 	err = bankAccount.Delete(userID)
