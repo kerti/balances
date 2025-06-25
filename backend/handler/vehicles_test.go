@@ -1167,3 +1167,125 @@ func (t *vehicleHandlerTestSuite) TestGetValueByFilter_ServiceFailedResolving() 
 
 	assert.Equal(t.T(), 0, pageInfo.Page)
 }
+
+func (t *vehicleHandlerTestSuite) TestUpdateValue_Normal() {
+	input := t.getNewVehicleValueInput(nuuid.From(t.testVehicleValueID), nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		input,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	updatedVehicleValue := model.NewVehicleValueFromInput(input, t.testVehicleID, t.testUserID)
+
+	t.mockSvc.EXPECT().UpdateValue(gomock.Any(), t.testUserID).Return(&updatedVehicleValue, nil)
+
+	t.handler.HandleUpdateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdateValue_FailedGettingIDFromRequest() {
+	input := t.getNewVehicleValueInput(nuuid.From(t.testVehicleValueID), nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		input,
+		nil,
+		nuuid.NUUID{},
+	)
+
+	t.handler.HandleUpdateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdateValue_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		input,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	t.handler.HandleUpdateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdateValue_MismatchedID() {
+	input := t.getNewVehicleValueInput(nuuid.NUUID{}, nuuid.NUUID{})
+	newID, _ := uuid.NewV7()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleValueID.String(),
+		input,
+		nil,
+		nuuid.From(newID),
+	)
+
+	t.handler.HandleUpdateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "id mismatch")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestUpdateValue_ServiceFailedUpdating() {
+	errMsg := "failed updating vehicle value"
+	input := t.getNewVehicleValueInput(nuuid.From(t.testVehicleValueID), nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/vehicles/"+t.testVehicleValueID.String(),
+		input,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	t.mockSvc.EXPECT().UpdateValue(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleUpdateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
