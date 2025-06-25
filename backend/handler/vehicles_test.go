@@ -366,8 +366,6 @@ func (t *vehicleHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 }
 
 func (t *vehicleHandlerTestSuite) TestGetByID_Normal_NoParams() {
-	formParams := make(map[string]string)
-	formParams["id"] = t.testVehicleID.String()
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
 		"/vehicles/"+t.testVehicleID.String(),
@@ -929,6 +927,87 @@ func (t *vehicleHandlerTestSuite) TestCreateValue_ServiceFailedCreatingValue() {
 	t.mockSvc.EXPECT().CreateValue(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
 
 	t.handler.HandleCreateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByID_Normal() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	input := t.getNewVehicleValueInput(nuuid.From(t.testVehicleValueID), nuuid.From(t.testVehicleID))
+	expectedResult := model.NewVehicleValueFromInput(input, t.testVehicleID, t.testUserID)
+	expected := expectedResult.ToOutput()
+
+	t.mockSvc.EXPECT().GetValueByID(t.testVehicleValueID).Return(&expectedResult, nil)
+
+	t.handler.HandleGetVehicleValueByID(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected.ID, actual.ID)
+	assert.Equal(t.T(), expected.VehicleID, actual.VehicleID)
+	assert.Equal(t.T(), expected.Date.Time().Unix(), actual.Date.Time().Unix())
+	assert.Equal(t.T(), expected.Value, actual.Value)
+	assert.Equal(t.T(), expected.Created.Time().Unix(), actual.Created.Time().Unix())
+	assert.Equal(t.T(), expected.CreatedBy, actual.CreatedBy)
+	assert.Equal(t.T(), expected.Updated, actual.Updated)
+	assert.Equal(t.T(), expected.UpdatedBy, actual.UpdatedBy)
+	assert.Equal(t.T(), expected.Deleted, actual.Deleted)
+	assert.Equal(t.T(), expected.DeletedBy, actual.DeletedBy)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByID_FailedParsingID() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.NUUID{},
+	)
+
+	t.handler.HandleGetVehicleValueByID(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByID_ServiceFailedResolving() {
+	errMsg := "service failed resolving vehicle value"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	t.mockSvc.EXPECT().GetValueByID(t.testVehicleValueID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleGetVehicleValueByID(rr, req)
 
 	actual, err := t.parseOutputToVehicleValue(rr)
 
