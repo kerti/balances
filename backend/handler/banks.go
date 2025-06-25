@@ -36,7 +36,7 @@ type BankAccountImpl struct {
 	Service service.BankAccount `inject:"bankAccountService"`
 }
 
-// Startup perform startup functions
+// Startup performs startup functions
 func (h *BankAccountImpl) Startup() {
 	logger.Trace("Bank Account Handler starting up...")
 }
@@ -114,7 +114,7 @@ func (h *BankAccountImpl) HandleGetBankAccountByFilter(w http.ResponseWriter, r 
 
 	bankAccounts, pageInfo, err := h.Service.GetByFilter(input)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
+		response.RespondWithError(w, err)
 		return
 	}
 
@@ -220,7 +220,7 @@ func (h *BankAccountImpl) HandleGetBankAccountBalanceByFilter(w http.ResponseWri
 
 	bankAccountBalances, pageInfo, err := h.Service.GetBalancesByFilter(input)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
+		response.RespondWithError(w, err)
 		return
 	}
 

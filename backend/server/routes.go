@@ -43,5 +43,17 @@ func (s *Server) InitRoutes() {
 	s.router.HandleFunc("/bankAccounts/balances/{id}", s.BankAccountHandler.HandleUpdateBankAccountBalance).Methods("PATCH")
 	s.router.HandleFunc("/bankAccounts/balances/{id}", s.BankAccountHandler.HandleDeleteBankAccountBalance).Methods("DELETE")
 
+	// Vehicles
+	s.router.HandleFunc("/vehicles", s.VehicleHandler.HandleCreateVehicle).Methods("POST")
+	s.router.HandleFunc("/vehicles/{id}", s.VehicleHandler.HandleGetVehicleByID).Methods("GET")
+	s.router.HandleFunc("/vehicles/search", s.VehicleHandler.HandleGetVehicleByFilter).Methods("POST")
+	s.router.HandleFunc("/vehicles/{id}", s.VehicleHandler.HandleUpdateVehicle).Methods("PATCH")
+	s.router.HandleFunc("/vehicles/{id}", s.VehicleHandler.HandleDeleteVehicle).Methods("DELETE")
+	s.router.HandleFunc("/vehicles/values", s.VehicleHandler.HandleCreateVehicleValue).Methods("POST")
+	s.router.HandleFunc("/vehicles/values/{id}", s.VehicleHandler.HandleGetVehicleValueByID).Methods("GET")
+	s.router.HandleFunc("/vehicles/values/search", s.VehicleHandler.HandleGetVehicleValueByFilter).Methods("POST")
+	s.router.HandleFunc("/vehicles/values/{id}", s.VehicleHandler.HandleUpdateVehicleValue).Methods("PATCH")
+	s.router.HandleFunc("/vehicles/values/{id}", s.VehicleHandler.HandleDeleteVehicleValue).Methods("DELETE")
+
 	http.Handle("/", s.router)
 }

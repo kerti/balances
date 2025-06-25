@@ -16,8 +16,6 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-var isShuttingDown bool
-
 // Server is the server instance
 type Server struct {
 	config             *config.Config
@@ -26,6 +24,7 @@ type Server struct {
 	BankAccountHandler handler.BankAccount `inject:"bankAccountHandler"`
 	HealthHandler      handler.Health      `inject:"healthHandler"`
 	UserHandler        handler.User        `inject:"userHandler"`
+	VehicleHandler     handler.Vehicle     `inject:"vehicleHandler"`
 	router             *mux.Router
 }
 

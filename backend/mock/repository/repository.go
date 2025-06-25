@@ -358,3 +358,213 @@ func (mr *MockUserMockRecorder) Update(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), user)
 }
+
+// MockVehicle is a mock of Vehicle interface.
+type MockVehicle struct {
+	ctrl     *gomock.Controller
+	recorder *MockVehicleMockRecorder
+}
+
+// MockVehicleMockRecorder is the mock recorder for MockVehicle.
+type MockVehicleMockRecorder struct {
+	mock *MockVehicle
+}
+
+// NewMockVehicle creates a new mock instance.
+func NewMockVehicle(ctrl *gomock.Controller) *MockVehicle {
+	mock := &MockVehicle{ctrl: ctrl}
+	mock.recorder = &MockVehicleMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockVehicle) EXPECT() *MockVehicleMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockVehicle) Create(vehicle model.Vehicle) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockVehicleMockRecorder) Create(vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVehicle)(nil).Create), vehicle)
+}
+
+// CreateValue mocks base method.
+func (m *MockVehicle) CreateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateValue", vehicleValue, vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateValue indicates an expected call of CreateValue.
+func (mr *MockVehicleMockRecorder) CreateValue(vehicleValue, vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateValue", reflect.TypeOf((*MockVehicle)(nil).CreateValue), vehicleValue, vehicle)
+}
+
+// ExistsByID mocks base method.
+func (m *MockVehicle) ExistsByID(id uuid.UUID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsByID", id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsByID indicates an expected call of ExistsByID.
+func (mr *MockVehicleMockRecorder) ExistsByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByID", reflect.TypeOf((*MockVehicle)(nil).ExistsByID), id)
+}
+
+// ExistsValueByID mocks base method.
+func (m *MockVehicle) ExistsValueByID(id uuid.UUID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsValueByID", id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsValueByID indicates an expected call of ExistsValueByID.
+func (mr *MockVehicleMockRecorder) ExistsValueByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsValueByID", reflect.TypeOf((*MockVehicle)(nil).ExistsValueByID), id)
+}
+
+// ResolveByFilter mocks base method.
+func (m *MockVehicle) ResolveByFilter(filter filter.Filter) ([]model.Vehicle, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveByFilter", filter)
+	ret0, _ := ret[0].([]model.Vehicle)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ResolveByFilter indicates an expected call of ResolveByFilter.
+func (mr *MockVehicleMockRecorder) ResolveByFilter(filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveByFilter", reflect.TypeOf((*MockVehicle)(nil).ResolveByFilter), filter)
+}
+
+// ResolveByIDs mocks base method.
+func (m *MockVehicle) ResolveByIDs(ids []uuid.UUID) ([]model.Vehicle, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveByIDs", ids)
+	ret0, _ := ret[0].([]model.Vehicle)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveByIDs indicates an expected call of ResolveByIDs.
+func (mr *MockVehicleMockRecorder) ResolveByIDs(ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveByIDs", reflect.TypeOf((*MockVehicle)(nil).ResolveByIDs), ids)
+}
+
+// ResolveLastValuesByVehicleID mocks base method.
+func (m *MockVehicle) ResolveLastValuesByVehicleID(id uuid.UUID, count int) ([]model.VehicleValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveLastValuesByVehicleID", id, count)
+	ret0, _ := ret[0].([]model.VehicleValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveLastValuesByVehicleID indicates an expected call of ResolveLastValuesByVehicleID.
+func (mr *MockVehicleMockRecorder) ResolveLastValuesByVehicleID(id, count interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveLastValuesByVehicleID", reflect.TypeOf((*MockVehicle)(nil).ResolveLastValuesByVehicleID), id, count)
+}
+
+// ResolveValuesByFilter mocks base method.
+func (m *MockVehicle) ResolveValuesByFilter(filter filter.Filter) ([]model.VehicleValue, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveValuesByFilter", filter)
+	ret0, _ := ret[0].([]model.VehicleValue)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ResolveValuesByFilter indicates an expected call of ResolveValuesByFilter.
+func (mr *MockVehicleMockRecorder) ResolveValuesByFilter(filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveValuesByFilter", reflect.TypeOf((*MockVehicle)(nil).ResolveValuesByFilter), filter)
+}
+
+// ResolveValuesByIDs mocks base method.
+func (m *MockVehicle) ResolveValuesByIDs(ids []uuid.UUID) ([]model.VehicleValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveValuesByIDs", ids)
+	ret0, _ := ret[0].([]model.VehicleValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveValuesByIDs indicates an expected call of ResolveValuesByIDs.
+func (mr *MockVehicleMockRecorder) ResolveValuesByIDs(ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveValuesByIDs", reflect.TypeOf((*MockVehicle)(nil).ResolveValuesByIDs), ids)
+}
+
+// Shutdown mocks base method.
+func (m *MockVehicle) Shutdown() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Shutdown")
+}
+
+// Shutdown indicates an expected call of Shutdown.
+func (mr *MockVehicleMockRecorder) Shutdown() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Shutdown", reflect.TypeOf((*MockVehicle)(nil).Shutdown))
+}
+
+// Startup mocks base method.
+func (m *MockVehicle) Startup() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Startup")
+}
+
+// Startup indicates an expected call of Startup.
+func (mr *MockVehicleMockRecorder) Startup() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Startup", reflect.TypeOf((*MockVehicle)(nil).Startup))
+}
+
+// Update mocks base method.
+func (m *MockVehicle) Update(vehicle model.Vehicle) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockVehicleMockRecorder) Update(vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVehicle)(nil).Update), vehicle)
+}
+
+// UpdateValue mocks base method.
+func (m *MockVehicle) UpdateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateValue", vehicleValue, vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateValue indicates an expected call of UpdateValue.
+func (mr *MockVehicleMockRecorder) UpdateValue(vehicleValue, vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateValue", reflect.TypeOf((*MockVehicle)(nil).UpdateValue), vehicleValue, vehicle)
+}

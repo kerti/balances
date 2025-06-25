@@ -9,7 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/guregu/null"
-	mock_repository "github.com/kerti/balances/backend/mock"
+	mock_repository "github.com/kerti/balances/backend/mock/repository"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
@@ -48,7 +48,7 @@ func (t *bankAccountsServiceTestSuite) TearDownTest() {
 	t.ctrl.Finish()
 }
 
-func (t *bankAccountsServiceTestSuite) getNewBankAccountInput(id nuuid.NUUID, balances *[]model.BankAccountBalanceInput) model.BankAccountInput {
+func (t *bankAccountsServiceTestSuite) getNewBankAccountInput(id nuuid.NUUID) model.BankAccountInput {
 	acc := model.BankAccountInput{}
 
 	if id.Valid {
@@ -66,14 +66,6 @@ func (t *bankAccountsServiceTestSuite) getNewBankAccountInput(id nuuid.NUUID, ba
 	acc.LastBalance = float64(1000000)
 	acc.LastBalanceDate = cachetime.CacheTime(lastBalanceDate)
 	acc.Status = model.BankAccountStatusActive
-
-	acc.Balances = []model.BankAccountBalanceInput{}
-	if balances != nil {
-		for _, bal := range *balances {
-			balCopy := bal
-			acc.Balances = append(acc.Balances, balCopy)
-		}
-	}
 
 	return acc
 }
@@ -172,7 +164,7 @@ func (t *bankAccountsServiceTestSuite) getDefaultPageInfo() model.PageInfoOutput
 }
 
 func (t *bankAccountsServiceTestSuite) TestCreate_Normal() {
-	testInput := t.getNewBankAccountInput(nuuid.NUUID{Valid: false}, nil)
+	testInput := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
 	t.mockRepo.EXPECT().Create(gomock.Any()).Return(nil)
 
 	res, err := t.svc.Create(testInput, t.testUserID)
@@ -192,7 +184,7 @@ func (t *bankAccountsServiceTestSuite) TestCreate_Normal() {
 
 func (t *bankAccountsServiceTestSuite) TestCreate_RepoFailToCreate() {
 	errMsg := "failed to create bank account"
-	testInput := t.getNewBankAccountInput(nuuid.NUUID{Valid: false}, nil)
+	testInput := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
 	t.mockRepo.EXPECT().Create(gomock.Any()).Return(errors.New(errMsg))
 
 	res, err := t.svc.Create(testInput, t.testUserID)
@@ -437,7 +429,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_Normal() {
 	t.mockRepo.EXPECT().Update(gomock.Any()).
 		Return(nil)
 
-	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID)), t.testUserID)
 
 	assert.NotNil(t.T(), res)
 	assert.NoError(t.T(), err)
@@ -449,7 +441,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_RepoErrorResolvingByIDs() {
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
 		Return([]model.BankAccount{}, errors.New(errMsg))
 
-	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID)), t.testUserID)
 
 	assert.Nil(t.T(), res)
 	assert.Error(t.T(), err)
@@ -460,7 +452,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_AccountNotFound() {
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testBankAccountID}).
 		Return([]model.BankAccount{}, nil)
 
-	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID)), t.testUserID)
 
 	assert.Nil(t.T(), res)
 	assert.Error(t.T(), err)
@@ -468,7 +460,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_AccountNotFound() {
 }
 
 func (t *bankAccountsServiceTestSuite) TestUpdate_AccountDeleted() {
-	bankAccountInput := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil)
+	bankAccountInput := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
 	deletedBankAccount := model.NewBankAccountFromInput(bankAccountInput, t.testUserID)
 	deletedBankAccount.Delete(t.testUserID)
 
@@ -493,7 +485,7 @@ func (t *bankAccountsServiceTestSuite) TestUpdate_RepoErrorUpdating() {
 	t.mockRepo.EXPECT().Update(gomock.Any()).
 		Return(errors.New(errMsg))
 
-	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID), nil), t.testUserID)
+	res, err := t.svc.Update(t.getNewBankAccountInput(nuuid.From(t.testBankAccountID)), t.testUserID)
 
 	assert.Nil(t.T(), res)
 	assert.Error(t.T(), err)

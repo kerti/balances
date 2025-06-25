@@ -1,0 +1,81 @@
+package service
+
+import (
+	"github.com/google/uuid"
+	"github.com/kerti/balances/backend/model"
+	"github.com/kerti/balances/backend/repository"
+	"github.com/kerti/balances/backend/util/cachetime"
+	"github.com/kerti/balances/backend/util/failure"
+	"github.com/kerti/balances/backend/util/logger"
+)
+
+// VehicleImpl is the service provider implementation
+type VehicleImpl struct {
+	Repository repository.Vehicle `inject:"vehicleRepository"`
+}
+
+// Startup performs startup functions
+func (s *VehicleImpl) Startup() {
+	logger.Trace("Vehicle Service starting up...")
+}
+
+// Shutdown cleans up everything and shuts down
+func (s *VehicleImpl) Shutdown() {
+	logger.Trace("Vehicle Service shutting down...")
+}
+
+// Create creates a new Vehicle
+func (s *VehicleImpl) Create(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error) {
+	vehicle := model.NewVehicleFromInput(input, userID)
+	err := s.Repository.Create(vehicle)
+	if err != nil {
+		return nil, err
+	}
+	return &vehicle, err
+}
+
+// GetByID fetches a Vehicle by its ID
+func (s *VehicleImpl) GetByID(id uuid.UUID, withValues bool, valueStartDate, valueEndDate cachetime.NCacheTime, pageSize *int) (*model.Vehicle, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// GetByFilter fetches a set of Vehicles by its filter
+func (s *VehicleImpl) GetByFilter(input model.VehicleFilterInput) ([]model.Vehicle, model.PageInfoOutput, error) {
+	return []model.Vehicle{}, model.PageInfoOutput{}, failure.Unimplemented("service unimplemented for this method")
+}
+
+// Update updates an existing Vehicle
+func (s *VehicleImpl) Update(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// Delete deletes an existing Vehicle. The method will find all the account's values
+// and delete all of them also.
+func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// CreateValue creates a new Vehicle Value
+func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// GetValueByID fetches a Vehicle Value by its ID
+func (s *VehicleImpl) GetValueByID(id uuid.UUID) (*model.VehicleValue, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// GetValuesByFilter fetches a set of Vehicle Values by its filter
+func (s *VehicleImpl) GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error) {
+	return []model.VehicleValue{}, model.PageInfoOutput{}, failure.Unimplemented("service unimplemented for this method")
+}
+
+// UpdateValue updates an existing Vehicle Value
+func (s *VehicleImpl) UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}
+
+// DeleteValue deletes an existing Vehicle Value
+func (s *VehicleImpl) DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.VehicleValue, error) {
+	return nil, failure.Unimplemented("service unimplemented for this method")
+}

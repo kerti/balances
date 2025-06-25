@@ -16,15 +16,6 @@ import (
 	"github.com/kerti/balances/backend/util/logger"
 )
 
-// Auth is the service provider interface
-type Auth interface {
-	Startup()
-	Shutdown()
-	Authenticate(basic string) (authInfo *model.AuthenticationInfo, err error)
-	Authorize(bearer string) (userID *uuid.UUID, err error)
-	GetToken(user model.User) (token *string, expiration *time.Time, err error)
-}
-
 // AuthImpl is the service provider implementation
 type AuthImpl struct {
 	UserRepository repository.User `inject:"userRepository"`
