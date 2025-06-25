@@ -890,3 +890,54 @@ func (t *vehicleHandlerTestSuite) TestCreateValue_Normal() {
 	assert.False(t.T(), actual.Deleted.Valid)
 	assert.False(t.T(), actual.DeletedBy.Valid)
 }
+
+func (t *vehicleHandlerTestSuite) TestCreateValue_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleCreateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestCreateValue_ServiceFailedCreatingValue() {
+	errMsg := "service failed creating vehicle value"
+	input := t.getNewVehicleValueInput(nuuid.NUUID{Valid: false}, nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.mockSvc.EXPECT().CreateValue(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleCreateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
