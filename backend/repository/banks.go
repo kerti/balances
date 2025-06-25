@@ -282,8 +282,7 @@ func (r *BankAccountMySQLRepo) ResolveBalancesByFilter(filter filter.Filter) (ba
 	filterArgsNoPagination := filter.GetArgs(false)
 	query, args, err = r.DB.In(
 		"SELECT COUNT(entity_id) FROM bank_account_balances "+filterQueryString,
-		filterArgsNoPagination...,
-	)
+		filterArgsNoPagination...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return

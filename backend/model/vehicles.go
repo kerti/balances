@@ -375,7 +375,7 @@ type VehicleValueFilterInput struct {
 // ToFilter converts this entity-specific filter to a generic filter.Filter object
 func (f *VehicleValueFilterInput) ToFilter() filter.Filter {
 	theFilter := filter.Filter{
-		TableName:      "vehicles",
+		TableName:      "vehicle_values",
 		IncludeDeleted: f.GetIncludeDeleted(),
 		Pagination:     f.BaseFilterInput.GetPagination(),
 	}

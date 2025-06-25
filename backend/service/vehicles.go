@@ -85,7 +85,7 @@ func (s *VehicleImpl) Update(input model.VehicleInput, userID uuid.UUID) (*model
 	return nil, failure.Unimplemented("service unimplemented for this method")
 }
 
-// Delete deletes an existing Vehicle. The method will find all the account's values
+// Delete deletes an existing Vehicle. The method will find all the vehicle's values
 // and delete all of them also.
 func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error) {
 	return nil, failure.Unimplemented("service unimplemented for this method")
