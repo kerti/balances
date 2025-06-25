@@ -453,10 +453,10 @@ func (mr *MockVehicleMockRecorder) Create(input, userID interface{}) *gomock.Cal
 }
 
 // CreateValue mocks base method.
-func (m *MockVehicle) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.Vehicle, error) {
+func (m *MockVehicle) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateValue", input, userID)
-	ret0, _ := ret[0].(*model.Vehicle)
+	ret0, _ := ret[0].(*model.VehicleValue)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

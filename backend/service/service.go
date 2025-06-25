@@ -52,7 +52,7 @@ type Vehicle interface {
 	GetByFilter(input model.VehicleFilterInput) ([]model.Vehicle, model.PageInfoOutput, error)
 	Update(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error)
 	Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error)
-	CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.Vehicle, error)
+	CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error)
 	GetValueByID(id uuid.UUID) (*model.VehicleValue, error)
 	GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error)
 	UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error)

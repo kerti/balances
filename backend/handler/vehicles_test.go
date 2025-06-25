@@ -29,11 +29,12 @@ import (
 
 type vehicleHandlerTestSuite struct {
 	suite.Suite
-	ctrl          *gomock.Controller
-	handler       handler.Vehicle
-	mockSvc       *mock_service.MockVehicle
-	testUserID    uuid.UUID
-	testVehicleID uuid.UUID
+	ctrl               *gomock.Controller
+	handler            handler.Vehicle
+	mockSvc            *mock_service.MockVehicle
+	testUserID         uuid.UUID
+	testVehicleID      uuid.UUID
+	testVehicleValueID uuid.UUID
 }
 
 func TestVehicleHandler(t *testing.T) {
@@ -48,6 +49,7 @@ func (t *vehicleHandlerTestSuite) SetupTest() {
 	}
 	t.testUserID, _ = uuid.NewV7()
 	t.testVehicleID, _ = uuid.NewV7()
+	t.testVehicleValueID, _ = uuid.NewV7()
 	t.handler.Startup()
 }
 
@@ -139,7 +141,58 @@ func (t *vehicleHandlerTestSuite) getNewVehicleInput(id nuuid.NUUID) model.Vehic
 	return veh
 }
 
+func (t *vehicleHandlerTestSuite) getNewVehicleValueInput(id, vehicleID nuuid.NUUID) model.VehicleValueInput {
+	vvi := model.VehicleValueInput{}
+
+	if id.Valid {
+		vvi.ID = id.UUID
+	} else {
+		vvi.ID = t.testVehicleValueID
+	}
+
+	if vehicleID.Valid {
+		vvi.VehicleID = vehicleID.UUID
+	} else {
+		vvi.VehicleID = t.testVehicleID
+	}
+
+	vvi.Date = cachetime.CacheTime(time.Now().AddDate(0, 0, -1))
+	vvi.Value = float64(50000)
+
+	return vvi
+}
+
 func (t *vehicleHandlerTestSuite) parseOutputToVehicle(rr *httptest.ResponseRecorder) (actual *model.VehicleOutput, fail *failure.Failure) {
+	// read the response
+	var response response.BaseResponse
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	if err != nil {
+		t.T().Fatal(err)
+	}
+
+	if response.Data != nil {
+		// marshal the data to JSON
+		actualMap := (*response.Data).(map[string]any)
+		jsonBytes, err := json.Marshal(actualMap)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+		// unmarshal back to the expected object
+		err = json.Unmarshal(jsonBytes, &actual)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+		return actual, nil
+	}
+
+	if response.Error != nil {
+		return nil, response.Error
+	}
+
+	return actual, nil
+}
+
+func (t *vehicleHandlerTestSuite) parseOutputToVehicleValue(rr *httptest.ResponseRecorder) (actual *model.VehicleValueOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -802,4 +855,38 @@ func (t *vehicleHandlerTestSuite) TestDelete_ServiceFailedDeleting() {
 	assert.Contains(t.T(), err.Message, errMsg)
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestCreateValue_Normal() {
+	input := t.getNewVehicleValueInput(nuuid.NUUID{Valid: false}, nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	expectedResult := model.NewVehicleValueFromInput(input, input.VehicleID, t.testUserID)
+	expected := expectedResult.ToOutput()
+
+	t.mockSvc.EXPECT().CreateValue(gomock.Any(), t.testUserID).Return(&expectedResult, nil)
+
+	t.handler.HandleCreateVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), http.StatusCreated, rr.Result().StatusCode)
+	assert.NotNil(t.T(), actual)
+	assert.Equal(t.T(), expected.ID, actual.ID)
+	assert.Equal(t.T(), expected.VehicleID, actual.VehicleID)
+	assert.Equal(t.T(), expected.Date.Time().Unix(), actual.Date.Time().Unix())
+	assert.Equal(t.T(), expected.Value, actual.Value)
+	assert.NotNil(t.T(), actual.Created)
+	assert.NotNil(t.T(), actual.CreatedBy)
+	assert.False(t.T(), actual.Updated.Valid)
+	assert.False(t.T(), actual.UpdatedBy.Valid)
+	assert.False(t.T(), actual.Deleted.Valid)
+	assert.False(t.T(), actual.DeletedBy.Valid)
 }

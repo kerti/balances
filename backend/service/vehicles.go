@@ -56,7 +56,7 @@ func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, er
 }
 
 // CreateValue creates a new Vehicle Value
-func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.Vehicle, error) {
+func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
 	return nil, failure.Unimplemented("service unimplemented for this method")
 }
 
