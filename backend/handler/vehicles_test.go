@@ -271,6 +271,55 @@ func (t *vehicleHandlerTestSuite) parseOutputToVehiclePage(rr *httptest.Response
 	return
 }
 
+func (t *vehicleHandlerTestSuite) parseOutputToVehicleValuePage(rr *httptest.ResponseRecorder) (items []model.VehicleValueOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
+	// read the response
+	var response response.BaseResponse
+	err := json.Unmarshal(rr.Body.Bytes(), &response)
+	if err != nil {
+		t.T().Fatal(err)
+	}
+
+	if response.Data != nil {
+		// marshal the data to JSON
+		actualMap := (*response.Data).(map[string]any)
+		jsonBytes, err := json.Marshal(actualMap)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+
+		// unmarshal back to the expected object
+		var actual model.PageOutput
+		err = json.Unmarshal(jsonBytes, &actual)
+		if err != nil {
+			t.T().Fatal(err)
+		}
+
+		//convert interface{} to []model.VehicleOutput
+		actualSlice := (actual.Items).([]any)
+		for _, vehicleValueInterface := range actualSlice {
+			vehicleValueMap := (vehicleValueInterface).(map[string]any)
+			vehicleValueJsonBytes, err := json.Marshal(vehicleValueMap)
+			if err != nil {
+				t.T().Fatal(err)
+			}
+			var actualVehicleValue model.VehicleValueOutput
+			err = json.Unmarshal(vehicleValueJsonBytes, &actualVehicleValue)
+			if err != nil {
+				t.T().Fatal(err)
+			}
+			items = append(items, actualVehicleValue)
+		}
+
+		pageInfo = actual.PageInfo
+	}
+
+	if response.Error != nil {
+		fail = response.Error
+	}
+
+	return
+}
+
 func (t *vehicleHandlerTestSuite) TestCreate_Normal() {
 	input := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
@@ -1019,4 +1068,102 @@ func (t *vehicleHandlerTestSuite) TestGetValueByID_ServiceFailedResolving() {
 	assert.Contains(t.T(), err.Message, errMsg)
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByFilter_Normal() {
+	keyword := "test keyword"
+	input := model.VehicleValueFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	expectedVehicleValues := []model.VehicleValue{}
+	vv1 := model.NewVehicleValueFromInput(t.getNewVehicleValueInput(nuuid.NUUID{}, nuuid.From(t.testVehicleID)), t.testVehicleID, t.testUserID)
+	vv2 := model.NewVehicleValueFromInput(t.getNewVehicleValueInput(nuuid.NUUID{}, nuuid.From(t.testVehicleID)), t.testVehicleID, t.testUserID)
+	expectedVehicleValues = append(expectedVehicleValues, vv1)
+	expectedVehicleValues = append(expectedVehicleValues, vv2)
+	expectedPageInfo := model.PageInfoOutput{
+		Page:       1,
+		PageSize:   10,
+		TotalCount: 1,
+		PageCount:  1,
+	}
+
+	t.mockSvc.EXPECT().GetValuesByFilter(input).Return(expectedVehicleValues, expectedPageInfo, nil)
+
+	t.handler.HandleGetVehicleValueByFilter(rr, req)
+
+	vehicleValues, pageInfo, err := t.parseOutputToVehicleValuePage(rr)
+
+	assert.Nil(t.T(), err)
+
+	assert.Equal(t.T(), len(expectedVehicleValues), len(vehicleValues))
+	assert.Equal(t.T(), expectedVehicleValues[0].ID, vehicleValues[0].ID)
+	assert.Equal(t.T(), expectedVehicleValues[1].ID, vehicleValues[1].ID)
+
+	assert.Equal(t.T(), 1, pageInfo.Page)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByFilter_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleGetVehicleValueByFilter(rr, req)
+
+	vehicles, pageInfo, err := t.parseOutputToVehicleValuePage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+
+	assert.Equal(t.T(), 0, len(vehicles))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
+}
+
+func (t *vehicleHandlerTestSuite) TestGetValueByFilter_ServiceFailedResolving() {
+	errMsg := "service failed resolving vehicle values"
+	keyword := "test keyword"
+	input := model.VehicleValueFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/vehicles/values/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.mockSvc.EXPECT().GetValuesByFilter(input).Return([]model.VehicleValue{}, model.PageInfoOutput{}, errors.New(errMsg))
+
+	t.handler.HandleGetVehicleValueByFilter(rr, req)
+
+	vahicleValues, pageInfo, err := t.parseOutputToVehicleValuePage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+
+	assert.Equal(t.T(), 0, len(vahicleValues))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
 }
