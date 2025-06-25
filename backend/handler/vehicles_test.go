@@ -730,3 +730,76 @@ func (t *vehicleHandlerTestSuite) TestUpdate_ServiceFailedUpdating() {
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
 }
+
+func (t *vehicleHandlerTestSuite) TestDelete_Normal() {
+	input := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/"+t.testVehicleID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleID),
+	)
+
+	deletedVehicle := model.NewVehicleFromInput(input, t.testUserID)
+	deletedVehicle.ID = t.testVehicleID
+
+	t.mockSvc.EXPECT().Delete(t.testVehicleID, t.testUserID).Return(&deletedVehicle, nil)
+
+	t.handler.HandleDeleteVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Equal(t.T(), t.testVehicleID, actual.ID)
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestDelete_FailedParsingID() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/"+t.testVehicleID.String(),
+		nil,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleDeleteVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestDelete_ServiceFailedDeleting() {
+	errMsg := "service failed deleting vehicle"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/"+t.testVehicleID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleID),
+	)
+
+	t.mockSvc.EXPECT().Delete(t.testVehicleID, t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleDeleteVehicle(rr, req)
+
+	actual, err := t.parseOutputToVehicle(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
