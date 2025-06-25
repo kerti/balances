@@ -1289,3 +1289,76 @@ func (t *vehicleHandlerTestSuite) TestUpdateValue_ServiceFailedUpdating() {
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
 }
+
+func (t *vehicleHandlerTestSuite) TestDeleteValue_Normal() {
+	input := t.getNewVehicleValueInput(nuuid.From(t.testVehicleValueID), nuuid.From(t.testVehicleID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	deletedVehicleValue := model.NewVehicleValueFromInput(input, t.testVehicleID, t.testUserID)
+	deletedVehicleValue.ID = t.testVehicleID
+
+	t.mockSvc.EXPECT().DeleteValue(t.testVehicleValueID, t.testUserID).Return(&deletedVehicleValue, nil)
+
+	t.handler.HandleDeleteVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Equal(t.T(), t.testVehicleID, actual.ID)
+	assert.Nil(t.T(), err)
+}
+
+func (t *vehicleHandlerTestSuite) TestDeleteValue_FailedParsingID() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleDeleteVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *vehicleHandlerTestSuite) TestDeleteValue_ServiceFailedDeleting() {
+	errMsg := "service failed deleting vehicle value"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/vehicles/values/"+t.testVehicleValueID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testVehicleValueID),
+	)
+
+	t.mockSvc.EXPECT().DeleteValue(t.testVehicleValueID, t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleDeleteVehicleValue(rr, req)
+
+	actual, err := t.parseOutputToVehicleValue(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
