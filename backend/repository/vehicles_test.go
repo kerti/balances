@@ -508,11 +508,11 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_Normal() {
 	likeKeyword := "%example%"
 
 	mock.
-		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
 		WillReturnRows(getCountResult(1))
 
@@ -535,7 +535,7 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnSelect() {
 	likeKeyword := "%example%"
 
 	mock.
-		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnError(errors.New(errMsg))
 
@@ -563,11 +563,11 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnCount() {
 	likeKeyword := "%example%"
 
 	mock.
-		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
 		WillReturnError(errors.New(errMsg))
 

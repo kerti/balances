@@ -43,7 +43,7 @@ const (
 	// VehicleColumnModel represents the corresponding column in Vehicle table
 	VehicleColumnModel filter.Field = "vehicles.model"
 	// VehicleColumnYear represents the corresponding column in Vehicle table
-	VehicleColumnYear filter.Field = "vehciles.year"
+	VehicleColumnYear filter.Field = "vehicles.year"
 	// VehicleColumnType represents the corresponding column in Vehicle table
 	VehicleColumnType filter.Field = "vehicles.type"
 	// VehicleColumnTitleHolder represents the corresponding column in Vehicle table
