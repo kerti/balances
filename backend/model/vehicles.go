@@ -43,7 +43,7 @@ const (
 	// VehicleColumnModel represents the corresponding column in Vehicle table
 	VehicleColumnModel filter.Field = "vehicles.model"
 	// VehicleColumnYear represents the corresponding column in Vehicle table
-	VehicleColumnYear filter.Field = "vehciles.year"
+	VehicleColumnYear filter.Field = "vehicles.year"
 	// VehicleColumnType represents the corresponding column in Vehicle table
 	VehicleColumnType filter.Field = "vehicles.type"
 	// VehicleColumnTitleHolder represents the corresponding column in Vehicle table
@@ -173,6 +173,19 @@ func NewVehicleFromInput(input VehicleInput, userID uuid.UUID) (v Vehicle) {
 	// TODO: validate?
 
 	return
+}
+
+// AttachValues attaches Vehicle Values to a Vehicle
+func (v *Vehicle) AttachValues(values []VehicleValue, clearBeforeAttach bool) {
+	if clearBeforeAttach {
+		v.Values = []VehicleValue{}
+	}
+
+	for _, value := range values {
+		if value.VehicleID == v.ID {
+			v.Values = append(v.Values, value)
+		}
+	}
 }
 
 // ToOutput converts a Vehicle to its JSON-compatible object representation
@@ -362,7 +375,7 @@ type VehicleValueFilterInput struct {
 // ToFilter converts this entity-specific filter to a generic filter.Filter object
 func (f *VehicleValueFilterInput) ToFilter() filter.Filter {
 	theFilter := filter.Filter{
-		TableName:      "vehicles",
+		TableName:      "vehicle_values",
 		IncludeDeleted: f.GetIncludeDeleted(),
 		Pagination:     f.BaseFilterInput.GetPagination(),
 	}

@@ -55,11 +55,13 @@ func Unauthorized(msg string) error {
 }
 
 // InternalError returns a new Failure with code for internal error and message derived from an error interface
-func InternalError(err error) error {
+func InternalError(operationName string, entityName string, err error) error {
 	if err != nil {
 		return &Failure{
-			Code:    CodeInternalError,
-			Message: err.Error(),
+			Code:      CodeInternalError,
+			Operation: &operationName,
+			Entity:    &entityName,
+			Message:   err.Error(),
 		}
 	}
 	return nil

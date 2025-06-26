@@ -36,12 +36,48 @@ func (s *VehicleImpl) Create(input model.VehicleInput, userID uuid.UUID) (*model
 
 // GetByID fetches a Vehicle by its ID
 func (s *VehicleImpl) GetByID(id uuid.UUID, withValues bool, valueStartDate, valueEndDate cachetime.NCacheTime, pageSize *int) (*model.Vehicle, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("Vehicle")
+	}
+
+	vehicle := vehicles[0]
+
+	if withValues {
+		filter := model.VehicleValueFilterInput{
+			VehicleIDs: &[]uuid.UUID{id},
+		}
+
+		if valueStartDate.Valid {
+			filter.StartDate = valueStartDate
+		}
+
+		if valueEndDate.Valid {
+			filter.EndDate = valueEndDate
+		}
+
+		if pageSize != nil {
+			filter.PageSize = pageSize
+		}
+
+		values, _, err := s.Repository.ResolveValuesByFilter(filter.ToFilter())
+		if err != nil {
+			return nil, err
+		}
+
+		vehicle.AttachValues(values, true)
+	}
+
+	return &vehicle, nil
 }
 
 // GetByFilter fetches a set of Vehicles by its filter
 func (s *VehicleImpl) GetByFilter(input model.VehicleFilterInput) ([]model.Vehicle, model.PageInfoOutput, error) {
-	return []model.Vehicle{}, model.PageInfoOutput{}, failure.Unimplemented("service unimplemented for this method")
+	return s.Repository.ResolveByFilter(input.ToFilter())
 }
 
 // Update updates an existing Vehicle
@@ -49,7 +85,7 @@ func (s *VehicleImpl) Update(input model.VehicleInput, userID uuid.UUID) (*model
 	return nil, failure.Unimplemented("service unimplemented for this method")
 }
 
-// Delete deletes an existing Vehicle. The method will find all the account's values
+// Delete deletes an existing Vehicle. The method will find all the vehicle's values
 // and delete all of them also.
 func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error) {
 	return nil, failure.Unimplemented("service unimplemented for this method")

@@ -126,13 +126,16 @@ func NewBankAccountFromInput(input BankAccountInput, userID uuid.UUID) (b BankAc
 }
 
 // AttachBalances attaches Bank Account Balances to a Bank Account
-func (b *BankAccount) AttachBalances(balances []BankAccountBalance) BankAccount {
+func (b *BankAccount) AttachBalances(balances []BankAccountBalance, clearBeforeAttach bool) {
+	if clearBeforeAttach {
+		b.Balances = []BankAccountBalance{}
+	}
+
 	for _, balance := range balances {
 		if balance.BankAccountID == b.ID {
 			b.Balances = append(b.Balances, balance)
 		}
 	}
-	return *b
 }
 
 // Update performs an update on a Bank Account
