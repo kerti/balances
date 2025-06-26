@@ -21,8 +21,10 @@ jobs:
       - name: Check if frontend/vue changed in this PR
         id: changes
         run: |
-          git fetch origin master
-          git diff --name-only origin/master...HEAD | grep "^frontend/vue/" || echo "nochanges" > .nochanges
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          MERGE_SHA="${{ github.sha }}"
+          echo "Comparing changes between $BASE_SHA and $MERGE_SHA"
+          git diff --name-only "$BASE_SHA" "$MERGE_SHA" | grep "^frontend/vue" || echo "nochanges" > .nochanges
 
       - name: Exit if no frontend/vue changes
         run: |
@@ -51,7 +53,7 @@ jobs:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B version-sync
           git remote set-url origin https://x-access-token:$TOKEN@github.com/${{ github.repository }}
           git add frontend/vue/package.json
@@ -62,12 +64,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          gh pr create --base master --head version-sync --title "chore: sync version bump $VERSION" --body "Auto-syncing version bump to master" || \
-          gh pr edit $(gh pr list --head version-sync --json number -q '.[0].number') --title "chore: sync version bump $VERSION" --body "Auto-syncing version bump to master"
+          gh pr create --base master --head version-sync --title "chore: sync frontend vue version bump $VERSION" --body "Auto-syncing frontend vue version bump to master" || \
+          gh pr edit $(gh pr list --head version-sync --json number -q '.[0].number') --title "chore: sync frontend vue version bump $VERSION" --body "Auto-syncing frontend vue version bump to master"
 
-      - name: Auto-merge PR
+      - name: Auto-squash-merge PR
         env:
           GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           PR_NUMBER=$(gh pr list --head version-sync --json number -q '.[0].number')
-          gh pr merge $PR_NUMBER --merge --delete-branch
+          TITLE="[frontend] chore: sync frontend vue version bump $VERSION (#$PR_NUMBER)"
+          gh pr merge $PR_NUMBER --squash --delete-branch --title "$TITLE"
