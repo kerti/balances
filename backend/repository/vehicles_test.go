@@ -502,3 +502,54 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_ErrorExecutingSelect() {
 
 	assert.Len(t.T(), res, 0)
 }
+
+// TODO: test resolve by filter here
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_Normal_NoID() {
+	res, err := t.repo.ResolveValuesByIDs([]uuid.UUID{})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 0)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_Normal_SingleID() {
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues + " WHERE vehicle_values.entity_id IN (?)").
+		WithArgs(t.testVehicleValueID).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleValueID))
+
+	res, err := t.repo.ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_Normal_MultipleIDs() {
+	id1, _ := uuid.NewV7()
+	id2, _ := uuid.NewV7()
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+" WHERE vehicle_values.entity_id IN (?, ?)").
+		WithArgs(id1, id2).
+		WillReturnRows(getMultiEntityIDResult([]uuid.UUID{id1, id2}))
+
+	res, err := t.repo.ResolveValuesByIDs([]uuid.UUID{id1, id2})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 2)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_ErrorExecutingSelect() {
+	errMsg := "failed resolving vehicle values by IDs"
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues + " WHERE vehicle_values.entity_id IN (?)").
+		WithArgs(t.testVehicleValueID).
+		WillReturnError(errors.New(errMsg))
+
+	res, err := t.repo.ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID})
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by IDs", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
+	assert.Len(t.T(), res, 0)
+}

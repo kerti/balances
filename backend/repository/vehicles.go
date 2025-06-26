@@ -197,12 +197,14 @@ func (r *VehicleMySQLRepo) ResolveValuesByIDs(ids []uuid.UUID) (vehicleValues []
 	query, args, err := r.DB.In(QuerySelectVehicleValues+" WHERE vehicle_values.entity_id IN (?)", ids)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by IDs", "Vehicle Value", err)
 		return
 	}
 
 	err = r.DB.Select(&vehicleValues, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by IDs", "Vehicle Value", err)
 	}
 
 	return
