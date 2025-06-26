@@ -148,6 +148,7 @@ func (r *VehicleMySQLRepo) ExistsByID(id uuid.UUID) (exists bool, err error) {
 		id.String())
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("exists by ID", "Vehicle", err)
 	}
 	return
 }
@@ -316,13 +317,15 @@ func (r *VehicleMySQLRepo) Create(vehicle model.Vehicle) error {
 
 	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
 		if err := r.txCreateVehicle(tx, vehicle); err != nil {
-			e <- err
+			wrappedErr := failure.InternalError("create", "Vehicle", err)
+			e <- wrappedErr
 			return
 		}
 
 		for _, value := range vehicle.Values {
 			if err := r.txCreateVehicleValue(tx, value); err != nil {
-				e <- err
+				wrappedErr := failure.InternalError("create", "Vehicle", err)
+				e <- wrappedErr
 				return
 			}
 		}
