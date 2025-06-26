@@ -214,6 +214,7 @@ func (r *VehicleMySQLRepo) ResolveValuesByIDs(ids []uuid.UUID) (vehicleValues []
 func (r *VehicleMySQLRepo) ResolveByFilter(filter filter.Filter) (vehicles []model.Vehicle, pageInfo model.PageInfoOutput, err error) {
 	filterQueryString, err := filter.ToQueryString()
 	if err != nil {
+		err = failure.InternalError("resolve by filter", "Vehicle", err)
 		return vehicles, pageInfo, err
 	}
 
@@ -223,12 +224,14 @@ func (r *VehicleMySQLRepo) ResolveByFilter(filter filter.Filter) (vehicles []mod
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle", err)
 		return
 	}
 
 	err = r.DB.Select(&vehicles, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle", err)
 		return
 	}
 
@@ -240,6 +243,8 @@ func (r *VehicleMySQLRepo) ResolveByFilter(filter filter.Filter) (vehicles []mod
 		filterArgsNoPagination...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle", err)
+		vehicles = []model.Vehicle{}
 		return
 	}
 

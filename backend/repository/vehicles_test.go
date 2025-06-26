@@ -503,7 +503,91 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_ErrorExecutingSelect() {
 	assert.Len(t.T(), res, 0)
 }
 
-// TODO: test resolve by filter here
+func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_Normal() {
+	keyword := "example"
+	likeKeyword := "%example%"
+
+	mock.
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
+
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
+		WillReturnRows(getCountResult(1))
+
+	testFilter := model.VehicleFilterInput{}
+	testFilter.Keyword = &keyword
+
+	res, pageInfo, err := t.repo.ResolveByFilter(testFilter.ToFilter())
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+	assert.Equal(t.T(), 1, pageInfo.Page)
+	assert.Equal(t.T(), 1, pageInfo.PageCount)
+	assert.Equal(t.T(), 1, pageInfo.TotalCount)
+	assert.Equal(t.T(), 10, pageInfo.PageSize)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnSelect() {
+	errMsg := "failed resolving vehicles by filter"
+	keyword := "example"
+	likeKeyword := "%example%"
+
+	mock.
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
+		WillReturnError(errors.New(errMsg))
+
+	testFilter := model.VehicleFilterInput{}
+	testFilter.Keyword = &keyword
+
+	res, pageInfo, err := t.repo.ResolveByFilter(testFilter.ToFilter())
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by filter", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Len(t.T(), res, 0)
+	assert.Equal(t.T(), 0, pageInfo.Page)
+	assert.Equal(t.T(), 0, pageInfo.PageCount)
+	assert.Equal(t.T(), 0, pageInfo.TotalCount)
+	assert.Equal(t.T(), 0, pageInfo.PageSize)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnCount() {
+	errMsg := "failed resolving vehicles by filter"
+	keyword := "example"
+	likeKeyword := "%example%"
+
+	mock.
+		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
+
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehciles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
+		WillReturnError(errors.New(errMsg))
+
+	testFilter := model.VehicleFilterInput{}
+	testFilter.Keyword = &keyword
+
+	res, pageInfo, err := t.repo.ResolveByFilter(testFilter.ToFilter())
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by filter", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Len(t.T(), res, 0)
+	assert.Equal(t.T(), 0, pageInfo.Page)
+	assert.Equal(t.T(), 0, pageInfo.PageCount)
+	assert.Equal(t.T(), 0, pageInfo.TotalCount)
+	assert.Equal(t.T(), 0, pageInfo.PageSize)
+}
 
 func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_Normal_NoID() {
 	res, err := t.repo.ResolveValuesByIDs([]uuid.UUID{})
