@@ -206,21 +206,21 @@ func (t *vehiclesRepositoryTestSuite) getArgsFromVehicleValueModel(vehicleValue 
 func (t *vehiclesRepositoryTestSuite) TestCreate_Normal() {
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(false))
 
-	mock.ExpectBegin()
+	t.sqlmock.ExpectBegin()
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
 		WithArgs(t.getArgsFromVehicleModel(testModel)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	for _, valueModel := range testModel.Values {
-		mock.
+		t.sqlmock.
 			ExpectPrepare(vehicleValuesStmtInsert).
 			ExpectExec().
 			WithArgs(t.getArgsFromVehicleValueModel(valueModel)...).
@@ -228,7 +228,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_Normal() {
 
 	}
 
-	mock.ExpectCommit()
+	t.sqlmock.ExpectCommit()
 
 	err := t.repo.Create(testModel)
 
@@ -239,7 +239,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_ErrorOnCheckExistence() {
 	errMsg := "failed checking existence of vehicle"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnError(errors.New(errMsg))
@@ -257,7 +257,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_ErrorOnCheckExistence() {
 func (t *vehiclesRepositoryTestSuite) TestCreate_AlreadyExists() {
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(true))
@@ -276,18 +276,18 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnPrepareVehicleStatement()
 	errMsg := "failed preparing statement to insert vehicle"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(false))
 
-	mock.ExpectBegin()
+	t.sqlmock.ExpectBegin()
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		WillReturnError(errors.New(errMsg))
 
-	mock.ExpectRollback()
+	t.sqlmock.ExpectRollback()
 
 	err := t.repo.Create(testModel)
 
@@ -303,20 +303,20 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleStatement() {
 	errMsg := "failed executing insert vehicle statement"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(false))
 
-	mock.ExpectBegin()
+	t.sqlmock.ExpectBegin()
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
 		WithArgs(t.getArgsFromVehicleModel(testModel)...).
 		WillReturnError(errors.New(errMsg))
 
-	mock.ExpectRollback()
+	t.sqlmock.ExpectRollback()
 
 	err := t.repo.Create(testModel)
 
@@ -332,24 +332,24 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnPrepareVehicleValueStatem
 	errMsg := "failed preparing insert vehicle value statement"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(false))
 
-	mock.ExpectBegin()
+	t.sqlmock.ExpectBegin()
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
 		WithArgs(t.getArgsFromVehicleModel(testModel)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehicleValuesStmtInsert).
 		WillReturnError(errors.New(errMsg))
 
-	mock.ExpectRollback()
+	t.sqlmock.ExpectRollback()
 
 	err := t.repo.Create(testModel)
 
@@ -365,26 +365,26 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleValueStatement
 	errMsg := "failed executing insert vehicle value statement"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 2)
 
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ? ").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(false))
 
-	mock.ExpectBegin()
+	t.sqlmock.ExpectBegin()
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
 		WithArgs(t.getArgsFromVehicleModel(testModel)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	mock.
+	t.sqlmock.
 		ExpectPrepare(vehicleValuesStmtInsert).
 		ExpectExec().
 		WithArgs(t.getArgsFromVehicleValueModel(testModel.Values[0])...).
 		WillReturnError(errors.New(errMsg))
 
-	mock.ExpectRollback()
+	t.sqlmock.ExpectRollback()
 
 	err := t.repo.Create(testModel)
 
@@ -399,7 +399,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleValueStatement
 // TODO: test create value here
 
 func (t *vehiclesRepositoryTestSuite) TestExistsByID_Normal() {
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getExistsResult(true))
@@ -411,7 +411,7 @@ func (t *vehiclesRepositoryTestSuite) TestExistsByID_Normal() {
 
 func (t *vehiclesRepositoryTestSuite) TestExistsByID_Error() {
 	errMsg := "failed checking existence of vehicle by ID"
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
 		WithArgs(t.testVehicleID).
 		WillReturnError(errors.New(errMsg))
@@ -427,7 +427,7 @@ func (t *vehiclesRepositoryTestSuite) TestExistsByID_Error() {
 }
 
 func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Normal() {
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entity_id = ?").
 		WithArgs(t.testVehicleValueID).
 		WillReturnRows(getExistsResult(true))
@@ -439,7 +439,7 @@ func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Normal() {
 
 func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Error() {
 	errMsg := "failed checking existence of vehicle value by ID"
-	mock.
+	t.sqlmock.
 		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entity_id = ?").
 		WithArgs(t.testVehicleValueID).
 		WillReturnError(errors.New(errMsg))
@@ -452,4 +452,53 @@ func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Error() {
 	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
 	assert.Equal(t.T(), "exists by ID", *err.(*failure.Failure).Operation)
 	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_Normal_NoID() {
+	res, err := t.repo.ResolveByIDs([]uuid.UUID{})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 0)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_Normal_SingleID() {
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicle + " WHERE vehicles.entity_id IN (?)").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
+
+	res, err := t.repo.ResolveByIDs([]uuid.UUID{t.testVehicleID})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_Normal_MultipleIDs() {
+	id1, _ := uuid.NewV7()
+	id2, _ := uuid.NewV7()
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicle+" WHERE vehicles.entity_id IN (?, ?)").
+		WithArgs(id1, id2).
+		WillReturnRows(getMultiEntityIDResult([]uuid.UUID{id1, id2}))
+
+	res, err := t.repo.ResolveByIDs([]uuid.UUID{id1, id2})
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 2)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveByIDs_ErrorExecutingSelect() {
+	errMsg := "failed resolving vehicles by IDs"
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicle + " WHERE vehicles.entity_id IN (?)").
+		WithArgs(t.testVehicleID).
+		WillReturnError(errors.New(errMsg))
+
+	res, err := t.repo.ResolveByIDs([]uuid.UUID{t.testVehicleID})
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by IDs", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
+	assert.Len(t.T(), res, 0)
 }
