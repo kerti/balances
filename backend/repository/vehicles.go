@@ -100,7 +100,7 @@ const (
 		)`
 
 	QueryInsertVehicleValue = `
-		INSERT INTO vehicle_values(
+		INSERT INTO vehicle_values (
 			entity_id,
 			vehicle_entity_id,
 			date,
