@@ -637,3 +637,81 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_ErrorExecutingSelec
 
 	assert.Len(t.T(), res, 0)
 }
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_Normal() {
+	mock.
+		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(t.testVehicleID, 10, 0).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
+
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getCountResult(1))
+
+	testFilter := model.VehicleValueFilterInput{}
+	testFilter.VehicleIDs = &[]uuid.UUID{t.testVehicleID}
+
+	res, pageInfo, err := t.repo.ResolveValuesByFilter(testFilter.ToFilter())
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+	assert.Equal(t.T(), 1, pageInfo.Page)
+	assert.Equal(t.T(), 1, pageInfo.PageCount)
+	assert.Equal(t.T(), 1, pageInfo.TotalCount)
+	assert.Equal(t.T(), 10, pageInfo.PageSize)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnSelect() {
+	errMsg := "failed resolving vehicle values by filter"
+
+	mock.
+		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(t.testVehicleID, 10, 0).
+		WillReturnError(errors.New(errMsg))
+
+	testFilter := model.VehicleValueFilterInput{}
+	testFilter.VehicleIDs = &[]uuid.UUID{t.testVehicleID}
+
+	res, pageInfo, err := t.repo.ResolveValuesByFilter(testFilter.ToFilter())
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by filter", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Len(t.T(), res, 0)
+	assert.Equal(t.T(), 0, pageInfo.Page)
+	assert.Equal(t.T(), 0, pageInfo.PageCount)
+	assert.Equal(t.T(), 0, pageInfo.TotalCount)
+	assert.Equal(t.T(), 0, pageInfo.PageSize)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnCount() {
+	errMsg := "failed resolving vehicle values by filter"
+	mock.
+		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
+		WithArgs(t.testVehicleID, 10, 0).
+		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
+
+	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
+		WithArgs(t.testVehicleID).
+		WillReturnError(errors.New(errMsg))
+
+	testFilter := model.VehicleValueFilterInput{}
+	testFilter.VehicleIDs = &[]uuid.UUID{t.testVehicleID}
+
+	res, pageInfo, err := t.repo.ResolveValuesByFilter(testFilter.ToFilter())
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by filter", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Len(t.T(), res, 0)
+	assert.Equal(t.T(), 0, pageInfo.Page)
+	assert.Equal(t.T(), 0, pageInfo.PageCount)
+	assert.Equal(t.T(), 0, pageInfo.TotalCount)
+	assert.Equal(t.T(), 0, pageInfo.PageSize)
+}

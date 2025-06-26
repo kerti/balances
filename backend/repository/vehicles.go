@@ -50,7 +50,7 @@ const (
 			vehicle_values.deleted,
 			vehicle_values.deleted_by
 		FROM
-			vehicle_values`
+			vehicle_values `
 
 	QueryInsertVehicle = `
 		INSERT INTO vehicles (
@@ -262,6 +262,7 @@ func (r *VehicleMySQLRepo) ResolveByFilter(filter filter.Filter) (vehicles []mod
 func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleValues []model.VehicleValue, pageInfo model.PageInfoOutput, err error) {
 	filterQueryString, err := filter.ToQueryString()
 	if err != nil {
+		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
 		return vehicleValues, pageInfo, err
 	}
 
@@ -271,12 +272,14 @@ func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleV
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
 		return
 	}
 
 	err = r.DB.Select(&vehicleValues, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
 		return
 	}
 
@@ -287,12 +290,16 @@ func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleV
 		filterArgsNoPagination...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
+		vehicleValues = []model.VehicleValue{}
 		return
 	}
 
 	err = r.DB.Get(&count, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
+		vehicleValues = []model.VehicleValue{}
 		return
 	}
 
