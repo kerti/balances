@@ -26,6 +26,10 @@ var (
 	vehicleValuesStmtInsert = `INSERT INTO vehicle_values
 	( entity_id, vehicle_entity_id, date, value, created, created_by, updated, updated_by, deleted, deleted_by )
 	VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )`
+
+	vehiclesStmtUpdate = `UPDATE vehicle_values
+	SET vehicle_entity_id = ?, date = ?, value = ?, created = ?, created_by = ?, updated = ?, updated_by = ?, deleted = ?, deleted_by = ?
+	WHERE entity_id = ?`
 )
 
 type vehiclesRepositoryTestSuite struct {
@@ -389,5 +393,63 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleValueStatement
 	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
 	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
 	assert.Equal(t.T(), "create", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+// TODO: test create value here
+
+func (t *vehiclesRepositoryTestSuite) TestExistsByID_Normal() {
+	mock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getExistsResult(true))
+
+	_, err := t.repo.ExistsByID(t.testVehicleID)
+
+	assert.NoError(t.T(), err)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestExistsByID_Error() {
+	errMsg := "failed checking existence of vehicle by ID"
+	mock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnError(errors.New(errMsg))
+
+	_, err := t.repo.ExistsByID(t.testVehicleID)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "exists by ID", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Normal() {
+	mock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entity_id = ?").
+		WithArgs(t.testVehicleValueID).
+		WillReturnRows(getExistsResult(true))
+
+	_, err := t.repo.ExistsValueByID(t.testVehicleValueID)
+
+	assert.NoError(t.T(), err)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestExistsValueByID_Error() {
+	errMsg := "failed checking existence of vehicle value by ID"
+	mock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entity_id = ?").
+		WithArgs(t.testVehicleValueID).
+		WillReturnError(errors.New(errMsg))
+
+	_, err := t.repo.ExistsValueByID(t.testVehicleValueID)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "exists by ID", *err.(*failure.Failure).Operation)
 	assert.Contains(t.T(), err.Error(), errMsg)
 }

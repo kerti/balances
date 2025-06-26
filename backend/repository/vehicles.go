@@ -157,10 +157,11 @@ func (r *VehicleMySQLRepo) ExistsByID(id uuid.UUID) (exists bool, err error) {
 func (r *VehicleMySQLRepo) ExistsValueByID(id uuid.UUID) (exists bool, err error) {
 	err = r.DB.Get(
 		&exists,
-		"SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entitiy_id = ?",
+		"SELECT COUNT(entity_id) > 0 FROM vehicle_values WHERE vehicle_values.entity_id = ?",
 		id.String())
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("exists by ID", "Vehicle Value", err)
 	}
 	return
 }
