@@ -927,7 +927,7 @@ func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_Normal() {
 }
 
 func (t *bankAccountsServiceTestSuite) TestGetBalanceByID_RepoFailedResolvingBalance() {
-	errMsg := "failed to resolva bank account balances"
+	errMsg := "failed to resolve bank account balances"
 	t.mockRepo.EXPECT().ResolveBalancesByIDs([]uuid.UUID{t.testBankAccountBalanceID}).
 		Return(
 			[]model.BankAccountBalance{},

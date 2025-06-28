@@ -364,7 +364,7 @@ func (r *BankAccountMySQLRepo) Update(bankAccount model.BankAccount) error {
 	}
 
 	if !exists {
-		err = failure.EntityNotFound("Bank Account")
+		err = failure.EntityNotFound("update", "Bank Account")
 		logger.ErrNoStack("%v", err)
 		return err
 	}
@@ -419,7 +419,7 @@ func (r *BankAccountMySQLRepo) UpdateBalance(bankAccountBalance model.BankAccoun
 	}
 
 	if !exists {
-		err = failure.EntityNotFound("Bank Account Balance")
+		err = failure.EntityNotFound("update balance", "Bank Account Balance")
 		logger.ErrNoStack("%v", err)
 		return err
 	}
