@@ -487,3 +487,24 @@ func (t *vehiclesServiceTestSuite) TestGetValueByID_ValueNotFound() {
 	assert.Contains(t.T(), errAsFailure.Message, "not found")
 	assert.Equal(t.T(), "get by ID", *errAsFailure.Operation)
 }
+
+func (t *vehiclesServiceTestSuite) TestGetValueBVyFilter_Normal() {
+	filter := model.VehicleValueFilterInput{}
+	t.mockRepo.EXPECT().ResolveValuesByFilter(filter.ToFilter()).
+		Return(
+			[]model.VehicleValue{
+				t.getNewVehicleValue(
+					nuuid.From(t.testVehicleValueID),
+					nuuid.From(t.testVehicleValueID),
+					float64(1000000),
+					time.Now())},
+			getDefaultPageInfo(),
+			nil,
+		)
+
+	res, pageInfo, err := t.svc.GetValuesByFilter(filter)
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 1)
+	assert.Equal(t.T(), pageInfo.TotalCount, 1)
+}
