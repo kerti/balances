@@ -55,7 +55,7 @@ func Unauthorized(msg string) error {
 }
 
 // InternalError returns a new Failure with code for internal error and message derived from an error interface
-func InternalError(operationName string, entityName string, err error) error {
+func InternalError(operationName, entityName string, err error) error {
 	if err != nil {
 		return &Failure{
 			Code:      CodeInternalError,
@@ -76,16 +76,17 @@ func Unimplemented(methodName string) error {
 }
 
 // EntityNotFound returns a new Failure with code for entity not found
-func EntityNotFound(entityName string) error {
+func EntityNotFound(operationName, entityName string) error {
 	return &Failure{
-		Code:    CodeEntityNotFound,
-		Entity:  &entityName,
-		Message: "Record not found.",
+		Code:      CodeEntityNotFound,
+		Operation: &operationName,
+		Entity:    &entityName,
+		Message:   "Record not found.",
 	}
 }
 
 // OperationNotPermitted returns a new Failure with code for operation not permitted
-func OperationNotPermitted(operationName string, entityName string, message string) error {
+func OperationNotPermitted(operationName, entityName string, message string) error {
 	return &Failure{
 		Code:      CodeOperationNotPermitted,
 		Operation: &operationName,

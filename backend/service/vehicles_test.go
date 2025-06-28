@@ -12,6 +12,7 @@ import (
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/service"
 	"github.com/kerti/balances/backend/util/cachetime"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/nuuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -19,11 +20,12 @@ import (
 
 type vehiclesServiceTestSuite struct {
 	suite.Suite
-	ctrl          *gomock.Controller
-	svc           service.Vehicle
-	mockRepo      *mock_repository.MockVehicle
-	testUserID    uuid.UUID
-	testVehicleID uuid.UUID
+	ctrl               *gomock.Controller
+	svc                service.Vehicle
+	mockRepo           *mock_repository.MockVehicle
+	testUserID         uuid.UUID
+	testVehicleID      uuid.UUID
+	testVehicleValueID uuid.UUID
 }
 
 func TestVehiclesService(t *testing.T) {
@@ -38,6 +40,7 @@ func (t *vehiclesServiceTestSuite) SetupTest() {
 	}
 	t.testUserID, _ = uuid.NewV7()
 	t.testVehicleID, _ = uuid.NewV7()
+	t.testVehicleValueID, _ = uuid.NewV7()
 	t.svc.Startup()
 }
 
@@ -169,13 +172,19 @@ func (t *vehiclesServiceTestSuite) TestCreate_Normal() {
 func (t *vehiclesServiceTestSuite) TestCreate_RepoFailToCreate() {
 	errMsg := "repo failed to create vehicle"
 	testInput := t.getNewVehicleInput(nuuid.NUUID{Valid: false})
-	t.mockRepo.EXPECT().Create(gomock.Any()).Return(errors.New(errMsg))
+	t.mockRepo.EXPECT().Create(gomock.Any()).Return(failure.InternalError("create", "Vehicle", errors.New(errMsg)))
 
-	res, err := t.svc.Create(testInput, t.testUserID)
+	actual, err := t.svc.Create(testInput, t.testUserID)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
 
-	assert.Nil(t.T(), res)
+	assert.Nil(t.T(), actual)
 	assert.Error(t.T(), err)
-	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Equal(t.T(), "Vehicle", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, errMsg)
+	assert.Equal(t.T(), "create", *errAsFailure.Operation)
 }
 
 func (t *vehiclesServiceTestSuite) TestGetByID_Exists_NoValue() {
@@ -325,13 +334,19 @@ func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithValue_WithPageSize() {
 func (t *vehiclesServiceTestSuite) TestGetByID_Exists_With_Balance_RepoErrorResolvingVehicle() {
 	errMsg := "failed to resolve vehicle by IDs"
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
-		Return([]model.Vehicle{}, errors.New(errMsg))
+		Return([]model.Vehicle{}, failure.InternalError("resolve by IDs", "Vehicle", errors.New(errMsg)))
 
-	res, err := t.svc.GetByID(t.testVehicleID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	actual, err := t.svc.GetByID(t.testVehicleID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
 
-	assert.Nil(t.T(), res)
+	assert.Nil(t.T(), actual)
 	assert.Error(t.T(), err)
-	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Equal(t.T(), "Vehicle", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, errMsg)
+	assert.Equal(t.T(), "resolve by IDs", *errAsFailure.Operation)
 }
 
 func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorResolvingValues() {
@@ -350,23 +365,36 @@ func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorResol
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
 		Return(resolvedVehicleSlice, nil)
 	t.mockRepo.EXPECT().ResolveValuesByFilter(valueFilterInput.ToFilter()).
-		Return([]model.VehicleValue{}, getDefaultPageInfo(), errors.New(errMsg))
+		Return([]model.VehicleValue{}, getDefaultPageInfo(), failure.InternalError("resolve by filter", "Vehicle Value", errors.New(errMsg)))
 
-	res, err := t.svc.GetByID(t.testVehicleID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	actual, err := t.svc.GetByID(t.testVehicleID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
 
-	assert.Nil(t.T(), res)
+	assert.Nil(t.T(), actual)
 	assert.Error(t.T(), err)
-	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Equal(t.T(), "Vehicle Value", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, errMsg)
+	assert.Equal(t.T(), "resolve by filter", *errAsFailure.Operation)
 }
 
 func (t *vehiclesServiceTestSuite) TestGetByID_NotExists() {
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
 		Return([]model.Vehicle{}, nil)
 
-	_, err := t.svc.GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	actual, err := t.svc.GetByID(t.testVehicleID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
 
+	assert.Nil(t.T(), actual)
 	assert.Error(t.T(), err)
-	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Equal(t.T(), "Vehicle", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, "not found")
+	assert.Equal(t.T(), "get by ID", *errAsFailure.Operation)
 }
 
 func (t *vehiclesServiceTestSuite) TestGetByFilter_EmptyFilter() {
@@ -393,4 +421,69 @@ func (t *vehiclesServiceTestSuite) TestGetByFilter_WithKeyword() {
 	_, _, err := t.svc.GetByFilter(filterInput)
 
 	assert.NoError(t.T(), err)
+}
+
+// TODO: test update
+
+// TODO: test delete
+
+// TODO: test create value
+
+func (t *vehiclesServiceTestSuite) TestGetValueByID_Normal() {
+	t.mockRepo.EXPECT().ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID}).
+		Return(
+			[]model.VehicleValue{
+				t.getNewVehicleValue(
+					nuuid.From(t.testVehicleValueID),
+					nuuid.From(t.testVehicleID),
+					float64(1000000), time.Now(),
+				),
+			},
+			nil)
+
+	res, err := t.svc.GetValueByID(t.testVehicleValueID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestGetValueByID_RepoFailedResolvingValue() {
+	errMsg := "failed to resolve vehicle values"
+	t.mockRepo.EXPECT().ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID}).
+		Return(
+			[]model.VehicleValue{},
+			failure.InternalError("resolve by filter", "Vehicle Value", errors.New(errMsg)))
+
+	actual, err := t.svc.GetValueByID(t.testVehicleValueID)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
+
+	assert.Nil(t.T(), actual)
+	assert.Error(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, errAsFailure.Code)
+	assert.Equal(t.T(), "Vehicle Value", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, errMsg)
+	assert.Equal(t.T(), "resolve by filter", *errAsFailure.Operation)
+}
+
+func (t *vehiclesServiceTestSuite) TestGetValueByID_ValueNotFound() {
+	t.mockRepo.EXPECT().ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID}).
+		Return(
+			[]model.VehicleValue{},
+			nil)
+
+	actual, err := t.svc.GetValueByID(t.testVehicleValueID)
+	errAsFailure, ok := err.(*failure.Failure)
+	if !ok {
+		t.T().Fatal("failed converting error to failure object")
+	}
+
+	assert.Nil(t.T(), actual)
+	assert.Error(t.T(), err)
+	assert.Equal(t.T(), failure.CodeEntityNotFound, errAsFailure.Code)
+	assert.Equal(t.T(), "Vehicle Value", *errAsFailure.Entity)
+	assert.Contains(t.T(), errAsFailure.Message, "not found")
+	assert.Equal(t.T(), "get by ID", *errAsFailure.Operation)
 }

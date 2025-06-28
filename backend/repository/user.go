@@ -204,7 +204,7 @@ func (r *UserMySQLRepo) Update(user model.User) error {
 	}
 
 	if !exists {
-		err = failure.EntityNotFound("User")
+		err = failure.EntityNotFound("update", "User")
 		logger.ErrNoStack("%v", err)
 		return err
 	}

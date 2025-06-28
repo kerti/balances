@@ -31,7 +31,7 @@ func (s *UserImpl) GetByID(id uuid.UUID) (*model.User, error) {
 	}
 
 	if len(users) != 1 {
-		return nil, failure.EntityNotFound("User")
+		return nil, failure.EntityNotFound("get by ID", "User")
 	}
 
 	return &users[0], nil
@@ -57,7 +57,7 @@ func (s *UserImpl) Update(input model.UserInput, userID uuid.UUID) (model.User, 
 	}
 
 	if len(users) != 1 {
-		return model.User{}, failure.EntityNotFound("User")
+		return model.User{}, failure.EntityNotFound("update:", "User")
 	}
 
 	user := users[0]

@@ -44,7 +44,7 @@ func (s *BankAccountImpl) GetByID(id uuid.UUID, withBalances bool, balanceStartD
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("get by ID", "Bank Account")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -89,7 +89,7 @@ func (s *BankAccountImpl) Update(input model.BankAccountInput, userID uuid.UUID)
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("update", "Bank Account")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -116,7 +116,7 @@ func (s *BankAccountImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.BankAcc
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("delete", "Bank Account")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -160,7 +160,7 @@ func (s *BankAccountImpl) CreateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("create balance", "Bank Account")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -179,7 +179,7 @@ func (s *BankAccountImpl) CreateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(lastBalances) != 1 {
-		return nil, failure.EntityNotFound("Bank Account Balance")
+		return nil, failure.EntityNotFound("create balance", "Bank Account Last Balance")
 	}
 
 	lastBalance := lastBalances[0]
@@ -208,7 +208,7 @@ func (s *BankAccountImpl) GetBalanceByID(id uuid.UUID) (*model.BankAccountBalanc
 	}
 
 	if len(bankAccountBalances) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("get by ID", "Bank Account Balance")
 	}
 
 	return &bankAccountBalances[0], nil
@@ -227,7 +227,7 @@ func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("get by filter", "Bank Account Balance")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -246,7 +246,7 @@ func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(bankAccountBalances) != 1 {
-		return nil, failure.EntityNotFound("Bank Account Balance")
+		return nil, failure.EntityNotFound("update", "Bank Account Balance")
 	}
 
 	bankAccountBalance := bankAccountBalances[0]
@@ -266,7 +266,7 @@ func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(lastBalances) != 1 {
-		return nil, failure.EntityNotFound("Bank Account Balance")
+		return nil, failure.EntityNotFound("update", "Bank Account Balance")
 	}
 
 	lastBalance := lastBalances[0]
@@ -294,7 +294,7 @@ func (s *BankAccountImpl) DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.
 	}
 
 	if len(bankAccountBalances) != 1 {
-		return nil, failure.EntityNotFound("Bank Account Balance")
+		return nil, failure.EntityNotFound("delete", "Bank Account Balance")
 	}
 
 	bankAccountBalance := bankAccountBalances[0]
@@ -309,7 +309,7 @@ func (s *BankAccountImpl) DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("Bank Account")
+		return nil, failure.EntityNotFound("delete", "Bank Account")
 	}
 
 	bankAccount := bankAccounts[0]
@@ -330,7 +330,7 @@ func (s *BankAccountImpl) DeleteBalance(id uuid.UUID, userID uuid.UUID) (*model.
 	}
 
 	if len(lastBalances) < 1 {
-		return nil, failure.EntityNotFound("Bank Account Last Balance")
+		return nil, failure.EntityNotFound("delete", "Bank Account Last Balance")
 	}
 
 	if len(lastBalances) < 2 {

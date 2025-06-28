@@ -42,7 +42,7 @@ func (s *VehicleImpl) GetByID(id uuid.UUID, withValues bool, valueStartDate, val
 	}
 
 	if len(vehicles) != 1 {
-		return nil, failure.EntityNotFound("Vehicle")
+		return nil, failure.EntityNotFound("get by ID", "Vehicle")
 	}
 
 	vehicle := vehicles[0]
@@ -98,12 +98,21 @@ func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUI
 
 // GetValueByID fetches a Vehicle Value by its ID
 func (s *VehicleImpl) GetValueByID(id uuid.UUID) (*model.VehicleValue, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	values, err := s.Repository.ResolveValuesByIDs([]uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(values) != 1 {
+		return nil, failure.EntityNotFound("get by ID", "Vehicle Value")
+	}
+
+	return &values[0], nil
 }
 
 // GetValuesByFilter fetches a set of Vehicle Values by its filter
 func (s *VehicleImpl) GetValuesByFilter(input model.VehicleValueFilterInput) ([]model.VehicleValue, model.PageInfoOutput, error) {
-	return []model.VehicleValue{}, model.PageInfoOutput{}, failure.Unimplemented("service unimplemented for this method")
+	return s.Repository.ResolveValuesByFilter(input.ToFilter())
 }
 
 // UpdateValue updates an existing Vehicle Value

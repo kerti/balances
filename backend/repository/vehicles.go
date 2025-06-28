@@ -263,7 +263,7 @@ func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleV
 	filterQueryString, err := filter.ToQueryString()
 	if err != nil {
 		err = failure.InternalError("resolve by filter", "Vehicle Value", err)
-		return vehicleValues, pageInfo, err
+		return
 	}
 
 	filterArgs := filter.GetArgs(true)
