@@ -52,9 +52,12 @@ export async function getBankAccountFromAPI(bankAccountId, startDate, endDate, p
         if (pageSize) {
             params.append('pageSize', pageSize)
         }
+        if (page) {
+            params.append('page', page)
+        }
         const { data } = await axiosInstance.get('bankAccounts/' + bankAccountId + '?' + params.toString())
         return data
-    } catch (errror) {
+    } catch (error) {
         return {
             error: error
         }

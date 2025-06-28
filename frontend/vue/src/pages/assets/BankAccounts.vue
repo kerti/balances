@@ -1,5 +1,5 @@
 <script setup>
-import { watch, onMounted, onUnmounted } from "vue"
+import { onMounted, onUnmounted, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import { useBankAccountsStore } from "@/stores/bankAccountsStore"
