@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -338,4 +339,55 @@ func (t *bankAccountsHandlerTestSuite) TestCreate_Normal() {
 	assert.Equal(t.T(), expected.LastBalance, actual.LastBalance)
 	assert.Equal(t.T(), expected.LastBalanceDate.Time().Unix(), actual.LastBalanceDate.Time().Unix())
 	assert.Equal(t.T(), expected.Status, actual.Status)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/bankAccounts",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleCreateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestCreate_ServiceFailedCreating() {
+	errMsg := "service failed creating bank account"
+	input := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/bankAccounts",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(nil, failure.InternalError("create", "Bank Account", errors.New(errMsg)))
+
+	t.handler.HandleCreateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.Error(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	assert.NotNil(t.T(), err.Entity)
+	assert.Equal(t.T(), "Bank Account", *err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	assert.NotNil(t.T(), err.Operation)
+	assert.Equal(t.T(), "create", *err.Operation)
 }
