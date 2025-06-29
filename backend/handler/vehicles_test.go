@@ -585,13 +585,11 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
 
 func (t *vehicleHandlerTestSuite) TestGetByID_ServiceFailedResolving() {
 	errMsg := "service failed resolving"
-	formParams := make(map[string]string)
-	formParams["id"] = t.testVehicleID.String()
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
 		"/vehicles/"+t.testVehicleID.String(),
 		nil,
-		&formParams,
+		nil,
 		nuuid.From(t.testVehicleID),
 	)
 

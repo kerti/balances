@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"testing"
 	"time"
 
@@ -237,8 +238,8 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountPage(rr *httptest
 
 		//convert interface{} to []model.BankAccountOutput
 		actualSlice := (actual.Items).([]any)
-		for _, vehicleInterface := range actualSlice {
-			bankAccountMap := (vehicleInterface).(map[string]any)
+		for _, bankAccountInterface := range actualSlice {
+			bankAccountMap := (bankAccountInterface).(map[string]any)
 			bankAccountJsonBytes, err := json.Marshal(bankAccountMap)
 			if err != nil {
 				t.T().Fatal(err)
@@ -261,7 +262,7 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountPage(rr *httptest
 	return
 }
 
-func (t *bankAccountsHandlerTestSuite) parseOutputToVehicleValuePage(rr *httptest.ResponseRecorder) (items []model.BankAccountBalanceOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
+func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountValuePage(rr *httptest.ResponseRecorder) (items []model.BankAccountBalanceOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -284,10 +285,10 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToVehicleValuePage(rr *httptes
 			t.T().Fatal(err)
 		}
 
-		//convert interface{} to []model.VehicleOutput
+		//convert interface{} to []model.BankAccountOutput
 		actualSlice := (actual.Items).([]any)
-		for _, vehicleValueInterface := range actualSlice {
-			bankAccountBalanceMap := (vehicleValueInterface).(map[string]any)
+		for _, bankAccountBalanceInterface := range actualSlice {
+			bankAccountBalanceMap := (bankAccountBalanceInterface).(map[string]any)
 			bankAccountBalanceJsonBytes, err := json.Marshal(bankAccountBalanceMap)
 			if err != nil {
 				t.T().Fatal(err)
@@ -390,4 +391,196 @@ func (t *bankAccountsHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 	assert.Contains(t.T(), err.Message, errMsg)
 	assert.NotNil(t.T(), err.Operation)
 	assert.Equal(t.T(), "create", *err.Operation)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_NoParams() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	expectedResult := model.NewBankAccountFromInput(input, t.testUserID)
+	expected := expectedResult.ToOutput()
+
+	t.mockSvc.EXPECT().GetByID(t.testBankAccountID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).Return(&expectedResult, nil)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected.AccountName, actual.AccountName)
+	assert.Equal(t.T(), expected.BankName, actual.BankName)
+	assert.Equal(t.T(), expected.AccountNumber, actual.AccountNumber)
+	assert.Equal(t.T(), expected.AccountHolderName, actual.AccountHolderName)
+	assert.Equal(t.T(), expected.LastBalance, actual.LastBalance)
+	assert.Equal(t.T(), expected.LastBalanceDate.Time().Unix(), actual.LastBalanceDate.Time().Unix())
+	assert.Equal(t.T(), expected.Status, actual.Status)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_FailedParsingID() {
+	formParams := make(map[string]string)
+	formParams["id"] = t.testBankAccountID.String() + "123"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/vehicles/"+t.testBankAccountID.String()+"123",
+		&formParams,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalances() {
+	formParams := make(map[string]string)
+	formParams["withBalances"] = "true"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		&formParams,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	expectedResult := model.NewBankAccountFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().
+		GetByID(t.testBankAccountID, true, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).
+		Return(&expectedResult, nil)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesStartDate() {
+	startDate := time.Unix(0, time.Now().AddDate(0, 0, -1).UnixMilli()*int64(time.Millisecond))
+	formParams := make(map[string]string)
+	formParams["balanceStartDate"] = strconv.FormatInt(startDate.UnixMilli(), 10)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		&formParams,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	expectedResult := model.NewBankAccountFromInput(input, t.testUserID)
+
+	var nStartDate cachetime.NCacheTime
+	nStartDate.Scan(startDate)
+	t.mockSvc.EXPECT().
+		GetByID(t.testBankAccountID, false, nStartDate, cachetime.NCacheTime{}, nil).
+		Return(&expectedResult, nil)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesEndDate() {
+	endDate := time.Unix(0, time.Now().UnixMilli()*int64(time.Millisecond))
+	formParams := make(map[string]string)
+	formParams["balanceEndDate"] = strconv.FormatInt(endDate.UnixMilli(), 10)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		&formParams,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	expectedResult := model.NewBankAccountFromInput(input, t.testUserID)
+
+	var nEndDate cachetime.NCacheTime
+	nEndDate.Scan(endDate)
+	t.mockSvc.EXPECT().
+		GetByID(t.testBankAccountID, false, cachetime.NCacheTime{}, nEndDate, nil).
+		Return(&expectedResult, nil)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
+	pageSize := 10
+	formParams := make(map[string]string)
+	formParams["pageSize"] = strconv.Itoa(pageSize)
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		&formParams,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	expectedResult := model.NewBankAccountFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().
+		GetByID(t.testBankAccountID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, &pageSize).
+		Return(&expectedResult, nil)
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_ServiceFailedResolving() {
+	errMsg := "failed resolving bank account"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodGet,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	t.mockSvc.EXPECT().GetByID(t.testBankAccountID, false, cachetime.NCacheTime{}, cachetime.NCacheTime{}, nil).
+		Return(nil, failure.InternalError("get by ID", "Bank Account", errors.New(errMsg)))
+
+	t.handler.HandleGetBankAccountByID(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	assert.NotNil(t.T(), err.Entity)
+	assert.Equal(t.T(), "Bank Account", *err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	assert.NotNil(t.T(), err.Operation)
+	assert.Equal(t.T(), "get by ID", *err.Operation)
 }
