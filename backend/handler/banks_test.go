@@ -584,3 +584,106 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_ServiceFailedResolving
 	assert.NotNil(t.T(), err.Operation)
 	assert.Equal(t.T(), "get by ID", *err.Operation)
 }
+
+func (t *bankAccountsHandlerTestSuite) TestGetByFilter_Normal() {
+	keyword := "test keyword"
+	input := model.BankAccountFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/bankAccounts/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	expectedBankAccounts := []model.BankAccount{}
+	acc1 := model.NewBankAccountFromInput(t.getNewBankAccountInput(nuuid.NUUID{}), t.testUserID)
+	acc2 := model.NewBankAccountFromInput(t.getNewBankAccountInput(nuuid.NUUID{}), t.testUserID)
+	expectedBankAccounts = append(expectedBankAccounts, acc1)
+	expectedBankAccounts = append(expectedBankAccounts, acc2)
+	expectedPageInfo := model.PageInfoOutput{
+		Page:       1,
+		PageSize:   10,
+		TotalCount: 1,
+		PageCount:  1,
+	}
+
+	t.mockSvc.EXPECT().GetByFilter(input).Return(expectedBankAccounts, expectedPageInfo, nil)
+
+	t.handler.HandleGetBankAccountByFilter(rr, req)
+
+	bankAccounts, pageInfo, err := t.parseOutputToBankAccountPage(rr)
+
+	assert.Nil(t.T(), err)
+
+	assert.Equal(t.T(), len(expectedBankAccounts), len(bankAccounts))
+	assert.Equal(t.T(), expectedBankAccounts[0].ID, bankAccounts[0].ID)
+	assert.Equal(t.T(), expectedBankAccounts[1].ID, bankAccounts[1].ID)
+
+	assert.Equal(t.T(), 1, pageInfo.Page)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByFilter_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/bankAccounts/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleGetBankAccountByFilter(rr, req)
+
+	bankAccounts, pageInfo, err := t.parseOutputToBankAccountPage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+
+	assert.Equal(t.T(), 0, len(bankAccounts))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
+}
+
+func (t *bankAccountsHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() {
+	errMsg := "failed resolving bank accounts by filter"
+	keyword := "test keyword"
+	input := model.BankAccountFilterInput{}
+	input.Keyword = &keyword
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/bankAccounts/search",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.mockSvc.EXPECT().GetByFilter(input).
+		Return(
+			[]model.BankAccount{},
+			model.PageInfoOutput{},
+			failure.InternalError("get by filter", "Bank Account",
+				errors.New(errMsg)))
+
+	t.handler.HandleGetBankAccountByFilter(rr, req)
+
+	bankAccounts, pageInfo, err := t.parseOutputToBankAccountPage(rr)
+
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	assert.NotNil(t.T(), err.Entity)
+	assert.Equal(t.T(), "Bank Account", *err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	assert.NotNil(t.T(), err.Operation)
+	assert.Equal(t.T(), "get by filter", *err.Operation)
+
+	assert.Equal(t.T(), 0, len(bankAccounts))
+
+	assert.Equal(t.T(), 0, pageInfo.Page)
+}
