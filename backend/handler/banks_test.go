@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type bankAccountsHandlerTestSuite struct {
+type bankAccountHandlerTestSuite struct {
 	suite.Suite
 	ctrl                     *gomock.Controller
 	handler                  handler.BankAccount
@@ -38,10 +38,10 @@ type bankAccountsHandlerTestSuite struct {
 }
 
 func TestBankAccountHandler(t *testing.T) {
-	suite.Run(t, new(bankAccountsHandlerTestSuite))
+	suite.Run(t, new(bankAccountHandlerTestSuite))
 }
 
-func (t *bankAccountsHandlerTestSuite) SetupTest() {
+func (t *bankAccountHandlerTestSuite) SetupTest() {
 	t.ctrl = gomock.NewController(t.T())
 	t.mockSvc = mock_service.NewMockBankAccount(t.ctrl)
 	t.handler = &handler.BankAccountImpl{
@@ -53,12 +53,12 @@ func (t *bankAccountsHandlerTestSuite) SetupTest() {
 	t.handler.Startup()
 }
 
-func (t *bankAccountsHandlerTestSuite) TearDownTest() {
+func (t *bankAccountHandlerTestSuite) TearDownTest() {
 	t.handler.Shutdown()
 	t.ctrl.Finish()
 }
 
-func (t *bankAccountsHandlerTestSuite) getNewRequestWithContext(method, path string, input any, formParams *map[string]string, routeVarId nuuid.NUUID) (recorder *httptest.ResponseRecorder, request *http.Request) {
+func (t *bankAccountHandlerTestSuite) getNewRequestWithContext(method, path string, input any, formParams *map[string]string, routeVarId nuuid.NUUID) (recorder *httptest.ResponseRecorder, request *http.Request) {
 	var reqBody *bytes.Buffer
 	var req *http.Request
 
@@ -112,7 +112,7 @@ func (t *bankAccountsHandlerTestSuite) getNewRequestWithContext(method, path str
 	return
 }
 
-func (t *bankAccountsHandlerTestSuite) getNewBankAccountInput(id nuuid.NUUID) model.BankAccountInput {
+func (t *bankAccountHandlerTestSuite) getNewBankAccountInput(id nuuid.NUUID) model.BankAccountInput {
 	acc := model.BankAccountInput{}
 
 	if id.Valid {
@@ -132,7 +132,7 @@ func (t *bankAccountsHandlerTestSuite) getNewBankAccountInput(id nuuid.NUUID) mo
 	return acc
 }
 
-func (t *bankAccountsHandlerTestSuite) getNewBankAccountBalanceInput(id, bankAccountID nuuid.NUUID) model.BankAccountBalanceInput {
+func (t *bankAccountHandlerTestSuite) getNewBankAccountBalanceInput(id, bankAccountID nuuid.NUUID) model.BankAccountBalanceInput {
 	bbi := model.BankAccountBalanceInput{}
 
 	if id.Valid {
@@ -153,7 +153,7 @@ func (t *bankAccountsHandlerTestSuite) getNewBankAccountBalanceInput(id, bankAcc
 	return bbi
 }
 
-func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccount(rr *httptest.ResponseRecorder) (actual *model.BankAccountOutput, fail *failure.Failure) {
+func (t *bankAccountHandlerTestSuite) parseOutputToBankAccount(rr *httptest.ResponseRecorder) (actual *model.BankAccountOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -183,7 +183,7 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccount(rr *httptest.Res
 	return actual, nil
 }
 
-func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountBalance(rr *httptest.ResponseRecorder) (actual *model.BankAccountBalanceOutput, fail *failure.Failure) {
+func (t *bankAccountHandlerTestSuite) parseOutputToBankAccountBalance(rr *httptest.ResponseRecorder) (actual *model.BankAccountBalanceOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -213,7 +213,7 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountBalance(rr *httpt
 	return actual, nil
 }
 
-func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountPage(rr *httptest.ResponseRecorder) (items []model.BankAccountOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
+func (t *bankAccountHandlerTestSuite) parseOutputToBankAccountPage(rr *httptest.ResponseRecorder) (items []model.BankAccountOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -262,7 +262,7 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountPage(rr *httptest
 	return
 }
 
-func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountValuePage(rr *httptest.ResponseRecorder) (items []model.BankAccountBalanceOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
+func (t *bankAccountHandlerTestSuite) parseOutputToBankAccountValuePage(rr *httptest.ResponseRecorder) (items []model.BankAccountBalanceOutput, pageInfo model.PageInfoOutput, fail *failure.Failure) {
 	// read the response
 	var response response.BaseResponse
 	err := json.Unmarshal(rr.Body.Bytes(), &response)
@@ -311,7 +311,7 @@ func (t *bankAccountsHandlerTestSuite) parseOutputToBankAccountValuePage(rr *htt
 	return
 }
 
-func (t *bankAccountsHandlerTestSuite) TestCreate_Normal() {
+func (t *bankAccountHandlerTestSuite) TestCreate_Normal() {
 	input := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
 		http.MethodPost,
@@ -342,7 +342,7 @@ func (t *bankAccountsHandlerTestSuite) TestCreate_Normal() {
 	assert.Equal(t.T(), expected.Status, actual.Status)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
+func (t *bankAccountHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
 	input := "test"
 	rr, req := t.getNewRequestWithContext(
 		http.MethodPost,
@@ -366,7 +366,7 @@ func (t *bankAccountsHandlerTestSuite) TestCreate_FailedParsingRequestPayload() 
 	assert.Nil(t.T(), err.Operation)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestCreate_ServiceFailedCreating() {
+func (t *bankAccountHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 	errMsg := "service failed creating bank account"
 	input := t.getNewBankAccountInput(nuuid.NUUID{Valid: false})
 	rr, req := t.getNewRequestWithContext(
@@ -393,7 +393,7 @@ func (t *bankAccountsHandlerTestSuite) TestCreate_ServiceFailedCreating() {
 	assert.Equal(t.T(), "create", *err.Operation)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_NoParams() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_NoParams() {
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
 		"/bankAccounts/"+t.testBankAccountID.String(),
@@ -422,12 +422,12 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_NoParams() {
 	assert.Equal(t.T(), expected.Status, actual.Status)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_FailedParsingID() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_FailedParsingID() {
 	formParams := make(map[string]string)
 	formParams["id"] = t.testBankAccountID.String() + "123"
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
-		"/vehicles/"+t.testBankAccountID.String()+"123",
+		"/bankAccounts/"+t.testBankAccountID.String()+"123",
 		&formParams,
 		nil,
 		nuuid.NUUID{Valid: false},
@@ -447,7 +447,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_FailedParsingID() {
 	assert.Nil(t.T(), err.Operation)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalances() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_WithBalances() {
 	formParams := make(map[string]string)
 	formParams["withBalances"] = "true"
 	rr, req := t.getNewRequestWithContext(
@@ -473,7 +473,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalances() {
 	assert.Nil(t.T(), err)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesStartDate() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_WithBalancesStartDate() {
 	startDate := time.Unix(0, time.Now().AddDate(0, 0, -1).UnixMilli()*int64(time.Millisecond))
 	formParams := make(map[string]string)
 	formParams["balanceStartDate"] = strconv.FormatInt(startDate.UnixMilli(), 10)
@@ -502,7 +502,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesStartDate(
 	assert.Nil(t.T(), err)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesEndDate() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_WithBalancesEndDate() {
 	endDate := time.Unix(0, time.Now().UnixMilli()*int64(time.Millisecond))
 	formParams := make(map[string]string)
 	formParams["balanceEndDate"] = strconv.FormatInt(endDate.UnixMilli(), 10)
@@ -531,7 +531,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithBalancesEndDate() 
 	assert.Nil(t.T(), err)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
 	pageSize := 10
 	formParams := make(map[string]string)
 	formParams["pageSize"] = strconv.Itoa(pageSize)
@@ -558,7 +558,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_WithPageSize() {
 	assert.Nil(t.T(), err)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_ServiceFailedResolving() {
+func (t *bankAccountHandlerTestSuite) TestGetByID_Normal_ServiceFailedResolving() {
 	errMsg := "failed resolving bank account"
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
@@ -585,7 +585,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByID_Normal_ServiceFailedResolving
 	assert.Equal(t.T(), "get by ID", *err.Operation)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByFilter_Normal() {
+func (t *bankAccountHandlerTestSuite) TestGetByFilter_Normal() {
 	keyword := "test keyword"
 	input := model.BankAccountFilterInput{}
 	input.Keyword = &keyword
@@ -624,7 +624,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByFilter_Normal() {
 	assert.Equal(t.T(), 1, pageInfo.Page)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByFilter_FailedParsingRequestPayload() {
+func (t *bankAccountHandlerTestSuite) TestGetByFilter_FailedParsingRequestPayload() {
 	input := "test"
 	rr, req := t.getNewRequestWithContext(
 		http.MethodPost,
@@ -651,7 +651,7 @@ func (t *bankAccountsHandlerTestSuite) TestGetByFilter_FailedParsingRequestPaylo
 	assert.Equal(t.T(), 0, pageInfo.Page)
 }
 
-func (t *bankAccountsHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() {
+func (t *bankAccountHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() {
 	errMsg := "failed resolving bank accounts by filter"
 	keyword := "test keyword"
 	input := model.BankAccountFilterInput{}
@@ -686,4 +686,126 @@ func (t *bankAccountsHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() 
 	assert.Equal(t.T(), 0, len(bankAccounts))
 
 	assert.Equal(t.T(), 0, pageInfo.Page)
+}
+
+func (t *bankAccountHandlerTestSuite) TestUpdate_Normal() {
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		input,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	updatedBankAccount := model.NewBankAccountFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().Update(gomock.Any(), t.testUserID).Return(&updatedBankAccount, nil)
+
+	t.handler.HandleUpdateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountHandlerTestSuite) TestUpdate_FailedGettingIDFromRequest() {
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		input,
+		nil,
+		nuuid.NUUID{},
+	)
+
+	t.handler.HandleUpdateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountHandlerTestSuite) TestUpdate_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		input,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	t.handler.HandleUpdateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountHandlerTestSuite) TestUpdate_MismatchedID() {
+	input := t.getNewBankAccountInput(nuuid.NUUID{})
+	newID, _ := uuid.NewV7()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		input,
+		nil,
+		nuuid.From(newID),
+	)
+
+	t.handler.HandleUpdateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "id mismatch")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountHandlerTestSuite) TestUpdate_ServiceFailedUpdating() {
+	errMsg := "failed updating bankAccount"
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		input,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	t.mockSvc.EXPECT().Update(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleUpdateBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
 }
