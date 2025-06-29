@@ -809,3 +809,76 @@ func (t *bankAccountHandlerTestSuite) TestUpdate_ServiceFailedUpdating() {
 	// TODO: specify this
 	assert.Nil(t.T(), err.Operation)
 }
+
+func (t *bankAccountHandlerTestSuite) TestDelete_Normal() {
+	input := t.getNewBankAccountInput(nuuid.From(t.testBankAccountID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	deletedBankAccount := model.NewBankAccountFromInput(input, t.testUserID)
+	deletedBankAccount.ID = t.testBankAccountID
+
+	t.mockSvc.EXPECT().Delete(t.testBankAccountID, t.testUserID).Return(&deletedBankAccount, nil)
+
+	t.handler.HandleDeleteBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Equal(t.T(), t.testBankAccountID, actual.ID)
+	assert.Nil(t.T(), err)
+}
+
+func (t *bankAccountHandlerTestSuite) TestDelete_FailedParsingID() {
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleDeleteBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *bankAccountHandlerTestSuite) TestDelete_ServiceFailedDeleting() {
+	errMsg := "service failed deleting bankAccount"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodDelete,
+		"/bankAccounts/"+t.testBankAccountID.String(),
+		nil,
+		nil,
+		nuuid.From(t.testBankAccountID),
+	)
+
+	t.mockSvc.EXPECT().Delete(t.testBankAccountID, t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleDeleteBankAccount(rr, req)
+
+	actual, err := t.parseOutputToBankAccount(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
