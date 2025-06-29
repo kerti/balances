@@ -1,14 +1,102 @@
 <script setup>
+import { onMounted, onUnmounted, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
+import { useVehiclesStore } from "@/stores/vehiclesStore"
+
+import debounce from "lodash.debounce"
+
+import { useDateUtils } from "@/composables/useDateUtils"
+import { useEnvUtils } from "@/composables/useEnvUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
 
 import LineChart from "@/components/assets/VehicleLineChart.vue"
+import DatePicker from "@/components/common/DatePicker.vue"
 
+const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
+const ev = useEnvUtils()
+const route = useRoute()
+const router = useRouter()
+const vehiclesStore = useVehiclesStore()
+const defaultPageSize = ev.getDefaultPageSize()
+
+const debouncedFilterVehicles = debounce(() => {
+  vehiclesStore.filterVehicles()
+}, 300)
+
+watch(
+  [
+    () => vehiclesStore.lvFilter,
+    () => vehiclesStore.lvValuesStartDate,
+    () => vehiclesStore.lvValuesEndDate,
+    () => vehiclesStore.lvPageSize,
+  ],
+  ([newLVFilter, newLVValuesStartDate, newLVValuesEndDate, newLVPageSize]) => {
+    const lvPageSizeParam =
+      Number.isInteger(newLVPageSize) && newLVPageSize !== defaultPageSize
+        ? newLVPageSize
+        : undefined
+
+    const defaultLVValuesStartDate = dateUtils.getEpochOneYearAgo()
+    const lvValuesStartDateParam =
+      Number.isInteger(newLVValuesStartDate) &&
+      newLVValuesStartDate !== defaultLVValuesStartDate
+        ? newLVValuesStartDate
+        : undefined
+
+    router.replace({
+      query: {
+        ...route.query,
+        lvFilter: newLVFilter || undefined,
+        lvValuesStartDate: lvValuesStartDateParam,
+        lvValuesEndDate: newLVValuesEndDate || undefined,
+        lvPageSize: lvPageSizeParam,
+      },
+    })
+    debouncedFilterVehicles()
+  }
+)
 
 const showAddVehicleDialog = () => {
   // bankAccountsStore.resetLVAddBankAccountDialog()
   lvAddVehicleDialog.showModal()
 }
+
+function refetch() {
+  const query = route.query
+
+  const parsedLVPageSize = numUtils.queryParamToInt(
+    query.lvPageSize,
+    defaultPageSize
+  )
+
+  const parsedLVValuesStartDate = numUtils.queryParamToNullableInt(
+    query.lvValuesStartDate
+  )
+  vehiclesStore.lvValuesStartDate = parsedLVValuesStartDate
+
+  const parsedLVValuesEndDate = numUtils.queryParamToNullableInt(
+    query.lvValuesEndDate
+  )
+  vehiclesStore.lvValuesEndDate = parsedLVValuesEndDate
+
+  const defaultLVValuesStartDate = dateUtils.getEpochOneYearAgo()
+  vehiclesStore.lvHydrate(
+    query.lvFilter?.toString() || "",
+    parsedLVValuesStartDate &&
+      parsedLVValuesStartDate !== defaultLVValuesStartDate
+      ? parsedLVValuesStartDate
+      : defaultLVValuesStartDate,
+    parsedLVValuesEndDate,
+    parsedLVPageSize
+  )
+
+  debouncedFilterVehicles()
+}
+
+onMounted(() => refetch())
+onUnmounted(() => vehiclesStore.lvDehydrate())
 </script>
 
 <template>
@@ -39,7 +127,7 @@ const showAddVehicleDialog = () => {
               <tr>
                 <th>Name</th>
                 <th>Identification</th>
-                <th class="text-right">Purchase Value</th>
+                <th class="text-right">Initial Value</th>
                 <th class="text-right">Current Value</th>
                 <th>Type</th>
                 <th>Status</th>
@@ -47,20 +135,29 @@ const showAddVehicleDialog = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr
+                v-for="(vehicle, index) in vehiclesStore.lvVehicles"
+                :key="index"
+                class="hover:bg-base-300"
+              >
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">John's Car</div>
-                      <div class="text-sm opacity-50">2008 Toyota Yaris E</div>
+                      <div class="font-bold">{{ vehicle.name }}</div>
+                      <div class="text-sm opacity-50">
+                        {{ vehicle.year }} {{ vehicle.make }}
+                        {{ vehicle.model }}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td>
                   <div class="flex items-center gap-3">
                     <div>
-                      <div class="font-bold">John Fitzgerald Doe</div>
-                      <div class="text-sm opacity-50">AB 1234 RFT</div>
+                      <div class="font-bold">{{ vehicle.titleHolder }}</div>
+                      <div class="text-sm opacity-50">
+                        {{ vehicle.licensePlateNumber }}
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -68,9 +165,14 @@ const showAddVehicleDialog = () => {
                   <div class="items-end">
                     <div>
                       <div class="font-bold">
-                        {{ numUtils.numericToMoney(120000) }}
+                        {{ numUtils.numericToMoney(vehicle.initialValue) }}
                       </div>
-                      <div class="text-sm opacity-50">at 12 April 2020</div>
+                      <div class="text-sm opacity-50">
+                        at
+                        {{
+                          dateUtils.epochToLocalDate(vehicle.initialValueDate)
+                        }}
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -78,20 +180,29 @@ const showAddVehicleDialog = () => {
                   <div class="items-end">
                     <div>
                       <div class="font-bold">
-                        {{ numUtils.numericToMoney(100000) }}
+                        {{ numUtils.numericToMoney(vehicle.currentValue) }}
                       </div>
-                      <div class="text-sm opacity-50">at 12 April 2025</div>
+                      <div class="text-sm opacity-50">
+                        at
+                        {{
+                          dateUtils.epochToLocalDate(vehicle.currentValueDate)
+                        }}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td>
                   <div>
-                    <span class="badge badge-sm badge-neutral">CAR</span>
+                    <span class="badge badge-sm badge-neutral">{{
+                      vehicle.type
+                    }}</span>
                   </div>
                 </td>
                 <td>
                   <div>
-                    <span class="badge badge-sm badge-neutral">IN USE</span>
+                    <span class="badge badge-sm badge-neutral">{{
+                      vehicle.status
+                    }}</span>
                   </div>
                 </td>
                 <td>
@@ -167,7 +278,7 @@ const showAddVehicleDialog = () => {
         </div>
         <div>
           <label class="label">Purchase Date*</label>
-          <DatePicker placeholder="pick a date" required />
+          <!-- <DatePicker placeholder="pick a date" required /> -->
         </div>
         <div>
           <label class="label">Initial Value*</label>
@@ -175,7 +286,7 @@ const showAddVehicleDialog = () => {
         </div>
         <div>
           <label class="label">Initial Value Date*</label>
-          <DatePicker placeholder="pick a date" required />
+          <!-- <DatePicker placeholder="pick a date" required /> -->
         </div>
         <div>
           <label class="label">Current Value*</label>
@@ -183,7 +294,7 @@ const showAddVehicleDialog = () => {
         </div>
         <div>
           <label class="label">Current Value Date*</label>
-          <DatePicker placeholder="pick a date" required />
+          <!-- <DatePicker placeholder="pick a date" required /> -->
         </div>
         <div>
           <label class="label">Annual Depreciation Rate (%)*</label>

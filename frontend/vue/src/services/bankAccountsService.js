@@ -11,7 +11,7 @@ import {
     getBankAccountBalanceFromAPI,
     updateAccountBalanceWithAPI,
     deleteBankAccountBalanceWithAPI,
-} from '@/api/bankAccountsApi';
+} from '@/api/bankAccountsApi'
 
 export function useBankAccountsService() {
 
@@ -46,7 +46,6 @@ export function useBankAccountsService() {
         const accounts = await searchBankAccountsFromAPI(filter, pageSize)
 
         if (!accounts.error) {
-
             // then get the balances data
             const bankAccountIds = accounts.data.items.map(account => account.id)
             const balances = await searchBankAccountBalancesFromAPI(bankAccountIds, balancesStartDate, balancesEndDate, 99999, 1)
@@ -59,7 +58,7 @@ export function useBankAccountsService() {
                 })
             } else {
                 return {
-                    error: result.error
+                    error: balances.error
                 }
             }
 
