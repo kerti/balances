@@ -43,29 +43,29 @@ func (s *UserImpl) GetByFilter(input model.UserFilterInput) ([]model.User, model
 }
 
 // Create creates a new User
-func (s *UserImpl) Create(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (s *UserImpl) Create(input model.UserInput, userID uuid.UUID) (*model.User, error) {
 	user := model.NewUserFromInput(input, userID)
 	err := s.Repository.Create(user)
-	return user, err
+	return &user, err
 }
 
 // Update updates an existing User
-func (s *UserImpl) Update(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (s *UserImpl) Update(input model.UserInput, userID uuid.UUID) (*model.User, error) {
 	users, err := s.Repository.ResolveByIDs([]uuid.UUID{input.ID})
 	if err != nil {
-		return model.User{}, err
+		return nil, err
 	}
 
 	if len(users) != 1 {
-		return model.User{}, failure.EntityNotFound("update:", "User")
+		return nil, failure.EntityNotFound("update:", "User")
 	}
 
 	user := users[0]
 	err = user.Update(input, userID)
 	if err != nil {
-		return model.User{}, err
+		return nil, err
 	}
 
 	err = s.Repository.Update(user)
-	return user, err
+	return &user, err
 }
