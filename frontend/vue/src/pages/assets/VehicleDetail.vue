@@ -1,0 +1,133 @@
+<script setup>
+import LineChart from "@/components/assets/VehicleLineChart.vue"
+</script>
+
+<template>
+  <div class="flex flex-col h-full space-y-6">
+    <!-- Top Half: Form and Values Table -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Left: Vehicle Form -->
+      <div class="card bg-base-100 shadow-md md:col-span-1">
+        <div class="card-body">
+          <h2 class="card-title">Vehicle Details</h2>
+          <form class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="label">Name*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Make*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Model*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Year*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Type*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Title Holder*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">License Plate Number*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Purchase Date*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Initial Value*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Initial Value Date*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Current Value*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Current Value Date*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Annual Depreciation (%)*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div>
+              <label class="label">Status*</label>
+              <input type="text" class="input input-bordered w-full" />
+            </div>
+            <div class="flex justify-end gap-2 pt-4">
+              <button type="button" class="btn btn-primary">Save</button>
+              <button type="button" class="btn btn-secondary">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right: Balance Table -->
+      <div class="card bg-base-100 shadow-md md:col-span-1">
+        <div class="card-body">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title">Value History</h2>
+            <button class="btn btn-neutral btn-xs" v-on:click="showEditor()">
+              <font-awesome-icon :icon="['fas', 'plus']" />
+              Add New Value
+            </button>
+          </div>
+          <div class="overflow-x-auto h-64">
+            <table class="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th class="text-right">Value</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>[date]</td>
+                  <td class="text-right">[value]</td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <button
+                        class="btn btn-neutral btn-sm tooltip"
+                        data-tip="Edit"
+                      >
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </button>
+                      <button
+                        class="btn btn-neutral btn-sm tooltip"
+                        data-tip="Delete"
+                      >
+                        <font-awesome-icon :icon="['fas', 'trash']" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Half: Line Chart -->
+    <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
+      <div class="card-body">
+        <h2 class="card-title">Value History Chart</h2>
+        <line-chart />
+      </div>
+    </div>
+  </div>
+</template>
