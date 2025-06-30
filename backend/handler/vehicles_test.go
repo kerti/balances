@@ -456,12 +456,10 @@ func (t *vehicleHandlerTestSuite) TestGetByID_Normal_NoParams() {
 }
 
 func (t *vehicleHandlerTestSuite) TestGetByID_FailedParsingID() {
-	formParams := make(map[string]string)
-	formParams["id"] = t.testVehicleID.String() + "123"
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
 		"/vehicles/"+t.testVehicleID.String()+"123",
-		formParams,
+		nil,
 		nil,
 		nuuid.NUUID{Valid: false},
 	)
