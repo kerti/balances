@@ -137,12 +137,15 @@ func (r *UserMySQLRepo) ResolveByFilter(filter filter.Filter) (users []model.Use
 		filterArgs...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("get by filter", "user", err)
 		return
 	}
 
 	err = r.DB.Select(&users, query, args...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("get by filter", "user", err)
+		return
 	}
 
 	var count int
@@ -153,6 +156,7 @@ func (r *UserMySQLRepo) ResolveByFilter(filter filter.Filter) (users []model.Use
 		filterArgsNoPagination...)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("get by filter", "user", err)
 		return
 	}
 

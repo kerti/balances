@@ -68,7 +68,7 @@ func (h *UserImpl) HandleGetUserByFilter(w http.ResponseWriter, r *http.Request)
 
 	users, pageInfo, err := h.Service.GetByFilter(input)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
+		response.RespondWithError(w, err)
 		return
 	}
 
