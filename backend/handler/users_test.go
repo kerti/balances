@@ -201,6 +201,83 @@ func (t *userHandlerTestSuite) parseOutputToUserPage(rr *httptest.ResponseRecord
 	return
 }
 
+func (t *userHandlerTestSuite) TestCreate_Normal() {
+	input := t.getNewUserInput(nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/users",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	expectedResult := model.NewUserFromInput(input, t.testUserID)
+	expected := expectedResult.ToOutput()
+
+	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(&expectedResult, nil)
+
+	t.handler.HandleCreateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), err)
+	assert.Equal(t.T(), expected.Username, actual.Username)
+	assert.Equal(t.T(), expected.Email, actual.Email)
+	assert.Equal(t.T(), expected.Password, actual.Password)
+	assert.Equal(t.T(), expected.Name, actual.Name)
+}
+
+func (t *userHandlerTestSuite) TestCreate_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/users",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.handler.HandleCreateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *userHandlerTestSuite) TestCreate_ServiceFailedCreating() {
+	errMsg := "service failed creating user"
+	input := t.getNewUserInput(nuuid.NUUID{Valid: false})
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPost,
+		"/users",
+		input,
+		nil,
+		nuuid.NUUID{Valid: false},
+	)
+
+	t.mockSvc.EXPECT().Create(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleCreateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), http.StatusInternalServerError, rr.Result().StatusCode)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
 func (t *userHandlerTestSuite) TestGetByID_Normal() {
 	rr, req := t.getNewRequestWithContext(
 		http.MethodGet,
@@ -378,4 +455,126 @@ func (t *userHandlerTestSuite) TestGetByFilter_ServiceFailedResolving() {
 	assert.Equal(t.T(), 0, len(users))
 
 	assert.Equal(t.T(), 0, pageInfo.Page)
+}
+
+func (t *userHandlerTestSuite) TestUpdate_Normal() {
+	input := t.getNewUserInput(nuuid.From(t.testUserID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/users/"+t.testUserID.String(),
+		input,
+		nil,
+		nuuid.From(t.testUserID),
+	)
+
+	updatedUser := model.NewUserFromInput(input, t.testUserID)
+
+	t.mockSvc.EXPECT().Update(gomock.Any(), t.testUserID).Return(&updatedUser, nil)
+
+	t.handler.HandleUpdateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.NotNil(t.T(), actual)
+	assert.Nil(t.T(), err)
+}
+
+func (t *userHandlerTestSuite) TestUpdate_FailedGettingIDFromRequest() {
+	input := t.getNewUserInput(nuuid.From(t.testUserID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/users/"+t.testUserID.String(),
+		input,
+		nil,
+		nuuid.NUUID{},
+	)
+
+	t.handler.HandleUpdateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "invalid UUID length")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *userHandlerTestSuite) TestUpdate_FailedParsingRequestPayload() {
+	input := "test"
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/users/"+t.testUserID.String(),
+		input,
+		nil,
+		nuuid.From(t.testUserID),
+	)
+
+	t.handler.HandleUpdateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "cannot unmarshal")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *userHandlerTestSuite) TestUpdate_MismatchedID() {
+	input := t.getNewUserInput(nuuid.NUUID{})
+	newID, _ := uuid.NewV7()
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/users/"+t.testUserID.String(),
+		input,
+		nil,
+		nuuid.From(newID),
+	)
+
+	t.handler.HandleUpdateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeBadRequest, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, "id mismatch")
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
+}
+
+func (t *userHandlerTestSuite) TestUpdate_ServiceFailedUpdating() {
+	errMsg := "failed updating user"
+	input := t.getNewUserInput(nuuid.From(t.testUserID))
+	rr, req := t.getNewRequestWithContext(
+		http.MethodPatch,
+		"/users/"+t.testUserID.String(),
+		input,
+		nil,
+		nuuid.From(t.testUserID),
+	)
+
+	t.mockSvc.EXPECT().Update(gomock.Any(), t.testUserID).Return(nil, errors.New(errMsg))
+
+	t.handler.HandleUpdateUser(rr, req)
+
+	actual, err := t.parseOutputToUser(rr)
+
+	assert.Nil(t.T(), actual)
+	assert.NotNil(t.T(), err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.Code)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Entity)
+	assert.Contains(t.T(), err.Message, errMsg)
+	// TODO: specify this
+	assert.Nil(t.T(), err.Operation)
 }

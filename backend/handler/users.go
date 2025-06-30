@@ -87,9 +87,9 @@ func (h *UserImpl) HandleGetUserByFilter(w http.ResponseWriter, r *http.Request)
 
 // HandleCreateUser handles the request
 func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
-	var input model.UserInput
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
+	input, err := h.getInputFromRequest(w, r)
+	if err != nil {
+		return
 	}
 
 	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
@@ -104,18 +104,20 @@ func (h *UserImpl) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 // HandleUpdateUser handles the request
 func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := uuid.Parse(vars["id"])
+	id, err := getIDFromRequest(w, r)
 	if err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
 		return
 	}
 
-	var input model.UserInput
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		response.RespondWithError(w, failure.BadRequest(err))
+	input, err := h.getInputFromRequest(w, r)
+	if err != nil {
+		return
 	}
-	input.ID = id
+
+	if input.ID.String() != id.String() {
+		response.RespondWithError(w, failure.BadRequestFromString("id mismatch"))
+		return
+	}
 
 	userID := (r.Context().Value(ctxprops.PropUserID)).(*uuid.UUID)
 	user, err := h.Service.Update(input, *userID)
@@ -125,4 +127,13 @@ func (h *UserImpl) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.RespondWithJSON(w, http.StatusCreated, user.ToOutput())
+}
+
+func (h *UserImpl) getInputFromRequest(w http.ResponseWriter, r *http.Request) (input model.UserInput, err error) {
+	err = json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.RespondWithError(w, failure.BadRequest(err))
+	}
+
+	return
 }

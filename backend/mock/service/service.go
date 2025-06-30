@@ -330,10 +330,10 @@ func (m *MockUser) EXPECT() *MockUserMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUser) Create(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (m *MockUser) Create(input model.UserInput, userID uuid.UUID) (*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", input, userID)
-	ret0, _ := ret[0].(model.User)
+	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -400,10 +400,10 @@ func (mr *MockUserMockRecorder) Startup() *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockUser) Update(input model.UserInput, userID uuid.UUID) (model.User, error) {
+func (m *MockUser) Update(input model.UserInput, userID uuid.UUID) (*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", input, userID)
-	ret0, _ := ret[0].(model.User)
+	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

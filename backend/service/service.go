@@ -39,8 +39,8 @@ type User interface {
 	Shutdown()
 	GetByID(id uuid.UUID) (*model.User, error)
 	GetByFilter(input model.UserFilterInput) ([]model.User, model.PageInfoOutput, error)
-	Create(input model.UserInput, userID uuid.UUID) (model.User, error)
-	Update(input model.UserInput, userID uuid.UUID) (model.User, error)
+	Create(input model.UserInput, userID uuid.UUID) (*model.User, error)
+	Update(input model.UserInput, userID uuid.UUID) (*model.User, error)
 }
 
 // Vehicle is the service provider interface
