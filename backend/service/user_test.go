@@ -193,7 +193,7 @@ func TestUserService(t *testing.T) {
 			result, err := svc.Update(testUserInput, testUserID)
 			svc.Shutdown()
 
-			assert.NotNil(t, result)
+			assert.Nil(t, result)
 			assert.NotNil(t, err)
 
 			mockRepo.AssertCalled(t, "ResolveByIDs", []uuid.UUID{testID1})
@@ -211,7 +211,7 @@ func TestUserService(t *testing.T) {
 			result, err := svc.Update(testUserInput, testUserID)
 			svc.Shutdown()
 
-			assert.NotNil(t, result)
+			assert.Nil(t, result)
 			assert.NotNil(t, err)
 			assert.IsType(t, &failure.Failure{}, err)
 			assert.Equal(t, failure.CodeEntityNotFound, err.(*failure.Failure).Code)
