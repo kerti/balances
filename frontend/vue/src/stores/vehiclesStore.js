@@ -30,7 +30,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     const dvPageSize = ref(10)
     const dvVehicle = ref({})
     const dvVehicleCache = ref({})
-    const dvChartData = ref({})
+    const dvChartData = ref([])
     // value editor dialog box
 
     ////// actions
@@ -103,7 +103,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         dvPageSize.value = 10
         dvVehicle.value = {}
         dvVehicleCache.value = {}
-        dvChartData.value = {}
+        dvChartData.value = []
         // TODO: set dialog boxes
     }
 

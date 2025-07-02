@@ -229,7 +229,7 @@ onUnmounted(() => vehiclesStore.dvDehydrate())
               Add New Value
             </button>
           </div>
-          <div class="overflow-x-auto h-64">
+          <div class="overflow-x-auto h-82">
             <table class="table table-zebra w-full">
               <thead>
                 <tr>
