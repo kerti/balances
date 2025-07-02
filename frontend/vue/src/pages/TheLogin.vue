@@ -49,7 +49,7 @@ const version = __APP_VERSION__
       >
         <div>
           <h1 class="text-3xl">Balances</h1>
-          <p>Your personal finance, simplified.</p>
+          <p class="pt-2">Your personal finance, simplified.</p>
           <p class="text-xs opacity-50 pt-15">version {{ version }}</p>
         </div>
       </div>
@@ -59,7 +59,7 @@ const version = __APP_VERSION__
         >
           <legend class="fieldset-legend">Login</legend>
 
-          <label class="label" for="username">Username</label>
+          <label class="label" for="username">Username*</label>
           <input
             type="text"
             class="input"
@@ -71,7 +71,7 @@ const version = __APP_VERSION__
             @input="updateUsername"
           />
 
-          <label class="label" for="password">Password</label>
+          <label class="label" for="password">Password*</label>
           <input
             type="password"
             class="input"
