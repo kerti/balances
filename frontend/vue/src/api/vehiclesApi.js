@@ -24,7 +24,7 @@ export async function searchVehiclesFromAPI(filter, pageSize) {
 export async function getVehicleFromAPI(vehicleId, startDate, endDate, pageSize, page) {
     try {
         const params = new URLSearchParams()
-        params.append('withBalances', true)
+        params.append('withValues', true)
         if (startDate) {
             params.append('valuesStartDate', startDate)
         }
