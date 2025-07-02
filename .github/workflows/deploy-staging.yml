@@ -54,7 +54,7 @@ jobs:
             git pull origin master
 
             echo "[INFO] Stopping running containers..."
-            docker compose -f docker-compose.staging.yml down
+            docker-compose -f docker-compose.staging.yml down
 
             echo "[INFO] Pruning unused Docker images..."
             docker image prune -f
