@@ -60,7 +60,7 @@ jobs:
             docker image prune -f
 
             echo "[INFO] Rebuilding and restarting services..."
-            docker compose -f docker-compose.staging.yml up -d --build
+            docker-compose -f docker-compose.staging.yml up -d --build
 
             echo "[INFO] Deploy complete."
 
