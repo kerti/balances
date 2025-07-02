@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8080:8080"
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/vue/Dockerfile
+    env_file:
+      - ./frontend/vue/.env
+    ports:
+      - "3000:80"
+    restart: always
+
