@@ -38,6 +38,12 @@ const routes = [
         meta: { requiresAuth: true, pageTitle: 'Vehicles' }
     },
     {
+        path: '/assets/vehicles/:id',
+        name: 'assets.vehicle.detail',
+        component: () => import('@/pages/assets/VehicleDetail.vue'),
+        meta: { requiresAuth: true, pageTitle: 'Vehicle Details' }
+    },
+    {
         path: '/assets/properties',
         name: 'assets.properties',
         component: () => import('@/pages/assets/Properties.vue'),

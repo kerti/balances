@@ -1,4 +1,4 @@
-import { searchVehiclesFromAPI, searchVehicleValuesFromAPI } from '@/api/vehiclesApi'
+import { getVehicleFromAPI, searchVehiclesFromAPI, searchVehicleValuesFromAPI } from '@/api/vehiclesApi'
 
 export function useVehiclesService() {
 
@@ -34,9 +34,24 @@ export function useVehiclesService() {
         }
     }
 
+    // read
+    async function getVehicle(id, valueStartDate, valueEndDate, pageSize) {
+        const vehicle = await getVehicleFromAPI(id, valueStartDate, valueEndDate, pageSize)
+
+        if (!vehicle.error) {
+            vehicle.data.values.sort((a, b) => a.date - b.date)
+            return vehicle.data
+        } else {
+            return {
+                error: vehicle.error
+            }
+        }
+    }
+
     return {
         // vehicles
         searchVehicles,
+        getVehicle,
         // vehicle values
     }
 }

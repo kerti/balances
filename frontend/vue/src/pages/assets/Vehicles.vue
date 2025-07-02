@@ -207,13 +207,19 @@ onUnmounted(() => vehiclesStore.lvDehydrate())
                 </td>
                 <td>
                   <div class="flex items-center gap-3">
-                    <button
-                      class="btn btn-neutral btn-sm tooltip"
-                      data-tip="Edit"
+                    <router-link
+                      :to="{
+                        name: 'assets.vehicle.detail',
+                        params: { id: vehicle.id },
+                      }"
                     >
-                      <font-awesome-icon :icon="['fas', 'edit']" />
-                    </button>
-
+                      <button
+                        class="btn btn-neutral btn-sm tooltip"
+                        data-tip="Edit"
+                      >
+                        <font-awesome-icon :icon="['fas', 'edit']" />
+                      </button>
+                    </router-link>
                     <button
                       class="btn btn-neutral btn-sm tooltip"
                       data-tip="Delete"

@@ -24,6 +24,13 @@ export const useVehiclesStore = defineStore('vehicles', () => {
 
     //// detail view
     // main page
+    const dvVehicleId = ref('')
+    const dvValuesStartDate = ref(0)
+    const dvValuesEndDate = ref(0)
+    const dvPageSize = ref(10)
+    const dvVehicle = ref({})
+    const dvVehicleCache = ref({})
+    const dvChartData = ref([])
     // value editor dialog box
 
     ////// actions
@@ -80,6 +87,67 @@ export const useVehiclesStore = defineStore('vehicles', () => {
 
     //// detail view
 
+    // hydration
+
+    async function dvHydrate(initDVVehicleId, initDVValuesStartDate, initDVValuesEndDate, initDVPageSize) {
+        dvVehicleId.value = initDVVehicleId
+        dvValuesStartDate.value = initDVValuesStartDate
+        dvValuesEndDate.value = initDVValuesEndDate
+        dvPageSize.value = initDVPageSize
+    }
+
+    function dvDehydrate() {
+        dvVehicleId.value = ''
+        dvValuesStartDate.value = 0
+        dvValuesEndDate.value = 0
+        dvPageSize.value = 10
+        dvVehicle.value = {}
+        dvVehicleCache.value = {}
+        dvChartData.value = []
+        // TODO: set dialog boxes
+    }
+
+    // CRUD
+
+    // TODO: create value
+
+    async function getVehicleForDV() {
+        const fetchedVehicle = await svc.getVehicle(
+            dvVehicleId.value,
+            dvValuesStartDate.value,
+            dvValuesEndDate.value,
+            dvPageSize.value)
+
+        dvVehicle.value = JSON.parse(JSON.stringify(fetchedVehicle))
+        dvVehicleCache.value = JSON.parse(JSON.stringify(fetchedVehicle))
+
+        extractDVChartData()
+    }
+
+    // TODO: get value by ID
+
+    // TODO: update vehicle
+
+    // TODO: update vehicle value
+
+    // TODO: delete vehicle value
+
+    // cache prep and reset
+
+    // chart utils
+
+    function extractDVChartData() {
+        dvChartData.value = [{
+            label: dvVehicle.value.name,
+            data: dvVehicle.value.values.map(value => {
+                return {
+                    x: value.date,
+                    y: value.value,
+                }
+            })
+        }]
+    }
+
     return {
         ////// reactive state
 
@@ -96,6 +164,13 @@ export const useVehiclesStore = defineStore('vehicles', () => {
 
         //// detail view
         // main page
+        dvVehicleId,
+        dvValuesStartDate,
+        dvValuesEndDate,
+        dvPageSize,
+        dvVehicle,
+        dvVehicleCache,
+        dvChartData,
         // vehicle editor dialog box
 
         ////// actions
@@ -112,6 +187,9 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         // cache and prep
 
         //// detail view
-        // ...
+        dvHydrate,
+        dvDehydrate,
+        // CRUD
+        getVehicleForDV,
     }
 })
