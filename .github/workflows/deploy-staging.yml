@@ -1,4 +1,4 @@
-name: Deploy to Staging
+name: Deploy Staging
 
 on:
   push:
@@ -7,24 +7,60 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to Staging Server
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to staging server
+      - name: Deploy to Remote Server
         run: |
-          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
-            cd ${{ secrets.DEPLOY_PATH }}
-            git pull origin master
+          ssh -o StrictHostKeyChecking=no ubuntu@your-server-ip << 'EOF'
+
+            set -e
+
+            cd ~/balances-staging
+
+            LOCKFILE="/tmp/staging-deploy.lock"
+            MAX_RETRIES=10
+            RETRY_DELAY=60
+            RETRIES=0
+
+            echo "[INFO] Checking for existing deploy lock..."
+
+            # Wait for lock to be released if it exists
+            while [ -f "\$LOCKFILE" ]; do
+              if [ \$RETRIES -ge \$MAX_RETRIES ]; then
+                echo "[ERROR] Lockfile still exists after \$((MAX_RETRIES * RETRY_DELAY / 60)) minutes. Aborting."
+                exit 1
+              fi
+              echo "[INFO] Another deploy is running. Waiting for \$RETRY_DELAY seconds..."
+              sleep \$RETRY_DELAY
+              RETRIES=\$((RETRIES + 1))
+            done
+
+            echo "[INFO] Acquiring lock..."
+            touch "\$LOCKFILE"
+
+            # Ensure lock is released on exit
+            trap 'echo "[INFO] Releasing deploy lock..."; rm -f "\$LOCKFILE"' EXIT
+
+            echo "[INFO] Bringing down existing containers..."
+            docker-compose -f docker-compose.staging.yml down
+
+            echo "[INFO] Cleaning up unused images..."
+            docker image prune -f
+
+            echo "[INFO] Rebuilding and starting containers..."
             docker-compose -f docker-compose.staging.yml up -d --build
+
+            echo "[INFO] Deploy complete."
+
           EOF
 
