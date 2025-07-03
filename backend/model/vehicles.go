@@ -215,6 +215,32 @@ func (v *Vehicle) Update(input VehicleInput, userID uuid.UUID) error {
 	return nil
 }
 
+// Delete performs a delete on a Vehicle
+func (v *Vehicle) Delete(userID uuid.UUID) error {
+	if v.Deleted.Valid || v.DeletedBy.Valid {
+		return failure.OperationNotPermitted("delete", "Vehicle", "already deleted")
+	}
+
+	now := time.Now()
+
+	v.Deleted = null.TimeFrom(now)
+	v.DeletedBy = nuuid.From(userID)
+
+	deletedValues := make([]VehicleValue, 0)
+	for _, value := range v.Values {
+		err := value.Delete(userID)
+		if err != nil {
+			return err
+		}
+
+		deletedValues = append(deletedValues, value)
+	}
+
+	v.Values = deletedValues
+
+	return nil
+}
+
 // ToOutput converts a Vehicle to its JSON-compatible object representation
 func (v *Vehicle) ToOutput() VehicleOutput {
 	o := VehicleOutput{
@@ -326,6 +352,34 @@ func NewVehicleValueFromInput(input VehicleValueInput, vehicleID uuid.UUID, user
 	// TODO: validate:
 
 	return
+}
+
+// Update performs an update on a Vehicle Value
+func (vv *VehicleValue) Update(input VehicleValueInput, userID uuid.UUID) error {
+	now := time.Now()
+
+	vv.Date = input.Date.Time()
+	vv.Value = input.Value
+	vv.Updated = null.TimeFrom(now)
+	vv.UpdatedBy = nuuid.From(userID)
+
+	// TODO: Validate ?
+
+	return nil
+}
+
+// Delete performs a delete on a Vehicle Value
+func (vv *VehicleValue) Delete(userID uuid.UUID) error {
+	if vv.Deleted.Valid || vv.DeletedBy.Valid {
+		return failure.OperationNotPermitted("delete", "Vehicle Value", "already deleted")
+	}
+
+	now := time.Now()
+
+	vv.Deleted = null.TimeFrom(now)
+	vv.DeletedBy = nuuid.From(userID)
+
+	return nil
 }
 
 // ToOutput converts a Vehicle Value to its JSON-compatible object representation
