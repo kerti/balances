@@ -46,7 +46,17 @@ export async function getVehicleFromAPI(vehicleId, startDate, endDate, pageSize,
     }
 }
 
-// TODO: update
+// update
+export async function updateVehicleWithAPI(vehicle) {
+    try {
+        const { data } = await axiosInstance.patch('vehicles/' + vehicle.id, vehicle)
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
 // TODO: delete
 

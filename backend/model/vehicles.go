@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guregu/null"
 	"github.com/kerti/balances/backend/util/cachetime"
+	"github.com/kerti/balances/backend/util/failure"
 	"github.com/kerti/balances/backend/util/filter"
 	"github.com/kerti/balances/backend/util/nuuid"
 )
@@ -186,6 +187,32 @@ func (v *Vehicle) AttachValues(values []VehicleValue, clearBeforeAttach bool) {
 			v.Values = append(v.Values, value)
 		}
 	}
+}
+
+// Update performs an update on a Vehicle
+func (v *Vehicle) Update(input VehicleInput, userID uuid.UUID) error {
+	if v.Deleted.Valid || v.DeletedBy.Valid {
+		return failure.OperationNotPermitted("update", "Vehicle", "already deleted")
+	}
+
+	now := time.Now()
+
+	v.Name = input.Name
+	v.Make = input.Make
+	v.Model = input.Model
+	v.Year = input.Year
+	v.Type = input.Type
+	v.TitleHolder = input.TitleHolder
+	v.LicensePlateNumber = input.LicensePlateNumber
+	v.PurchaseDate = input.PurchaseDate.Time()
+	v.InitialValue = input.InitialValue
+	v.InitialValueDate = input.InitialValueDate.Time()
+	v.AnnualDepreciationPercent = input.AnnualDepreciationPercent
+	v.Status = input.Status
+	v.Updated = null.TimeFrom(now)
+	v.UpdatedBy = nuuid.From(userID)
+
+	return nil
 }
 
 // ToOutput converts a Vehicle to its JSON-compatible object representation

@@ -69,7 +69,7 @@ func main() {
 // handle graceful shutdown
 func handleShutdown(container inject.ServiceContainer) {
 	config := config.Get()
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	go func(ch chan os.Signal) {
 		<-ch

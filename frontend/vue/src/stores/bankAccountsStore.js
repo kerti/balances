@@ -136,17 +136,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         lvDeleteBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
     }
 
-    function revertDVBankAccountToCache() {
-        if (dvAccountCache.value) {
-            dvAccount.value = JSON.parse(JSON.stringify(dvAccountCache.value))
-        }
-    }
-
-    function prepDVBlankBankAccount() {
-        dvAccount.value = JSON.parse(JSON.stringify(blankBankAccount))
-        dvAccountCache.value = JSON.parse(JSON.stringify(blankBankAccount))
-    }
-
     // chart utils
 
     function extractLVChartData() {
@@ -271,6 +260,12 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
 
     // cache prep and reset
 
+    function revertDVBankAccountToCache() {
+        if (dvAccountCache.value) {
+            dvAccount.value = JSON.parse(JSON.stringify(dvAccountCache.value))
+        }
+    }
+
     function revertDVBankAccountBalanceToCache() {
         if (dvEditBankAccountBalanceCache.value) {
             dvEditBankAccountBalance.value = JSON.parse(JSON.stringify(dvEditBankAccountBalanceCache.value))
@@ -342,8 +337,6 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         // cache and prep
         resetLVAddBankAccountDialog,
         resetLVDeleteBankAccountDialog,
-        revertDVBankAccountToCache,
-        prepDVBlankBankAccount,
 
         //// detail view
         // hydration
@@ -357,6 +350,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         updateBankAccountBalance,
         deleteBankAccountBalance,
         // cache and prep
+        revertDVBankAccountToCache,
         revertDVBankAccountBalanceToCache,
         prepDVBlankBankAccountBalance,
     }
