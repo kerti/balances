@@ -126,7 +126,6 @@ export const useVehiclesStore = defineStore('vehicles', () => {
 
     // TODO: get value by ID
 
-    // TODO: update vehicle
     async function updateVehicle() {
         const res = await svc.updateVehicle(dvVehicle.value)
         if (!res.error) {
