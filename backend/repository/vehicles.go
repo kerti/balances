@@ -123,6 +123,31 @@ const (
 			:deleted,
 			:deleted_by
 		)`
+
+	QueryUpdateVehicle = `
+		UPDATE vehicles
+		SET
+			name = :name,
+			make = :make,
+			model = :model,
+			year = :year,
+			type = :type,
+			title_holder = :title_holder,
+			license_plate_number = :license_plate_number,
+			purchase_date = :purchase_date,
+			initial_value = :initial_value,
+			initial_value_date = :initial_value_date,
+			current_value = :current_value,
+			current_value_date = :current_value_date,
+			annual_depreciation_percent = :annual_depreciation_percent,
+			status = :status,
+			created = :created,
+			created_by = :created_by,
+			updated = :updated,
+			updated_by = :updated_by,
+			deleted = :deleted,
+			deleted_by = :deleted_by
+		WHERE entity_id = :entity_id`
 )
 
 // VehicleMySQLRepo is the repository for Vehicles implemented with MySQL backend
@@ -353,7 +378,27 @@ func (r *VehicleMySQLRepo) Create(vehicle model.Vehicle) error {
 
 // Update updates a Vehicle
 func (r *VehicleMySQLRepo) Update(vehicle model.Vehicle) error {
-	return failure.Unimplemented("repository unimplemented for this method: update")
+	exists, err := r.ExistsByID(vehicle.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	if !exists {
+		err = failure.EntityNotFound("update", "Vehicle")
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
+		if err := r.txUpdateVehicle(tx, vehicle); err != nil {
+			err = failure.InternalError("update", "Vehicle", err)
+			e <- err
+			return
+		}
+
+		e <- nil
+	})
 }
 
 // CreateValue creates a new Vehicle Value and optionally updates the Vehicle transactionally
@@ -390,6 +435,22 @@ func (r *VehicleMySQLRepo) txCreateVehicleValue(tx *sqlx.Tx, vehicleValue model.
 	}
 
 	_, err = stmt.Exec(vehicleValue)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *VehicleMySQLRepo) txUpdateVehicle(tx *sqlx.Tx, vehicle model.Vehicle) error {
+	stmt, err := tx.PrepareNamed(QueryUpdateVehicle)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	_, err = stmt.Exec(vehicle)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err

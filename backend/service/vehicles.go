@@ -82,7 +82,28 @@ func (s *VehicleImpl) GetByFilter(input model.VehicleFilterInput) ([]model.Vehic
 
 // Update updates an existing Vehicle
 func (s *VehicleImpl) Update(input model.VehicleInput, userID uuid.UUID) (*model.Vehicle, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{input.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("update", "Vehicle")
+	}
+
+	vehicle := vehicles[0]
+
+	err = vehicle.Update(input, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.Repository.Update(vehicle)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vehicle, err
 }
 
 // Delete deletes an existing Vehicle. The method will find all the vehicle's values

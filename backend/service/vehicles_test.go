@@ -423,7 +423,89 @@ func (t *vehiclesServiceTestSuite) TestGetByFilter_WithKeyword() {
 	assert.NoError(t.T(), err)
 }
 
-// TODO: test update
+func (t *vehiclesServiceTestSuite) TestUpdate_Normal() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{t.getNewVehicle(nuuid.From(t.testVehicleID), nil)}, nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).
+		Return(nil)
+
+	res, err := t.svc.Update(t.getNewVehicleInput(nuuid.From(t.testVehicleID)), t.testUserID)
+
+	assert.NotNil(t.T(), res)
+	assert.NoError(t.T(), err)
+}
+
+func (t *vehiclesServiceTestSuite) TestUpdate_RepoErrorResolvingByIDs() {
+	errMsg := "query failed"
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, failure.InternalError("resolve by IDs", "Vehicle", errors.New(errMsg)))
+
+	res, err := t.svc.Update(t.getNewVehicleInput(nuuid.From(t.testVehicleID)), t.testUserID)
+
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve by IDs", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+func (t *vehiclesServiceTestSuite) TestUpdate_AccountNotFound() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, nil)
+
+	res, err := t.svc.Update(t.getNewVehicleInput(nuuid.From(t.testVehicleID)), t.testUserID)
+
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeEntityNotFound, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), "not found")
+}
+
+func (t *vehiclesServiceTestSuite) TestUpdate_VehicleDeleted() {
+	vehicleInput := t.getNewVehicleInput(nuuid.From(t.testVehicleID))
+	deletedVehicle := model.NewVehicleFromInput(vehicleInput, t.testUserID)
+	deletedVehicle.Delete(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{deletedVehicle}, nil)
+
+	res, err := t.svc.Update(t.getNewVehicleInput(nuuid.From(t.testVehicleID)), t.testUserID)
+
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeOperationNotPermitted, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), "already deleted")
+}
+
+func (t *vehiclesServiceTestSuite) TestUpdate_RepoErrorUpdating() {
+	errMsg := "failed to update"
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{t.getNewVehicle(nuuid.From(t.testVehicleID), nil)}, nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).
+		Return(failure.InternalError("update", "Vehicle", errors.New(errMsg)))
+
+	res, err := t.svc.Update(t.getNewVehicleInput(nuuid.From(t.testVehicleID)), t.testUserID)
+
+	assert.Nil(t.T(), res)
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
 
 // TODO: test delete
 

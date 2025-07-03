@@ -126,13 +126,31 @@ export const useVehiclesStore = defineStore('vehicles', () => {
 
     // TODO: get value by ID
 
-    // TODO: update vehicle
+    async function updateVehicle() {
+        const res = await svc.updateVehicle(dvVehicle.value)
+        if (!res.error) {
+            // preserve values records not fetched during vehicle update
+            res.values = JSON.parse(JSON.stringify(dvVehicleCache.value.values))
+            // then sync the store to the latest data from update
+            dvVehicle.value = JSON.parse(JSON.stringify(res))
+            dvVehicleCache.value = JSON.parse(JSON.stringify(res))
+            toast.showToast('Vehicle updated!', 'success')
+        } else {
+            toast.showToast('Failed to save vehicle: ' + res.error.message, 'error')
+        }
+    }
 
     // TODO: update vehicle value
 
     // TODO: delete vehicle value
 
     // cache prep and reset
+
+    function revertDVVehicleToCache() {
+        if (dvVehicleCache.value) {
+            dvVehicle.value = JSON.parse(JSON.stringify(dvVehicleCache.value))
+        }
+    }
 
     // chart utils
 
@@ -185,11 +203,13 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         // getVehicleToDeleteById,
         // deleteVehicle,
         // cache and prep
+        revertDVVehicleToCache,
 
         //// detail view
         dvHydrate,
         dvDehydrate,
         // CRUD
         getVehicleForDV,
+        updateVehicle,
     }
 })

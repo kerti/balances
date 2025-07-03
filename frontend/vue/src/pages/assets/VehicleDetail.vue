@@ -97,6 +97,14 @@ onMounted(() => {
 })
 
 onUnmounted(() => vehiclesStore.dvDehydrate())
+
+const resetVehicleForm = () => {
+  vehiclesStore.revertDVVehicleToCache()
+}
+
+const saveVehicle = () => {
+  vehiclesStore.updateVehicle()
+}
 </script>
 
 <template>
@@ -212,8 +220,20 @@ onUnmounted(() => vehiclesStore.dvDehydrate())
               </select>
             </div>
             <div class="flex justify-end gap-2 pt-4">
-              <button type="button" class="btn btn-primary">Save</button>
-              <button type="button" class="btn btn-secondary">Reset</button>
+              <button
+                type="button"
+                @click="saveVehicle"
+                class="btn btn-primary"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                @click="resetVehicleForm"
+                class="btn btn-secondary"
+              >
+                Reset
+              </button>
             </div>
           </form>
         </div>

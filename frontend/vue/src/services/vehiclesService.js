@@ -1,4 +1,4 @@
-import { getVehicleFromAPI, searchVehiclesFromAPI, searchVehicleValuesFromAPI } from '@/api/vehiclesApi'
+import { getVehicleFromAPI, searchVehiclesFromAPI, searchVehicleValuesFromAPI, updateVehicleWithAPI } from '@/api/vehiclesApi'
 
 export function useVehiclesService() {
 
@@ -48,10 +48,42 @@ export function useVehiclesService() {
         }
     }
 
+    // update
+    async function updateVehicle(vehicle) {
+        const payload = {
+            id: vehicle.id,
+            name: vehicle.name,
+            make: vehicle.make,
+            model: vehicle.model,
+            year: vehicle.year,
+            type: vehicle.type,
+            titleHolder: vehicle.titleHolder,
+            licensePlateNumber: vehicle.licensePlateNumber,
+            purchaseDate: vehicle.purchaseDate,
+            initialValue: vehicle.initialValue,
+            initialValueDate: vehicle.initialValueDate,
+            currentValue: vehicle.currentValue,
+            currentValueDate: vehicle.currentValueDate,
+            annualDepreciationPercent: vehicle.annualDepreciationPercent,
+            status: vehicle.status,
+        }
+
+        const result = await updateVehicleWithAPI(payload)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
+
     return {
         // vehicles
         searchVehicles,
         getVehicle,
+        updateVehicle,
         // vehicle values
     }
 }
