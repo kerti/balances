@@ -27,7 +27,11 @@ var (
 	( entity_id, vehicle_entity_id, date, value, created, created_by, updated, updated_by, deleted, deleted_by )
 	VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )`
 
-	vehiclesStmtUpdate = `UPDATE vehicle_values
+	vehiclesStmtUpdate = `UPDATE vehicles
+	SET name = ?, make = ?, model = ?, year = ?, type = ?, title_holder = ?, license_plate_number = ?, purchase_date = ?, initial_value = ?, initial_value_date = ?, current_value = ?, current_value_date = ?, annual_depreciation_percent = ?, status = ?, created = ?, created_by = ?, updated = ?, updated_by = ?, deleted = ?, deleted_by = ?
+	WHERE entity_id = ?`
+
+	vehicleValuesStmtUpdate = `UPDATE vehicle_values
 	SET vehicle_entity_id = ?, date = ?, value = ?, created = ?, created_by = ?, updated = ?, updated_by = ?, deleted = ?, deleted_by = ?
 	WHERE entity_id = ?`
 )
@@ -162,8 +166,10 @@ func (t *vehiclesRepositoryTestSuite) getNewVehicleValueModel(id nuuid.NUUID, ve
 	return vv
 }
 
-func (t *vehiclesRepositoryTestSuite) getArgsFromVehicleModel(vehicle model.Vehicle) (args []driver.Value) {
-	args = append(args, vehicle.ID)
+func (t *vehiclesRepositoryTestSuite) getArgsFromVehicleModel(vehicle model.Vehicle, setIdLast bool) (args []driver.Value) {
+	if !setIdLast {
+		args = append(args, vehicle.ID)
+	}
 	args = append(args, vehicle.Name)
 	args = append(args, vehicle.Make)
 	args = append(args, vehicle.Model)
@@ -184,6 +190,10 @@ func (t *vehiclesRepositoryTestSuite) getArgsFromVehicleModel(vehicle model.Vehi
 	args = append(args, vehicle.UpdatedBy)
 	args = append(args, vehicle.Deleted)
 	args = append(args, vehicle.DeletedBy)
+
+	if setIdLast {
+		args = append(args, vehicle.ID)
+	}
 
 	return
 }
@@ -216,7 +226,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_Normal() {
 	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
-		WithArgs(t.getArgsFromVehicleModel(testModel)...).
+		WithArgs(t.getArgsFromVehicleModel(testModel, false)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	for _, valueModel := range testModel.Values {
@@ -313,7 +323,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleStatement() {
 	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
-		WithArgs(t.getArgsFromVehicleModel(testModel)...).
+		WithArgs(t.getArgsFromVehicleModel(testModel, false)...).
 		WillReturnError(errors.New(errMsg))
 
 	t.sqlmock.ExpectRollback()
@@ -342,7 +352,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnPrepareVehicleValueStatem
 	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
-		WithArgs(t.getArgsFromVehicleModel(testModel)...).
+		WithArgs(t.getArgsFromVehicleModel(testModel, false)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	t.sqlmock.
@@ -375,7 +385,7 @@ func (t *vehiclesRepositoryTestSuite) TestCreate_FailOnExecVehicleValueStatement
 	t.sqlmock.
 		ExpectPrepare(vehiclesStmtInsert).
 		ExpectExec().
-		WithArgs(t.getArgsFromVehicleModel(testModel)...).
+		WithArgs(t.getArgsFromVehicleModel(testModel, false)...).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	t.sqlmock.
@@ -507,12 +517,12 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_Normal() {
 	keyword := "example"
 	likeKeyword := "%example%"
 
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+	t.sqlmock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
 		WillReturnRows(getCountResult(1))
 
@@ -534,7 +544,7 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnSelect() {
 	keyword := "example"
 	likeKeyword := "%example%"
 
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnError(errors.New(errMsg))
@@ -562,12 +572,12 @@ func (t *vehiclesRepositoryTestSuite) TestResolveByFilter_ErrorOnCount() {
 	keyword := "example"
 	likeKeyword := "%example%"
 
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicle+"WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
+	t.sqlmock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicles WHERE (((((((vehicles.name LIKE ?) OR (vehicles.make LIKE ?)) OR (vehicles.model LIKE ?)) OR (vehicles.year LIKE ?)) OR (vehicles.type LIKE ?)) OR (vehicles.title_holder LIKE ?))) AND vehicles.deleted IS NULL").
 		WithArgs(likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword).
 		WillReturnError(errors.New(errMsg))
 
@@ -639,12 +649,12 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByIDs_ErrorExecutingSelec
 }
 
 func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_Normal() {
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(t.testVehicleID, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
+	t.sqlmock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
 		WithArgs(t.testVehicleID).
 		WillReturnRows(getCountResult(1))
 
@@ -664,7 +674,7 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_Normal() {
 func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnSelect() {
 	errMsg := "failed resolving vehicle values by filter"
 
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(t.testVehicleID, 10, 0).
 		WillReturnError(errors.New(errMsg))
@@ -689,12 +699,12 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnSelect() 
 
 func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnCount() {
 	errMsg := "failed resolving vehicle values by filter"
-	mock.
+	t.sqlmock.
 		ExpectQuery(repository.QuerySelectVehicleValues+"WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL LIMIT ? OFFSET ?").
 		WithArgs(t.testVehicleID, 10, 0).
 		WillReturnRows(getSingleEntityIDResult(t.testVehicleID))
 
-	mock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
+	t.sqlmock.ExpectQuery("SELECT COUNT(entity_id) FROM vehicle_values WHERE ((vehicle_values.vehicle_entity_id IN (?))) AND vehicle_values.deleted IS NULL").
 		WithArgs(t.testVehicleID).
 		WillReturnError(errors.New(errMsg))
 
@@ -714,4 +724,120 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnCount() {
 	assert.Equal(t.T(), 0, pageInfo.PageCount)
 	assert.Equal(t.T(), 0, pageInfo.TotalCount)
 	assert.Equal(t.T(), 0, pageInfo.PageSize)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_Normal() {
+	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
+
+	t.sqlmock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getExistsResult(true))
+
+	t.sqlmock.ExpectBegin()
+
+	t.sqlmock.
+		ExpectPrepare(vehiclesStmtUpdate).
+		ExpectExec().
+		WithArgs(t.getArgsFromVehicleModel(testModel, true)...).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	t.sqlmock.ExpectCommit()
+
+	err := t.repo.Update(testModel)
+
+	assert.NoError(t.T(), err)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_ErrorOnCheckExistence() {
+	errMsg := "failed checking the existence of vehicle"
+	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
+
+	t.sqlmock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnError(errors.New(errMsg))
+
+	err := t.repo.Update(testModel)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "exists by ID", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_DoesNotExist() {
+	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
+
+	t.sqlmock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getExistsResult(false))
+
+	err := t.repo.Update(testModel)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeEntityNotFound, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), "Record not found")
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_FailOnPrepare() {
+	errMsg := "failed preparing update statemtnt for vehicle"
+	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
+
+	t.sqlmock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getExistsResult(true))
+
+	t.sqlmock.ExpectBegin()
+
+	t.sqlmock.
+		ExpectPrepare(vehiclesStmtUpdate).
+		WillReturnError(errors.New(errMsg))
+
+	t.sqlmock.ExpectRollback()
+
+	err := t.repo.Update(testModel)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_FailOnExec() {
+	errMsg := "failed executing update statement for vehicle"
+	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
+
+	t.sqlmock.
+		ExpectQuery("SELECT COUNT(entity_id) > 0 FROM vehicles WHERE vehicles.entity_id = ?").
+		WithArgs(t.testVehicleID).
+		WillReturnRows(getExistsResult(true))
+
+	t.sqlmock.ExpectBegin()
+
+	t.sqlmock.
+		ExpectPrepare(vehiclesStmtUpdate).
+		ExpectExec().
+		WithArgs(t.getArgsFromVehicleModel(testModel, true)...).
+		WillReturnError(errors.New(errMsg))
+
+	t.sqlmock.ExpectRollback()
+
+	err := t.repo.Update(testModel)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "update", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
 }

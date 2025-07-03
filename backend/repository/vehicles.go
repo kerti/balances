@@ -392,6 +392,7 @@ func (r *VehicleMySQLRepo) Update(vehicle model.Vehicle) error {
 
 	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
 		if err := r.txUpdateVehicle(tx, vehicle); err != nil {
+			err = failure.InternalError("update", "Vehicle", err)
 			e <- err
 			return
 		}
