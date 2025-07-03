@@ -1,6 +1,11 @@
 include .env
 export
 
+BOLD := \033[1m
+GREEN := \033[0;32m
+RED := \033[0;31m
+NC := \033[0m
+
 SEEDER_DIR := ./migrations/seeder
 SEED_FILES := $(shell bash -c "find $(SEEDER_DIR) -type f -name '*.sql' | sort")
 MYSQL_CMD := MYSQL_PWD=$(DB_PASS) mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) $(DB_NAME)
@@ -23,19 +28,24 @@ test-report:
 	./coverage.sh --html
 
 check-env:
-	@[ -n "$(DB_HOST)" ] || (echo "❌ DB_HOST not set" && exit 1)
-	@[ -n "$(DB_PORT)" ] || (echo "❌ DB_PORT not set" && exit 1)
-	@[ -n "$(DB_USER)" ] || (echo "❌ DB_USER not set" && exit 1)
-	@[ -n "$(DB_PASS)" ] || (echo "❌ DB_PASS not set" && exit 1)
-	@[ -n "$(DB_NAME)" ] || (echo "❌ DB_NAME not set" && exit 1)
+	@[ -n "$(DB_HOST)" ] || (echo "❌ $(RED)DB_HOST$(NC) not set" && exit 1)
+	@[ -n "$(DB_PORT)" ] || (echo "❌ $(RED)DB_PORT$(NC) not set" && exit 1)
+	@[ -n "$(DB_USER)" ] || (echo "❌ $(RED)DB_USER$(NC) not set" && exit 1)
+	@[ -n "$(DB_PASS)" ] || (echo "❌ $(RED)DB_PASS$(NC) not set" && exit 1)
+	@[ -n "$(DB_NAME)" ] || (echo "❌ $(RED)DB_NAME$(NC) not set" && exit 1)
 
 seed: check-env
-	@echo "Running seed files in $(SEEDER_DIR)..."
+	@echo "$(BOLD)Running seed files in $(GREEN)$(SEEDER_DIR)$(NC)..."
 	@for file in $(SEED_FILES); do \
-		echo "Executing $$file..."; \
-		$(MYSQL_CMD) < $$file || { echo "❌ Failed on $$file"; exit 1; }; \
+		printf "==> Executing $(GREEN)$$file$(NC)... "; \
+		if $(MYSQL_CMD) < $$file; then \
+			printf "$(GREEN)✅ OK$(NC)\n"; \
+		else \
+			echo "$(RED)❌ Failed on $$file$(NC)"; \
+			exit 1; \
+		fi; \
 	done
-	@echo "✅ All seeders executed successfully."
+	@echo "$(BOLD)✅ All seeders executed successfully.$(NC)"
 
 help:
 	@echo "Available targets:"
@@ -43,4 +53,4 @@ help:
 	@echo "  genmock      Generate mock files"
 	@echo "  test         Run tests"
 	@echo "  test-report  Generate HTML test coverage report"
-	@echo "  seed         Run DB seeders from $(SEEDER_DIR)"
+	@echo "  seed         Run DB seeders from $(GREEN)$(BOLD)$(SEEDER_DIR)$(NC)"
