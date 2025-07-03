@@ -1,6 +1,8 @@
 -- This SQL script resets the database and puts it back to
 -- "demo-ready" state, particularly in the assets category.
 
+START TRANSACTION;
+
 -- -- Bank Accounts and Bank Acount Balances
 
 DELETE FROM `bank_account_balances`;
@@ -64,8 +66,8 @@ INSERT INTO `vehicles`
 (`entity_id`, `name`, `make`, `model`, `year`, `type`, `title_holder`, `license_plate_number`, `purchase_date`, `initial_value`, `initial_value_date`, `current_value`, `current_value_date`, `annual_depreciation_percent`, `status`, `created_by`)
 VALUES
 ('e932f0e7-6677-4f9d-969d-940be9e5f3c5', 'John''s Car', 'Hyundai', 'Palisade', 2024, 'car', 'John Fitzgerald Doe', 'TUNEMAN', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000, timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1260000000 * POWER((1 - (0.035 / 12)), 12), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 3.50, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
-('291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', 'Jane''s Car', 'Ford', 'Everest Titanium', 2024, 'truck', 'Jane Eleanor Doe', 'SKYBLUE', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000, timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - (0.034 / 12)), 12), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 3.40, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
-('5ab48d72-9ade-49b6-9c65-cd7fb3cf1273', 'Mike''s Bike', 'Brompton', 'Pikes Gen 2', 2023, 'bicycle', 'Michael Ralph Doe', '-',  timestamp(last_day(curdate() - interval 24 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000, timestamp(last_day(curdate() - interval 24 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000 * POWER((1 - (0.012 / 12)), 24), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 1.20, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c')
+('291cbcfa-50c9-40ac-a6d3-fd0f051ace0b', 'Jane''s Car', 'Ford', 'Everest Titanium', 2024, 'truck', 'Jane Eleanor Doe', 'SKYBLUE', timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000, timestamp(last_day(curdate() - interval 12 month) + interval 1 day - interval 7 hour - interval 1 minute), 1025000000 * POWER((1 - (0.034 / 12)), 12), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 3.40, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
+('5ab48d72-9ade-49b6-9c65-cd7fb3cf1273', 'Mike''s Bike', 'Brompton', 'Pikes Gen 2', 2023, 'bicycle', 'Michael Ralph Doe', '-',  timestamp(last_day(curdate() - interval 24 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000, timestamp(last_day(curdate() - interval 24 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000 * POWER((1 - (0.012 / 12)), 24), timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 1.20, 'in_use', 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
 
 INSERT INTO `vehicle_values`
 (`entity_id`, `vehicle_entity_id`, `date`, `value`, `created_by`)
@@ -121,3 +123,5 @@ VALUES
 ('b9c998d8-fb38-44d5-98e3-67038cde0001', '5ab48d72-9ade-49b6-9c65-cd7fb3cf1273', timestamp(last_day(curdate() - interval 3 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000 * POWER((1 - (0.012 / 12)), 21), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
 ('bca0a18d-a6ab-44b1-a901-61acf70329b1', '5ab48d72-9ade-49b6-9c65-cd7fb3cf1273', timestamp(last_day(curdate() - interval 2 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000 * POWER((1 - (0.012 / 12)), 22), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c'),
 ('82e189e8-b955-421c-bf12-2a93c8886be0', '5ab48d72-9ade-49b6-9c65-cd7fb3cf1273', timestamp(last_day(curdate() - interval 1 month) + interval 1 day - interval 7 hour - interval 1 minute), 10350000 * POWER((1 - (0.012 / 12)), 23), 'cf4dcb72-27ed-442f-bac0-2c2871e29b1c');
+
+COMMIT;
