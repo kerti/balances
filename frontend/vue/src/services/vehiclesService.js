@@ -4,6 +4,7 @@ import {
     searchVehiclesFromAPI,
     getVehicleFromAPI,
     updateVehicleWithAPI,
+    deleteVehicleWithAPI,
     // vehicle values
     searchVehicleValuesFromAPI,
 } from '@/api/vehiclesApi'
@@ -116,12 +117,26 @@ export function useVehiclesService() {
         }
     }
 
+    // delete
+    async function deleteVehicle(id) {
+        const result = await deleteVehicleWithAPI(id)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
+
     return {
         // vehicles
         createVehicle,
         searchVehicles,
         getVehicle,
         updateVehicle,
+        deleteVehicle,
         // vehicle values
     }
 }

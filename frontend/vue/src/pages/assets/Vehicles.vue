@@ -105,6 +105,26 @@ const createVehicle = async () => {
     vehiclesStore.resetLVAddVehicleDialog()
   }
 }
+
+const showDeleteVehicleConfirmation = async (vehicleId) => {
+  const res = await vehiclesStore.getVehicleToDeleteById(vehicleId)
+  if (!res.error) {
+    lvDeleteVehicleDialog.showModal()
+  }
+}
+
+const cancelDeleteVehicle = () => {
+  lvDeleteVehicleDialog.close()
+  vehiclesStore.resetLVDeleteVehicleDialog()
+}
+
+const deleteVehicle = async () => {
+  const res = await vehiclesStore.deleteVehicle()
+  if (!res.error) {
+    lvDeleteVehicleDialog.close()
+    vehiclesStore.resetLVAddVehicleDialog()
+  }
+}
 </script>
 
 <template>
@@ -231,6 +251,7 @@ const createVehicle = async () => {
                     <button
                       class="btn btn-neutral btn-sm tooltip"
                       data-tip="Delete"
+                      v-on:click="showDeleteVehicleConfirmation(vehicle.id)"
                     >
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
@@ -380,6 +401,104 @@ const createVehicle = async () => {
             class="btn btn-secondary"
           >
             Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Dialog Box: Confirm Vehicle Delete -->
+  <dialog id="lvDeleteVehicleDialog" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Confirm Vehicle Delete</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-2 grid-rows-7 gap-4">
+          <div>Name</div>
+          <div>
+            {{ vehiclesStore.lvDeleteVehicle.name }}
+          </div>
+          <div>Make</div>
+          <div>{{ vehiclesStore.lvDeleteVehicle.make }}</div>
+          <div>Model</div>
+          <div>
+            {{ vehiclesStore.lvDeleteVehicle.model }}
+          </div>
+          <div>Year</div>
+          <div>
+            {{ vehiclesStore.lvDeleteVehicle.year }}
+          </div>
+          <div>Type</div>
+          <div>{{ vehiclesStore.lvDeleteVehicle.type }}</div>
+          <div>Title Holder</div>
+          <div>{{ vehiclesStore.lvDeleteVehicle.titleHolder }}</div>
+          <div>License Plate Number</div>
+          <div>{{ vehiclesStore.lvDeleteVehicle.licensePlateNumber }}</div>
+          <div>Purchase Date</div>
+          <div>
+            {{
+              dateUtils.epochToLocalDate(
+                vehiclesStore.lvDeleteVehicle.purchaseDate
+              )
+            }}
+          </div>
+          <div>Initial Value</div>
+          <div>
+            {{
+              numUtils.numericToMoney(
+                vehiclesStore.lvDeleteVehicle.initialValue
+              )
+            }}
+          </div>
+          <div>Initial Value Date</div>
+          <div>
+            {{
+              dateUtils.epochToLocalDate(
+                vehiclesStore.lvDeleteVehicle.initialValueDate
+              )
+            }}
+          </div>
+          <div>Current Value</div>
+          <div>
+            {{
+              numUtils.numericToMoney(
+                vehiclesStore.lvDeleteVehicle.currentValue
+              )
+            }}
+          </div>
+          <div>Current Value Date</div>
+          <div>
+            {{
+              dateUtils.epochToLocalDate(
+                vehiclesStore.lvDeleteVehicle.currentValueDate
+              )
+            }}
+          </div>
+          <div>Annual Depreciation Rate (%)</div>
+          <div>
+            {{ vehiclesStore.lvDeleteVehicle.annualDepreciationPercent }}
+          </div>
+          <div>Status</div>
+          <div>{{ vehiclesStore.lvDeleteVehicle.status }}</div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button
+            type="button"
+            @click="deleteVehicle()"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            @click="cancelDeleteVehicle()"
+            class="btn btn-secondary"
+          >
+            Cancel
           </button>
         </div>
       </form>
