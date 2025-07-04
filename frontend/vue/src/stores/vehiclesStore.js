@@ -8,6 +8,23 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     const toast = useToast()
 
     ////// templates
+    const blankVehicle = {
+        id: '',
+        name: '',
+        make: '',
+        model: '',
+        year: 0,
+        type: '',
+        titleHolder: '',
+        licensePlateNumber: '',
+        purchaseDate: (new Date()).getTime(),
+        initialValue: 0,
+        initialValueDate: (new Date()).getTime(),
+        currentValue: 0,
+        currentValueDate: (new Date()).getTime(),
+        annualDepreciationPercent: 0,
+        status: 'in_use',
+    }
 
     ////// reactive state
 
@@ -20,7 +37,9 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     const lvVehicles = ref([])
     const lvChartData = ref([])
     // add vehicle dialog box
+    const lvAddVehicle = ref({})
     // delete vehicle dialog box
+    const lvDeleteVehicle = ref({})
 
     //// detail view
     // main page
@@ -51,12 +70,40 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         lvPageSize.value = 10
         lvVehicles.value = []
         lvChartData.value = []
-        // lvAddBankAccount.value = {}
+        lvAddBankAccount.value = {}
     }
 
     // CRUD
 
-    // TODO: add vehicle
+    async function createVehicle() {
+        const res = await svc.createVehicle({
+            id: lvAddVehicle.value.id,
+            name: lvAddVehicle.value.name,
+            make: lvAddVehicle.value.make,
+            model: lvAddVehicle.value.model,
+            year: lvAddVehicle.value.year,
+            type: lvAddVehicle.value.type,
+            titleHolder: lvAddVehicle.value.titleHolder,
+            licensePlateNumber: lvAddVehicle.value.licensePlateNumber,
+            purchaseDate: lvAddVehicle.value.purchaseDate,
+            initialValue: lvAddVehicle.value.initialValue,
+            initialValueDate: lvAddVehicle.value.initialValueDate,
+            currentValue: lvAddVehicle.value.currentValue,
+            currentValueDate: lvAddVehicle.value.currentValueDate,
+            annualDepreciationPercent: lvAddVehicle.value.annualDepreciationPercent,
+            status: lvAddVehicle.value.status,
+        })
+        if (!res.error) {
+            filterVehicles()
+            toast.showToast('Vehicle created!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to create vehicle: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
+    }
 
     async function filterVehicles() {
         lvVehicles.value = await svc.searchVehicles(
@@ -68,6 +115,16 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     }
 
     // TODO: everything else in list view
+
+    // cache prep and reset
+
+    function resetLVAddVehicleDialog() {
+        lvAddVehicle.value = JSON.parse(JSON.stringify(blankVehicle))
+    }
+
+    function resetLVDeleteVehicleDialog() {
+        lvDeleteVehicle.value = JSON.parse(JSON.stringify(blankVehicle))
+    }
 
     // chart utils
 
@@ -178,7 +235,9 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         lvVehicles,
         lvChartData,
         // add vehicle dialog box
+        lvAddVehicle,
         // delete vehicle dialog box
+        lvDeleteVehicle,
 
         //// detail view
         // main page
@@ -191,6 +250,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         dvChartData,
         // vehicle editor dialog box
 
+
         ////// actions
 
         //// list view
@@ -198,12 +258,13 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         lvHydrate,
         lvDehydrate,
         // CRUD
-        // createVehicle,
+        createVehicle,
         filterVehicles,
         // getVehicleToDeleteById,
         // deleteVehicle,
         // cache and prep
-        revertDVVehicleToCache,
+        resetLVAddVehicleDialog,
+        resetLVDeleteVehicleDialog,
 
         //// detail view
         dvHydrate,
@@ -211,5 +272,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         // CRUD
         getVehicleForDV,
         updateVehicle,
+        // cache and prep
+        revertDVVehicleToCache,
     }
 })

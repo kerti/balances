@@ -59,7 +59,7 @@ watch(
 )
 
 const showAddVehicleDialog = () => {
-  // bankAccountsStore.resetLVAddBankAccountDialog()
+  vehiclesStore.resetLVAddVehicleDialog()
   lvAddVehicleDialog.showModal()
 }
 
@@ -97,6 +97,14 @@ function refetch() {
 
 onMounted(() => refetch())
 onUnmounted(() => vehiclesStore.lvDehydrate())
+
+const createVehicle = async () => {
+  const res = await vehiclesStore.createVehicle()
+  if (!res.error) {
+    lvAddVehicleDialog.close()
+    vehiclesStore.resetLVAddVehicleDialog()
+  }
+}
 </script>
 
 <template>
@@ -256,59 +264,123 @@ onUnmounted(() => vehiclesStore.lvDehydrate())
       <form class="grid grid-cols-2 gap-4">
         <div>
           <label class="label">Vehicle Name*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.name"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Make*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.make"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Model*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.model"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Year*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.year"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Type*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <select
+            v-model="vehiclesStore.lvAddVehicle.type"
+            class="select select-bordered w-full"
+          >
+            <option>bicycle</option>
+            <option>car</option>
+            <option>motorcycle</option>
+            <option>truck</option>
+          </select>
         </div>
         <div>
           <label class="label">Title Holder*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.titleHolder"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">License Plate Number*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.licensePlateNumber"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Purchase Date*</label>
-          <!-- <DatePicker placeholder="pick a date" required /> -->
+          <DatePicker
+            v-model:date="vehiclesStore.lvAddVehicle.purchaseDate"
+            placeholder="pick a date"
+            required
+          />
         </div>
         <div>
           <label class="label">Initial Value*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.initialValue"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Initial Value Date*</label>
-          <!-- <DatePicker placeholder="pick a date" required /> -->
+          <DatePicker
+            v-model:date="vehiclesStore.lvAddVehicle.initialValueDate"
+            placeholder="pick a date"
+            required
+          />
         </div>
         <div>
           <label class="label">Current Value*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.currentValue"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div>
           <label class="label">Current Value Date*</label>
-          <!-- <DatePicker placeholder="pick a date" required /> -->
+          <DatePicker
+            v-model:date="vehiclesStore.lvAddVehicle.currentValueDate"
+            placeholder="pick a date"
+            required
+          />
         </div>
         <div>
           <label class="label">Annual Depreciation Rate (%)*</label>
-          <input type="text" class="input input-bordered w-full" />
+          <input
+            v-model="vehiclesStore.lvAddVehicle.annualDepreciationPercent"
+            type="text"
+            class="input input-bordered w-full"
+          />
         </div>
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" class="btn btn-primary">Save</button>
-          <button type="button" class="btn btn-secondary">Reset</button>
+          <button type="button" @click="createVehicle" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="vehiclesStore.resetLVAddVehicleDialog()"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
         </div>
       </form>
     </div>

@@ -126,7 +126,7 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         }
     }
 
-    // cache prep, and reset
+    // cache prep and reset
 
     function resetLVAddBankAccountDialog() {
         lvAddBankAccount.value = JSON.parse(JSON.stringify(blankBankAccount))

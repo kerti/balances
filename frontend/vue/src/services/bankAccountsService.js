@@ -24,7 +24,7 @@ export function useBankAccountsService() {
             bankName: account.bankName,
             accountHolderName: account.accountHolderName,
             accountNumber: account.accountNumber,
-            lastBalance: parseInt(account.lastBalance),
+            lastBalance: parseFloat(account.lastBalance),
             lastBalanceDate: account.lastBalanceDate,
             status: account.status,
         }

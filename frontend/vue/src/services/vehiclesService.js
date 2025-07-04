@@ -1,10 +1,47 @@
-import { getVehicleFromAPI, searchVehiclesFromAPI, searchVehicleValuesFromAPI, updateVehicleWithAPI } from '@/api/vehiclesApi'
+import {
+    // vehicles
+    createVehicleWithAPI,
+    searchVehiclesFromAPI,
+    getVehicleFromAPI,
+    updateVehicleWithAPI,
+    // vehicle values
+    searchVehicleValuesFromAPI,
+} from '@/api/vehiclesApi'
 
 export function useVehiclesService() {
 
     //// vehicles CRUD
 
-    // TODO: create
+    // create
+    async function createVehicle(vehicle) {
+        console.log(vehicle)
+        const payload = {
+            name: vehicle.name,
+            make: vehicle.make,
+            model: vehicle.model,
+            year: parseInt(vehicle.year),
+            type: vehicle.type,
+            titleHolder: vehicle.titleHolder,
+            licensePlateNumber: vehicle.licensePlateNumber,
+            purchaseDate: vehicle.purchaseDate,
+            initialValue: parseFloat(vehicle.initialValue),
+            initialValueDate: vehicle.initialValueDate,
+            currentValue: parseFloat(vehicle.currentValue),
+            currentValueDate: vehicle.currentValueDate,
+            annualDepreciationPercent: parseFloat(vehicle.annualDepreciationPercent),
+            status: vehicle.status,
+        }
+
+        const result = await createVehicleWithAPI(payload)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
 
     // read
     async function searchVehicles(filter, valuesStartDate, valuesEndDate, pageSize) {
@@ -81,6 +118,7 @@ export function useVehiclesService() {
 
     return {
         // vehicles
+        createVehicle,
         searchVehicles,
         getVehicle,
         updateVehicle,
