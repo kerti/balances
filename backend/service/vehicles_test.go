@@ -331,7 +331,7 @@ func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithValue_WithPageSize() {
 	assert.NoError(t.T(), err)
 }
 
-func (t *vehiclesServiceTestSuite) TestGetByID_Exists_With_Balance_RepoErrorResolvingVehicle() {
+func (t *vehiclesServiceTestSuite) TestGetByID_Exists_With_Value_RepoErrorResolvingVehicle() {
 	errMsg := "failed to resolve vehicle by IDs"
 	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
 		Return([]model.Vehicle{}, failure.InternalError("resolve by IDs", "Vehicle", errors.New(errMsg)))
@@ -349,7 +349,7 @@ func (t *vehiclesServiceTestSuite) TestGetByID_Exists_With_Balance_RepoErrorReso
 	assert.Equal(t.T(), "resolve by IDs", *errAsFailure.Operation)
 }
 
-func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithBalance_RepoErrorResolvingValues() {
+func (t *vehiclesServiceTestSuite) TestGetByID_Exists_WithValue_RepoErrorResolvingValues() {
 	errMsg := "error resolving values"
 	valueFilterInput := model.VehicleValueFilterInput{
 		VehicleIDs: &[]uuid.UUID{t.testVehicleID},
@@ -507,7 +507,184 @@ func (t *vehiclesServiceTestSuite) TestUpdate_RepoErrorUpdating() {
 	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
-// TODO: test delete
+func (t *vehiclesServiceTestSuite) TestDelete_Normal() {
+	valuesSlice := []model.VehicleValue{}
+
+	valuesSlice = append(
+		valuesSlice,
+		t.getNewVehicleValue(
+			nuuid.NUUID{},
+			nuuid.From(t.testVehicleID),
+			float64(10000),
+			time.Now().AddDate(0, 0, -1)))
+
+	valuesSlice = append(
+		valuesSlice,
+		t.getNewVehicleValue(
+			nuuid.NUUID{},
+			nuuid.From(t.testVehicleID),
+			float64(9000),
+			time.Now()))
+
+	testVehicle := t.getNewVehicle(nuuid.From(t.testVehicleID), &valuesSlice)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testVehicle}, nil)
+
+	t.mockRepo.EXPECT().ResolveValuesByFilter(gomock.Any()).
+		Return(valuesSlice, getDefaultPageInfo(), nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).Return(nil)
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.NoError(t.T(), err)
+
+	assert.NotNil(t.T(), res)
+	assert.True(t.T(), res.Deleted.Valid)
+	assert.True(t.T(), res.DeletedBy.Valid)
+
+	assert.Len(t.T(), res.Values, 2)
+	for _, resValue := range res.Values {
+		assert.True(t.T(), resValue.Deleted.Valid)
+		assert.True(t.T(), resValue.DeletedBy.Valid)
+	}
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_RepoErrorResolvingByIDs() {
+	errMsg := "failed resolving by IDs"
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, errors.New(errMsg))
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_RepoErrorResolvingValuesByFilter() {
+	errMsg := "failed resolving vehicle values"
+
+	testVehicle := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testVehicle}, nil)
+
+	t.mockRepo.EXPECT().ResolveValuesByFilter(gomock.Any()).
+		Return([]model.VehicleValue{}, model.PageInfoOutput{}, errors.New(errMsg))
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_VehicleNotFound() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, nil)
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_VehicleAlreadyDeleted() {
+	testDeletedVehicle := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testDeletedVehicle.Deleted = null.TimeFrom(time.Now())
+	testDeletedVehicle.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testDeletedVehicle}, nil)
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "delete")
+	assert.Contains(t.T(), err.Error(), "Vehicle")
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_VehicleValueAlreadyDeleted() {
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{t.getNewVehicle(nuuid.From(t.testVehicleID), nil)}, nil)
+
+	testDeletedNonLastVehicleValue := t.getNewVehicleValue(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(10000),
+		time.Now().AddDate(0, 0, -1))
+
+	testDeletedNonLastVehicleValue.Deleted = null.TimeFrom(time.Now())
+	testDeletedNonLastVehicleValue.DeletedBy = nuuid.From(t.testUserID)
+
+	testLastVehicleValue := t.getNewVehicleValue(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(12000),
+		time.Now())
+
+	t.mockRepo.EXPECT().ResolveValuesByFilter(gomock.Any()).
+		Return(
+			[]model.VehicleValue{
+				testDeletedNonLastVehicleValue,
+				testLastVehicleValue,
+			},
+			getDefaultPageInfo(),
+			nil)
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "delete")
+	assert.Contains(t.T(), err.Error(), "Vehicle Value")
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestDelete_RepoErrorUpdating() {
+	errMsg := "failed updating vehicle"
+	valueSlice := []model.VehicleValue{}
+
+	valueSlice = append(
+		valueSlice,
+		t.getNewVehicleValue(
+			nuuid.NUUID{},
+			nuuid.From(t.testVehicleID),
+			float64(10000),
+			time.Now().AddDate(0, 0, -1)))
+
+	valueSlice = append(
+		valueSlice,
+		t.getNewVehicleValue(
+			nuuid.NUUID{},
+			nuuid.From(t.testVehicleID),
+			float64(12000),
+			time.Now()))
+
+	testVehicle := t.getNewVehicle(nuuid.From(t.testVehicleID), &valueSlice)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testVehicle}, nil)
+
+	t.mockRepo.EXPECT().ResolveValuesByFilter(gomock.Any()).
+		Return(valueSlice, getDefaultPageInfo(), nil)
+
+	t.mockRepo.EXPECT().Update(gomock.Any()).Return(errors.New(errMsg))
+
+	res, err := t.svc.Delete(t.testVehicleID, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+
+	assert.Nil(t.T(), res)
+}
 
 // TODO: test create value
 
