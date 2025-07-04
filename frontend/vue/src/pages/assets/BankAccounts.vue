@@ -111,9 +111,11 @@ const createBankAccount = async () => {
   }
 }
 
-const showDeleteBankAccountConfirmation = (accountId) => {
-  bankAccountsStore.getAccountToDeleteById(accountId)
-  lvDeleteBankAccountDialog.showModal()
+const showDeleteBankAccountConfirmation = async (accountId) => {
+  const res = await bankAccountsStore.getAccountToDeleteById(accountId)
+  if (!res.error) {
+    lvDeleteBankAccountDialog.showModal()
+  }
 }
 
 const cancelDeleteBankAccount = () => {

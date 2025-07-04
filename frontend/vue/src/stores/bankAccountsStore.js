@@ -109,7 +109,16 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
     }
 
     async function getAccountToDeleteById(id) {
-        lvDeleteBankAccount.value = await svc.getBankAccount(id, null, null, 0)
+        const res = await svc.getBankAccount(id, null, null, 0)
+        if (!res.error) {
+            lvDeleteBankAccount.value = res
+            return res
+        } else {
+            toast.showToast('Failed to retrieve bank account for deletion: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
     }
 
     async function deleteBankAccount() {

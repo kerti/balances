@@ -3,7 +3,32 @@ import { useEnvUtils } from '@/composables/useEnvUtils'
 
 //// vehicles CRUD
 
-// TODO: create
+// create
+export async function createVehicleWithAPI(vehicle) {
+    try {
+        const { data } = await axiosInstance.post('vehicles', {
+            name: vehicle.name,
+            make: vehicle.make,
+            model: vehicle.model,
+            year: vehicle.year,
+            type: vehicle.type,
+            titleHolder: vehicle.titleHolder,
+            licensePlateNumber: vehicle.licensePlateNumber,
+            purchaseDate: vehicle.purchaseDate,
+            initialValue: vehicle.initialValue,
+            initialValueDate: vehicle.initialValueDate,
+            currentValue: vehicle.currentValue,
+            currentValueDate: vehicle.currentValueDate,
+            annualDepreciationPercent: vehicle.annualDepreciationPercent,
+            status: vehicle.status,
+        })
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
 // read
 export async function searchVehiclesFromAPI(filter, pageSize) {
@@ -58,29 +83,10 @@ export async function updateVehicleWithAPI(vehicle) {
     }
 }
 
-// TODO: delete
-
-//// vehicle values CRUD
-
-// create
-export async function createVehicleWithAPI(vehicle) {
+// delete
+export async function deleteVehicleWithAPI(id) {
     try {
-        const { data } = await axiosInstance.post('vehicles', {
-            name: vehicle.name,
-            make: vehicle.make,
-            model: vehicle.model,
-            year: vehicle.year,
-            type: vehicle.type,
-            titleHolder: vehicle.titleHolder,
-            licensePlateNumber: vehicle.licensePlateNumber,
-            purchaseDate: vehicle.purchaseDate,
-            initialValue: vehicle.initialValue,
-            initialValueDate: vehicle.initialValueDate,
-            currentValue: vehicle.currentValue,
-            currentValueDate: vehicle.currentValueDate,
-            annualDepreciationPercent: vehicle.annualDepreciationPercent,
-            status: vehicle.status,
-        })
+        const { data } = await axiosInstance.delete('vehicles/' + id)
         return data
     } catch (error) {
         return {
@@ -88,6 +94,10 @@ export async function createVehicleWithAPI(vehicle) {
         }
     }
 }
+
+//// vehicle values CRUD
+
+// TODO: create
 
 // read
 export async function searchVehicleValuesFromAPI(vehicleIds, startDate, endDate, pageSize, page) {

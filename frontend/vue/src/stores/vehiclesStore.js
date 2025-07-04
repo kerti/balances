@@ -70,7 +70,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         lvPageSize.value = 10
         lvVehicles.value = []
         lvChartData.value = []
-        lvAddBankAccount.value = {}
+        lvAddVehicle.value = {}
     }
 
     // CRUD
@@ -112,6 +112,33 @@ export const useVehiclesStore = defineStore('vehicles', () => {
             lvValuesEndDate.value,
             lvPageSize.value)
         extractLVChartData()
+    }
+
+    async function getVehicleToDeleteById(id) {
+        const res = await svc.getVehicle(id, null, null, 0)
+        if (!res.error) {
+            lvDeleteVehicle.value = res
+            return res
+        } else {
+            toast.showToast('Failed to retrieve vehicle for deletion: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
+    }
+
+    async function deleteVehicle() {
+        const res = await svc.deleteVehicle(lvDeleteVehicle.value.id)
+        if (!res.error) {
+            filterVehicles()
+            toast.showToast('Vehicle deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete vehicle: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
     }
 
     // TODO: everything else in list view
@@ -260,8 +287,8 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         // CRUD
         createVehicle,
         filterVehicles,
-        // getVehicleToDeleteById,
-        // deleteVehicle,
+        getVehicleToDeleteById,
+        deleteVehicle,
         // cache and prep
         resetLVAddVehicleDialog,
         resetLVDeleteVehicleDialog,
