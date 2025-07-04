@@ -1,6 +1,8 @@
 package service
 
 import (
+	"math"
+
 	"github.com/google/uuid"
 	"github.com/kerti/balances/backend/model"
 	"github.com/kerti/balances/backend/repository"
@@ -109,7 +111,47 @@ func (s *VehicleImpl) Update(input model.VehicleInput, userID uuid.UUID) (*model
 // Delete deletes an existing Vehicle. The method will find all the vehicle's values
 // and delete all of them also.
 func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("delete", "Vehicle")
+	}
+
+	vehicle := vehicles[0]
+
+	// pre-validate to save one database call
+	if !vehicle.Deleted.Valid && !vehicle.DeletedBy.Valid {
+		filter := model.VehicleValueFilterInput{}
+		filter.VehicleIDs = &[]uuid.UUID{vehicle.ID}
+
+		page := 1
+		pageSize := math.MaxInt
+
+		filter.Page = &page
+		filter.PageSize = &pageSize
+
+		values, _, err := s.Repository.ResolveValuesByFilter(filter.ToFilter())
+		if err != nil {
+			return nil, err
+		}
+
+		vehicle.AttachValues(values, true)
+	}
+
+	err = vehicle.Delete(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.Repository.Update(vehicle)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vehicle, err
 }
 
 // CreateValue creates a new Vehicle Value
