@@ -340,7 +340,26 @@ func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleV
 
 // ResolveLastValuesByVehicleID resolves last X Vehicle Values by their Vehicle ID and count param
 func (r *VehicleMySQLRepo) ResolveLastValuesByVehicleID(id uuid.UUID, count int) (vehicleValues []model.VehicleValue, err error) {
-	return []model.VehicleValue{}, failure.Unimplemented("repository unimplemented for this method: resolveLastValuesByVehicleID")
+	if count == 0 {
+		return
+	}
+
+	whereClause := " WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?"
+	query, args, err := r.DB.In(QuerySelectVehicleValues+whereClause, id, count)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve last values", "Vehicle Value", err)
+		return
+	}
+
+	err = r.DB.Select(&vehicleValues, query, args...)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve last values", "Vehicle Value", err)
+		return
+	}
+
+	return
 }
 
 // Create creates a Vehicle

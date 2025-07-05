@@ -726,7 +726,45 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnCount() {
 	assert.Equal(t.T(), 0, pageInfo.PageSize)
 }
 
-func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_Normal() {
+func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_Normal() {
+	id1, _ := uuid.NewV7()
+	id2, _ := uuid.NewV7()
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
+		WithArgs(t.testVehicleID, 2).
+		WillReturnRows(getMultiEntityIDResult([]uuid.UUID{id1, id2}))
+
+	res, err := t.repo.ResolveLastValuesByVehicleID(t.testVehicleID, 2)
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 2)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_CountZero() {
+	res, err := t.repo.ResolveLastValuesByVehicleID(t.testVehicleID, 0)
+
+	assert.NoError(t.T(), err)
+	assert.Len(t.T(), res, 0)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_FailOnSelect() {
+	errMsg := "failed resolving last values"
+
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
+		WithArgs(t.testVehicleID, 2).
+		WillReturnError(errors.New(errMsg))
+
+	res, err := t.repo.ResolveLastValuesByVehicleID(t.testVehicleID, 2)
+
+	assert.Error(t.T(), err)
+	assert.IsType(t.T(), &failure.Failure{}, err)
+	assert.Equal(t.T(), failure.CodeInternalError, err.(*failure.Failure).Code)
+	assert.Equal(t.T(), "Vehicle Value", *err.(*failure.Failure).Entity)
+	assert.Equal(t.T(), "resolve last values", *err.(*failure.Failure).Operation)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Len(t.T(), res, 0)
+}
+
+func (t *vehiclesRepositoryTestSuite) TestUpdate_Normal() {
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
 
 	t.sqlmock.
@@ -749,7 +787,7 @@ func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_Normal() {
 	assert.NoError(t.T(), err)
 }
 
-func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_ErrorOnCheckExistence() {
+func (t *vehiclesRepositoryTestSuite) TestUpdate_ErrorOnCheckExistence() {
 	errMsg := "failed checking the existence of vehicle"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
 
@@ -768,7 +806,7 @@ func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_ErrorOnCheckExistence() 
 	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
-func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_DoesNotExist() {
+func (t *vehiclesRepositoryTestSuite) TestUpdate_DoesNotExist() {
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
 
 	t.sqlmock.
@@ -786,7 +824,7 @@ func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_DoesNotExist() {
 	assert.Contains(t.T(), err.Error(), "Record not found")
 }
 
-func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_FailOnPrepare() {
+func (t *vehiclesRepositoryTestSuite) TestUpdate_FailOnPrepare() {
 	errMsg := "failed preparing update statemtnt for vehicle"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
 
@@ -813,7 +851,7 @@ func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_FailOnPrepare() {
 	assert.Contains(t.T(), err.Error(), errMsg)
 }
 
-func (t *vehiclesRepositoryTestSuite) TestUpdateVehicle_FailOnExec() {
+func (t *vehiclesRepositoryTestSuite) TestUpdate_FailOnExec() {
 	errMsg := "failed executing update statement for vehicle"
 	testModel := t.getNewVehicleModel(nuuid.From(t.testVehicleID), 0)
 
