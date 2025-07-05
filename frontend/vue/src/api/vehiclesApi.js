@@ -97,7 +97,21 @@ export async function deleteVehicleWithAPI(id) {
 
 //// vehicle values CRUD
 
-// TODO: create
+// create
+export async function createVehicleValueWithAPI(vehicleValue) {
+    try {
+        const { data } = await axiosInstance.post('vehicles/values', {
+            vehicleId: vehicleValue.id,
+            date: vehicleValue.date,
+            value: vehicleValue.value,
+        })
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
 // read
 export async function searchVehicleValuesFromAPI(vehicleIds, startDate, endDate, pageSize, page) {
@@ -117,11 +131,41 @@ export async function searchVehicleValuesFromAPI(vehicleIds, startDate, endDate,
     }
 }
 
-// TODO: read
+// read
+export async function getVehicleValueFromAPI(id) {
+    try {
+        const { data } = await axiosInstance.get('vehicles/values/' + id)
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
-// TODO: update
+// update
+export async function updateVehicleValueWithAPI(vehicleValue) {
+    try {
+        const { data } = await axiosInstance.patch('vehicles/values/' + vehicleValue.id, vehicleValue)
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
-// TODO: delete
+// delete
+export async function deleteVehicleValueWithAPI(id) {
+    try {
+        const { data } = await axiosInstance.delete('vehicles/values/' + id)
+        return data
+    } catch (error) {
+        return {
+            error: error
+        }
+    }
+}
 
 //// utilities
 

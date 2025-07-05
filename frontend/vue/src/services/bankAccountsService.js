@@ -147,7 +147,7 @@ export function useBankAccountsService() {
             return accountBalance.data
         } else {
             return {
-                error: result.error
+                error: accountBalance.error
             }
         }
     }
