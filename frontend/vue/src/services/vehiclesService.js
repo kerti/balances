@@ -6,7 +6,11 @@ import {
     updateVehicleWithAPI,
     deleteVehicleWithAPI,
     // vehicle values
+    createVehicleValueWithAPI,
     searchVehicleValuesFromAPI,
+    getVehicleValueFromAPI,
+    updateVehicleValueWithAPI,
+    deleteVehicleValueWithAPI,
 } from '@/api/vehiclesApi'
 
 export function useVehiclesService() {
@@ -130,6 +134,73 @@ export function useVehiclesService() {
         }
     }
 
+    //// vehicles CRUD
+
+    // create
+    async function createVehicleValue(vehicleValue) {
+        const payload = {
+            vehicleId: vehicleValue.vehicleId,
+            date: vehicleValue.date,
+            value: parseInt(vehicleValue.value)
+        }
+
+        const result = await createVehicleValueWithAPI(payload)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
+
+    // read
+    async function getVehicleValue(id) {
+        const vehicleValue = await getVehicleValueFromAPI(id)
+
+        if (!vehicleValue.error) {
+            return vehicleValue.data
+        } else {
+            return {
+                error: vehicleValue.error
+            }
+        }
+    }
+
+    // update
+    async function updateVehicleValue(vehicleValue) {
+        const payload = {
+            id: vehicleValue.id,
+            vehicleId: vehicleValue.vehicleId,
+            date: vehicleValue.date,
+            value: parseInt(vehicleValue.value),
+        }
+
+        const result = await updateVehicleValueWithAPI(payload)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
+
+    // delete
+    async function deleteVehicleValue(id) {
+        const result = await deleteVehicleValueWithAPI(id)
+
+        if (!result.error) {
+            return result.data
+        } else {
+            return {
+                error: result.error
+            }
+        }
+    }
+
     return {
         // vehicles
         createVehicle,
@@ -138,5 +209,9 @@ export function useVehiclesService() {
         updateVehicle,
         deleteVehicle,
         // vehicle values
+        createVehicleValue,
+        getVehicleValue,
+        updateVehicleValue,
+        deleteVehicleValue,
     }
 }
