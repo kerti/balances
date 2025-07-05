@@ -227,7 +227,7 @@ func (s *BankAccountImpl) UpdateBalance(input model.BankAccountBalanceInput, use
 	}
 
 	if len(bankAccounts) != 1 {
-		return nil, failure.EntityNotFound("get by filter", "Bank Account Balance")
+		return nil, failure.EntityNotFound("update", "Bank Account Balance")
 	}
 
 	bankAccount := bankAccounts[0]
