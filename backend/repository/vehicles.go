@@ -422,7 +422,35 @@ func (r *VehicleMySQLRepo) Update(vehicle model.Vehicle) error {
 
 // CreateValue creates a new Vehicle Value and optionally updates the Vehicle transactionally
 func (r *VehicleMySQLRepo) CreateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
-	return failure.Unimplemented("repository unimplemented for this method: createValue")
+	exists, err := r.ExistsValueByID(vehicleValue.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	if exists {
+		err = failure.OperationNotPermitted("create", "Vehicle Value", "already exists")
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
+		if err := r.txCreateVehicleValue(tx, vehicleValue); err != nil {
+			err = failure.InternalError("create", "Vehicle Value", err)
+			e <- err
+			return
+		}
+
+		if vehicle != nil {
+			if err := r.txUpdateVehicle(tx, *vehicle); err != nil {
+				err = failure.InternalError("create", "Vehicle Value", err)
+				e <- err
+				return
+			}
+		}
+
+		e <- nil
+	})
 }
 
 // UpdateValue updates an existing Vehicle Value and optionally updates the Vehicle transactionally
