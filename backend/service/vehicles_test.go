@@ -1077,6 +1077,8 @@ func (t *vehiclesServiceTestSuite) TestUpdateValue_Normal_CurrentValue() {
 		testInput.Date.Time())
 
 	updatedVehicle := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	updatedVehicle.PurchaseDate = vehicleToUpdate.PurchaseDate
+	updatedVehicle.InitialValueDate = vehicleToUpdate.InitialValueDate
 	updatedVehicle.CurrentValue = updatedValue.Value
 	updatedVehicle.CurrentValueDate = updatedValue.Date
 
