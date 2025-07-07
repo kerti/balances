@@ -156,7 +156,50 @@ func (s *VehicleImpl) Delete(id uuid.UUID, userID uuid.UUID) (*model.Vehicle, er
 
 // CreateValue creates a new Vehicle Value
 func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{input.VehicleID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("create balance", "Vehicle Value")
+	}
+
+	vehicle := vehicles[0]
+
+	if vehicle.Deleted.Valid || vehicle.DeletedBy.Valid {
+		return nil, failure.OperationNotPermitted("add balance", "Vehicle", "the Vehicle is already deleted")
+	}
+
+	if vehicle.Status == model.VehicleStatusSold {
+		return nil, failure.OperationNotPermitted("add balance", "Vehicle", "the Vehicle has been sold")
+	}
+
+	lastValues, err := s.Repository.ResolveLastValuesByVehicleID(vehicle.ID, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(lastValues) != 1 {
+		return nil, failure.EntityNotFound("create value", "Vehicle Last Value")
+	}
+
+	lastValue := lastValues[0]
+	isNewerValue := lastValue.Date.Before(input.Date.Time())
+	var vehicleToUpdate *model.Vehicle
+
+	if isNewerValue {
+		vehicle.SetCurrentValue(input, userID)
+		vehicleToUpdate = &vehicle
+	}
+
+	vehicleValue := model.NewVehicleValueFromInput(input, vehicle.ID, userID)
+	err = s.Repository.CreateValue(vehicleValue, vehicleToUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vehicleValue, nil
 }
 
 // GetValueByID fetches a Vehicle Value by its ID
@@ -180,10 +223,140 @@ func (s *VehicleImpl) GetValuesByFilter(input model.VehicleValueFilterInput) ([]
 
 // UpdateValue updates an existing Vehicle Value
 func (s *VehicleImpl) UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{input.VehicleID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("update", "Vehicle Value")
+	}
+
+	vehicle := vehicles[0]
+
+	if vehicle.Deleted.Valid || vehicle.DeletedBy.Valid {
+		return nil, failure.OperationNotPermitted("update", "Vehicle Value", "the Vehicle is already deleted")
+	}
+
+	if vehicle.Status == model.VehicleStatusSold {
+		return nil, failure.OperationNotPermitted("update", "Vehicle Value", "the Vehicle has been sold")
+	}
+
+	vehicleValues, err := s.Repository.ResolveValuesByIDs([]uuid.UUID{input.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicleValues) != 1 {
+		return nil, failure.EntityNotFound("update", "Vehicle Value")
+	}
+
+	vehicleValue := vehicleValues[0]
+
+	if vehicleValue.Deleted.Valid || vehicleValue.DeletedBy.Valid {
+		return nil, failure.OperationNotPermitted("update", "Vehicle Value", "the Vehicle Value is already deleted")
+	}
+
+	err = vehicleValue.Update(input, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	currentValues, err := s.Repository.ResolveLastValuesByVehicleID(vehicle.ID, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(currentValues) != 1 {
+		return nil, failure.EntityNotFound("update", "Vehicle Value")
+	}
+
+	currentValue := currentValues[0]
+	isNewerOrCurrentValue := currentValue.Date.Before(input.Date.Time()) || input.ID == currentValue.ID
+	var vehicleToUpdate *model.Vehicle
+
+	if isNewerOrCurrentValue {
+		vehicle.SetCurrentValue(input, userID)
+		vehicleToUpdate = &vehicle
+	}
+
+	err = s.Repository.UpdateValue(vehicleValue, vehicleToUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vehicleValue, nil
 }
 
 // DeleteValue deletes an existing Vehicle Value
 func (s *VehicleImpl) DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.VehicleValue, error) {
-	return nil, failure.Unimplemented("service unimplemented for this method")
+	vehicleValues, err := s.Repository.ResolveValuesByIDs([]uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicleValues) != 1 {
+		return nil, failure.EntityNotFound("delete", "Vehicle Value")
+	}
+
+	vehicleValue := vehicleValues[0]
+
+	if vehicleValue.Deleted.Valid || vehicleValue.DeletedBy.Valid {
+		return nil, failure.OperationNotPermitted("delete", "Vehicle Value", "the Vehicle Value is already deleted")
+	}
+
+	vehicles, err := s.Repository.ResolveByIDs([]uuid.UUID{vehicleValue.VehicleID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vehicles) != 1 {
+		return nil, failure.EntityNotFound("delete", "Vehicle")
+	}
+
+	vehicle := vehicles[0]
+
+	if vehicle.Deleted.Valid || vehicle.DeletedBy.Valid {
+		return nil, failure.OperationNotPermitted("delete", "Vehicle Value", "the Vehicle is already deleted")
+	}
+
+	if vehicle.Status == model.VehicleStatusSold {
+		return nil, failure.OperationNotPermitted("delete", "Vehicle Value", "the Vehicle has been sold")
+	}
+
+	vehicleValue.Delete(userID)
+
+	currentValues, err := s.Repository.ResolveLastValuesByVehicleID(vehicle.ID, 2)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(currentValues) < 1 {
+		return nil, failure.EntityNotFound("delete", "Vehicle Current Value")
+	}
+
+	if len(currentValues) < 2 {
+		return nil, failure.OperationNotPermitted("delete", "Vehicle Value", "cannot delete the only Vehicle Value belonging to a Vehicle")
+	}
+
+	currentValueDeleted := vehicleValue.ID.String() == currentValues[0].ID.String()
+	var vehicleToUpdate *model.Vehicle
+
+	if currentValueDeleted {
+		newCurrentValueInput := model.VehicleValueInput{
+			ID:        currentValues[1].ID,
+			VehicleID: currentValues[1].VehicleID,
+			Value:     currentValues[1].Value,
+			Date:      cachetime.CacheTime(currentValues[1].Date),
+		}
+		vehicle.SetCurrentValue(newCurrentValueInput, userID)
+		vehicleToUpdate = &vehicle
+	}
+
+	err = s.Repository.UpdateValue(vehicleValue, vehicleToUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vehicleValue, nil
 }

@@ -195,10 +195,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         })
         if (!res.error) {
             getBankAccountForDV()
-            toast.showToast('Balance created!', 'success')
+            toast.showToast('Bank account balance created!', 'success')
             return res
         } else {
-            toast.showToast('Failed to create balance: ' + res.error.message, 'error')
+            toast.showToast('Failed to create bank account balance: ' + res.error.message, 'error')
             return {
                 error: res.error
             }
@@ -243,10 +243,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         if (!res.error) {
             getBankAccountForDV()
             getBankAccountBalanceById(res.id)
-            toast.showToast('Balance updated!', 'success')
+            toast.showToast('Bank account balance updated!', 'success')
             return res
         } else {
-            toast.showToast('Failed to save balance: ' + res.error.message, 'error')
+            toast.showToast('Failed to save bank account balance: ' + res.error.message, 'error')
             return {
                 error: res.error
             }
@@ -257,10 +257,10 @@ export const useBankAccountsStore = defineStore('bankAccounts', () => {
         const res = await svc.deleteBankAccountBalance(dvEditBankAccountBalance.value.id)
         if (!res.error) {
             getBankAccountForDV()
-            toast.showToast('Balance deleted!', 'success')
+            toast.showToast('Bank account balance deleted!', 'success')
             return res
         } else {
-            toast.showToast('Failed to delete balance: ' + res.error.message, 'error')
+            toast.showToast('Failed to delete bank account balance: ' + res.error.message, 'error')
             return {
                 error: res.error
             }

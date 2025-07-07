@@ -105,6 +105,51 @@ const resetVehicleForm = () => {
 const saveVehicle = () => {
   vehiclesStore.updateVehicle()
 }
+
+const showEditor = (valueId) => {
+  if (valueId) {
+    vehiclesStore.dvValueEditorMode = "Edit"
+    vehiclesStore.getVehicleValueById(valueId)
+  } else {
+    vehiclesStore.dvValueEditorMode = "Add"
+    vehiclesStore.prepDVBlankVehicleValue()
+  }
+  valueEditor.showModal()
+}
+
+const resetValueForm = () => {
+  vehiclesStore.revertDVVehicleValueToCache()
+}
+
+const saveValue = async () => {
+  if (vehiclesStore.dvValueEditorMode == "Edit") {
+    const res = await vehiclesStore.updateVehicleValue()
+    if (!res.error) {
+      valueEditor.close()
+    }
+  } else if (vehiclesStore.dvValueEditorMode == "Add") {
+    const res = await vehiclesStore.createVehicleValue()
+    if (!res.error) {
+      valueEditor.close()
+    }
+  }
+}
+
+const showValueDeleteConfirmation = (valueId) => {
+  vehiclesStore.getVehicleValueById(valueId)
+  vdConfirm.showModal()
+}
+
+const cancelValueDelete = () => {
+  vdConfirm.close()
+}
+
+const deleteValue = async () => {
+  const res = await vehiclesStore.deleteVehicleValue()
+  if (!res.error) {
+    vdConfirm.close()
+  }
+}
 </script>
 
 <template>
@@ -272,12 +317,14 @@ const saveVehicle = () => {
                       <button
                         class="btn btn-neutral btn-sm tooltip"
                         data-tip="Edit"
+                        v-on:click="showEditor(value.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
                       <button
                         class="btn btn-neutral btn-sm tooltip"
                         data-tip="Delete"
+                        v-on:click="showValueDeleteConfirmation(value.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'trash']" />
                       </button>
@@ -299,4 +346,91 @@ const saveVehicle = () => {
       </div>
     </div>
   </div>
+
+  <!-- Dialog Box: Value Editor -->
+  <dialog id="valueEditor" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">
+        {{ vehiclesStore.dvValueEditorMode }} Vehicle Value
+      </h3>
+      <form class="gri grid-cols-1 gap-4">
+        <div>
+          <label class="label">Value*</label>
+          <input
+            v-model="vehiclesStore.dvEditVehicleValue.value"
+            type="text"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div>
+          <label class="label">Date*</label>
+          <DatePicker
+            v-model:date="vehiclesStore.dvEditVehicleValue.date"
+            placeholder="pick a date"
+            required
+          />
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="saveValue" class="btn btn-primary">
+            Save
+          </button>
+          <button
+            type="button"
+            @click="resetValueForm"
+            class="btn btn-secondary"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Dialog Box: Confirm Value Delete -->
+  <dialog id="vdConfirm" class="modal">
+    <div class="modal-box overflow-visible relative z-50">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold pb-5">Confirm Vehicle Value Delete</h3>
+      <form class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-2 grid-rows-2 gap-4">
+          <div>Value</div>
+          <div>
+            {{
+              numUtils.numericToMoney(vehiclesStore.dvEditVehicleValue.value)
+            }}
+          </div>
+          <div>Date</div>
+          <div>
+            {{
+              dateUtils.epochToLocalDate(vehiclesStore.dvEditVehicleValue.date)
+            }}
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" @click="deleteValue()" class="btn btn-primary">
+            Confirm
+          </button>
+          <button
+            type="button"
+            @click="cancelValueDelete()"
+            class="btn btn-secondary"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 </template>

@@ -148,6 +148,20 @@ const (
 			deleted = :deleted,
 			deleted_by = :deleted_by
 		WHERE entity_id = :entity_id`
+
+	QueryUpdateVehicleValue = `
+		UPDATE vehicle_values
+		SET
+			vehicle_entity_id = :vehicle_entity_id,
+			date = :date,
+			value = :value,
+			created = :created,
+			created_by = :created_by,
+			updated = :updated,
+			updated_by = :updated_by,
+			deleted = :deleted,
+			deleted_by = :deleted_by
+		WHERE entity_id = :entity_id`
 )
 
 // VehicleMySQLRepo is the repository for Vehicles implemented with MySQL backend
@@ -340,7 +354,26 @@ func (r *VehicleMySQLRepo) ResolveValuesByFilter(filter filter.Filter) (vehicleV
 
 // ResolveLastValuesByVehicleID resolves last X Vehicle Values by their Vehicle ID and count param
 func (r *VehicleMySQLRepo) ResolveLastValuesByVehicleID(id uuid.UUID, count int) (vehicleValues []model.VehicleValue, err error) {
-	return []model.VehicleValue{}, failure.Unimplemented("repository unimplemented for this method: resolveLastValuesByVehicleID")
+	if count == 0 {
+		return
+	}
+
+	whereClause := " WHERE vehicle_values.vehicle_entity_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?"
+	query, args, err := r.DB.In(QuerySelectVehicleValues+whereClause, id, count)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve last values", "Vehicle Value", err)
+		return
+	}
+
+	err = r.DB.Select(&vehicleValues, query, args...)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		err = failure.InternalError("resolve last values", "Vehicle Value", err)
+		return
+	}
+
+	return
 }
 
 // Create creates a Vehicle
@@ -403,12 +436,68 @@ func (r *VehicleMySQLRepo) Update(vehicle model.Vehicle) error {
 
 // CreateValue creates a new Vehicle Value and optionally updates the Vehicle transactionally
 func (r *VehicleMySQLRepo) CreateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
-	return failure.Unimplemented("repository unimplemented for this method: createValue")
+	exists, err := r.ExistsValueByID(vehicleValue.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	if exists {
+		err = failure.OperationNotPermitted("create", "Vehicle Value", "already exists")
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
+		if err := r.txCreateVehicleValue(tx, vehicleValue); err != nil {
+			err = failure.InternalError("create", "Vehicle Value", err)
+			e <- err
+			return
+		}
+
+		if vehicle != nil {
+			if err := r.txUpdateVehicle(tx, *vehicle); err != nil {
+				err = failure.InternalError("create", "Vehicle Value", err)
+				e <- err
+				return
+			}
+		}
+
+		e <- nil
+	})
 }
 
 // UpdateValue updates an existing Vehicle Value and optionally updates the Vehicle transactionally
 func (r *VehicleMySQLRepo) UpdateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error {
-	return failure.Unimplemented("repository unimplemented for this method: updateValue")
+	exists, err := r.ExistsValueByID(vehicleValue.ID)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	if !exists {
+		err = failure.EntityNotFound("update", "Vehicle Value")
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return r.DB.WithTransaction(r.DB, func(tx *sqlx.Tx, e chan error) {
+		if err := r.txUpdateVehicleValue(tx, vehicleValue); err != nil {
+			err = failure.InternalError("update", "Vehicle Value", err)
+			e <- err
+			return
+		}
+
+		if vehicle != nil {
+			if err := r.txUpdateVehicle(tx, *vehicle); err != nil {
+				err = failure.InternalError("update", "Vehicle Value", err)
+				e <- err
+				return
+			}
+		}
+
+		e <- nil
+	})
 }
 
 func (r *VehicleMySQLRepo) txCreateVehicle(tx *sqlx.Tx, vehicle model.Vehicle) error {
@@ -451,6 +540,22 @@ func (r *VehicleMySQLRepo) txUpdateVehicle(tx *sqlx.Tx, vehicle model.Vehicle) e
 	}
 
 	_, err = stmt.Exec(vehicle)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *VehicleMySQLRepo) txUpdateVehicleValue(tx *sqlx.Tx, vehicleValue model.VehicleValue) error {
+	stmt, err := tx.PrepareNamed(QueryUpdateVehicleValue)
+	if err != nil {
+		logger.ErrNoStack("%v", err)
+		return err
+	}
+
+	_, err = stmt.Exec(vehicleValue)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
 		return err

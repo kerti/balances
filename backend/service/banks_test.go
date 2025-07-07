@@ -662,8 +662,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalance() {
 		nuuid.NUUID{},
 		nuuid.From(t.testBankAccountID),
 		float64(1234.56),
-		testBalanceDate,
-	)
+		testBalanceDate)
 
 	testAccountToUpdate := t.getNewBankAccount(nuuid.From(t.testBankAccountID), nil)
 	testAccountToUpdate.LastBalance = float64(900)
@@ -737,7 +736,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_NotLastBalance()
 	assert.NotNil(t.T(), res)
 }
 
-func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedResolvingByIDs() {
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_RepoFailedResolvingByIDs() {
 	errMsg := "failed to resolve bank accounts by IDs"
 	testBalanceDate := time.Now()
 	testInput := t.getNewBankAccountBalanceInput(
@@ -756,7 +755,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedResolv
 	assert.Nil(t.T(), res)
 }
 
-func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_BankAccountNotFound() {
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_BankAccountNotFound() {
 	testBalanceDate := time.Now()
 	testInput := t.getNewBankAccountBalanceInput(
 		nuuid.NUUID{},
@@ -817,7 +816,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_BankAccountInactive() {
 	assert.Nil(t.T(), res)
 }
 
-func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedResolvingLastBalance() {
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_RepoFailedResolvingLastBalance() {
 	errMsg := "failed resolving bank account balances by bank account ID"
 	testBalanceDate := time.Now().AddDate(0, 0, -12)
 	testInput := t.getNewBankAccountBalanceInput(
@@ -843,7 +842,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedResolv
 	assert.Nil(t.T(), res)
 }
 
-func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalanceNotFound() {
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_LastBalanceNotFound() {
 	testBalanceDate := time.Now().AddDate(0, 0, -12)
 	testInput := t.getNewBankAccountBalanceInput(
 		nuuid.NUUID{},
@@ -868,7 +867,7 @@ func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_LastBalanceNotFo
 	assert.Nil(t.T(), res)
 }
 
-func (t *bankAccountsServiceTestSuite) TestCreateBalance_Normal_RepoFailedCreatingBankAccountBalance() {
+func (t *bankAccountsServiceTestSuite) TestCreateBalance_RepoFailedCreatingBankAccountBalance() {
 	errMsg := "failed creating bank account balance"
 	testBalanceDate := time.Now().AddDate(0, 0, -12)
 	testInput := t.getNewBankAccountBalanceInput(

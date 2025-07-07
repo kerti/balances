@@ -241,6 +241,20 @@ func (v *Vehicle) Delete(userID uuid.UUID) error {
 	return nil
 }
 
+// SetCurrentValue sets a new current value and current value date on a Vehicle
+func (v *Vehicle) SetCurrentValue(input VehicleValueInput, userID uuid.UUID) error {
+	now := time.Now()
+
+	v.CurrentValue = input.Value
+	v.CurrentValueDate = input.Date.Time()
+	v.Updated = null.TimeFrom(now)
+	v.UpdatedBy = nuuid.From(userID)
+
+	// TODO: Validate ?
+
+	return nil
+}
+
 // ToOutput converts a Vehicle to its JSON-compatible object representation
 func (v *Vehicle) ToOutput() VehicleOutput {
 	o := VehicleOutput{

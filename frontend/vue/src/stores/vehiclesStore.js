@@ -25,6 +25,12 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         annualDepreciationPercent: 0,
         status: 'in_use',
     }
+    const blankVehicleValue = {
+        id: '',
+        vehicleId: '',
+        date: (new Date()).getTime(),
+        value: 0,
+    }
 
     ////// reactive state
 
@@ -51,6 +57,9 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     const dvVehicleCache = ref({})
     const dvChartData = ref([])
     // value editor dialog box
+    const dvValueEditorMode = ref('Add')
+    const dvEditVehicleValue = ref({})
+    const dvEditVehicleValueCache = ref({})
 
     ////// actions
 
@@ -141,8 +150,6 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         }
     }
 
-    // TODO: everything else in list view
-
     // cache prep and reset
 
     function resetLVAddVehicleDialog() {
@@ -188,12 +195,30 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         dvVehicle.value = {}
         dvVehicleCache.value = {}
         dvChartData.value = []
-        // TODO: set dialog boxes
+        dvValueEditorMode.value = 'Add'
+        dvEditVehicleValue.value = {}
+        dvEditVehicleValueCache.value = {}
     }
 
     // CRUD
 
-    // TODO: create value
+    async function createVehicleValue() {
+        const res = await svc.createVehicleValue({
+            vehicleId: dvEditVehicleValue.value.vehicleId,
+            date: dvEditVehicleValue.value.date,
+            value: dvEditVehicleValue.value.value,
+        })
+        if (!res.error) {
+            getVehicleForDV()
+            toast.showToast('Vehicle value created!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to create vehicle value: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
+    }
 
     async function getVehicleForDV() {
         const fetchedVehicle = await svc.getVehicle(
@@ -208,7 +233,11 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         extractDVChartData()
     }
 
-    // TODO: get value by ID
+    async function getVehicleValueById(id) {
+        const fetchedValue = await svc.getVehicleValue(id)
+        dvEditVehicleValue.value = JSON.parse(JSON.stringify(fetchedValue))
+        dvEditVehicleValueCache.value = JSON.parse(JSON.stringify(fetchedValue))
+    }
 
     async function updateVehicle() {
         const res = await svc.updateVehicle(dvVehicle.value)
@@ -224,9 +253,34 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         }
     }
 
-    // TODO: update vehicle value
+    async function updateVehicleValue() {
+        const res = await svc.updateVehicleValue(dvEditVehicleValue.value)
+        if (!res.error) {
+            getVehicleForDV()
+            getVehicleValueById(res.id)
+            toast.showToast('Vehicle value updated!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to save vehicle value: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
+    }
 
-    // TODO: delete vehicle value
+    async function deleteVehicleValue() {
+        const res = await svc.deleteVehicleValue(dvEditVehicleValue.value.id)
+        if (!res.error) {
+            getVehicleForDV()
+            toast.showToast('Vehicle value deleted!', 'success')
+            return res
+        } else {
+            toast.showToast('Failed to delete vehicle value: ' + res.error.message, 'error')
+            return {
+                error: res.error
+            }
+        }
+    }
 
     // cache prep and reset
 
@@ -234,6 +288,19 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         if (dvVehicleCache.value) {
             dvVehicle.value = JSON.parse(JSON.stringify(dvVehicleCache.value))
         }
+    }
+
+    function revertDVVehicleValueToCache() {
+        if (dvEditVehicleValueCache.value) {
+            dvEditVehicleValue.value = JSON.parse(JSON.stringify(dvEditVehicleValueCache.value))
+        }
+    }
+
+    function prepDVBlankVehicleValue() {
+        const template = JSON.parse(JSON.stringify(blankVehicleValue))
+        template.vehicleId = dvVehicleId.value
+        dvEditVehicleValue.value = JSON.parse(JSON.stringify(template))
+        dvEditVehicleValueCache.value = JSON.parse(JSON.stringify(template))
     }
 
     // chart utils
@@ -276,7 +343,9 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         dvVehicleCache,
         dvChartData,
         // vehicle editor dialog box
-
+        dvValueEditorMode,
+        dvEditVehicleValue,
+        dvEditVehicleValueCache,
 
         ////// actions
 
@@ -297,9 +366,15 @@ export const useVehiclesStore = defineStore('vehicles', () => {
         dvHydrate,
         dvDehydrate,
         // CRUD
+        createVehicleValue,
         getVehicleForDV,
+        getVehicleValueById,
         updateVehicle,
+        updateVehicleValue,
+        deleteVehicleValue,
         // cache and prep
         revertDVVehicleToCache,
+        revertDVVehicleValueToCache,
+        prepDVBlankVehicleValue,
     }
 })
