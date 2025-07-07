@@ -34,6 +34,7 @@ func main() {
 	container.RegisterService("bankAccountRepository", new(repository.BankAccountMySQLRepo))
 	container.RegisterService("userRepository", new(repository.UserMySQLRepo))
 	container.RegisterService("vehicleRepository", new(repository.VehicleMySQLRepo))
+	container.RegisterService("propertyRepository", new(repository.PropertyMySQLRepo))
 
 	// Prepare containers - services
 	container.RegisterService("authService", new(service.AuthImpl))

@@ -458,10 +458,9 @@ func (f *PropertyFilterInput) ToFilter() filter.Filter {
 	keywordFields := []filter.Field{
 		PropertyColumnName,
 		PropertyColumnAddress,
-		PropertyColumnTotalArea,
-		PropertyColumnBuildingArea,
 		PropertyColumnType,
 		PropertyColumnTitleHolder,
+		PropertyColumnTaxIdentifier,
 	}
 
 	return filter.Filter{

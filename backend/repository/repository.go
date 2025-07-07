@@ -51,3 +51,20 @@ type Vehicle interface {
 	CreateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error
 	UpdateValue(vehicleValue model.VehicleValue, vehicle *model.Vehicle) error
 }
+
+// Property is the Property repository interface
+type Property interface {
+	Startup()
+	Shutdown()
+	ExistsByID(id uuid.UUID) (exists bool, err error)
+	ExistsValueByID(id uuid.UUID) (exists bool, err error)
+	ResolveByIDs(ids []uuid.UUID) (vehicles []model.Property, err error)
+	ResolveValuesByIDs(ids []uuid.UUID) (vehicleValues []model.PropertyValue, err error)
+	ResolveByFilter(filter filter.Filter) (vehicles []model.Property, pageInfo model.PageInfoOutput, err error)
+	ResolveValuesByFilter(filter filter.Filter) (vehicleValues []model.PropertyValue, pageInfo model.PageInfoOutput, err error)
+	ResolveLastValuesByPropertyID(id uuid.UUID, count int) (vehicleValues []model.PropertyValue, err error)
+	Create(vehicle model.Property) error
+	Update(vehicle model.Property) error
+	CreateValue(vehicleValue model.PropertyValue, vehicle *model.Property) error
+	UpdateValue(vehicleValue model.PropertyValue, vehicle *model.Property) error
+}
