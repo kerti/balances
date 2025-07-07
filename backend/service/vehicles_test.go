@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -142,6 +143,29 @@ func (t *vehiclesServiceTestSuite) getNewVehicleValue(id nuuid.NUUID, vehicleID 
 
 	val.Value = value
 	val.Date = date
+
+	return val
+}
+
+func (t *vehiclesServiceTestSuite) getNewVehicleValueInput(id nuuid.NUUID, vehicleID nuuid.NUUID, value float64, date time.Time) model.VehicleValueInput {
+	val := model.VehicleValueInput{}
+
+	if id.Valid {
+		val.ID = id.UUID
+	} else {
+		newID, _ := uuid.NewV7()
+		val.ID = newID
+	}
+
+	if vehicleID.Valid {
+		val.VehicleID = vehicleID.UUID
+	} else {
+		newVehicleID, _ := uuid.NewV7()
+		val.VehicleID = newVehicleID
+	}
+
+	val.Value = value
+	val.Date = cachetime.CacheTime(date)
 
 	return val
 }
@@ -686,7 +710,267 @@ func (t *vehiclesServiceTestSuite) TestDelete_RepoErrorUpdating() {
 	assert.Nil(t.T(), res)
 }
 
-// TODO: test create value
+func (t *vehiclesServiceTestSuite) TestCreateValue_Normal_CurrentValue() {
+	testValueDate := time.Now()
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+	testValue := t.getNewVehicleValue(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	testVehicleToUpdate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testVehicleToUpdate.CurrentValue = float64(900)
+	testVehicleToUpdate.CurrentValueDate = time.Now().AddDate(0, 0, -1)
+
+	testVehicleAfterUpate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testVehicleAfterUpate.PurchaseDate = testVehicleToUpdate.PurchaseDate
+	testVehicleAfterUpate.InitialValueDate = testVehicleToUpdate.InitialValueDate
+	testVehicleAfterUpate.CurrentValue = testValue.Value
+	testVehicleAfterUpate.CurrentValueDate = testValue.Date
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testVehicleToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastValuesByVehicleID(t.testVehicleID, 1).
+		Return(
+			[]model.VehicleValue{
+				t.getNewVehicleValue(
+					nuuid.NUUID{},
+					nuuid.From(t.testVehicleID),
+					float64(900),
+					time.Now().AddDate(0, 0, -1)),
+			},
+			nil)
+
+	t.mockRepo.EXPECT().CreateValue(
+		vehicleValueMatcher{testValue},
+		vehiclePointerMatcher{testVehicleAfterUpate}).
+		Return(nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_Normal_NotCurrentValue() {
+	testValueDate := time.Now().AddDate(0, 0, -12)
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+	testValue := t.getNewVehicleValue(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	testVehicleToUpdate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testVehicleToUpdate.CurrentValue = float64(900)
+	testVehicleToUpdate.CurrentValueDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testVehicleToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastValuesByVehicleID(t.testVehicleID, 1).
+		Return(
+			[]model.VehicleValue{
+				t.getNewVehicleValue(
+					nuuid.NUUID{},
+					nuuid.From(t.testVehicleID),
+					float64(900),
+					time.Now().AddDate(0, 0, -1)),
+			},
+			nil)
+
+	t.mockRepo.EXPECT().
+		CreateValue(vehicleValueMatcher{testValue}, nil).
+		Return(nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.NoError(t.T(), err)
+	assert.NotNil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_RepoFailedResolvingByIDs() {
+	errMsg := "failed to resolve vehicle by IDs"
+	testValueDate := time.Now()
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, errors.New(errMsg))
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_VehicleNotFound() {
+	testValueDate := time.Now()
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{}, nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_VehicleDeleted() {
+	testValueDate := time.Now()
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	deletedAccount := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	deletedAccount.Deleted = null.TimeFrom(time.Now())
+	deletedAccount.DeletedBy = nuuid.From(t.testUserID)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{deletedAccount}, nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "deleted")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_VehicleSold() {
+	testValueDate := time.Now()
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	deletedAccount := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	deletedAccount.Status = model.VehicleStatusSold
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{deletedAccount}, nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "sold")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_RepoFailedResolvingCurrentValue() {
+	errMsg := "failed resolving vehicle values by vehicle ID"
+	testValueDate := time.Now().AddDate(0, 0, -12)
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	testAccountToUpdate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testAccountToUpdate.CurrentValue = float64(900)
+	testAccountToUpdate.CurrentValueDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastValuesByVehicleID(t.testVehicleID, 1).
+		Return([]model.VehicleValue{}, errors.New(errMsg))
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_CurrentValueNotFound() {
+	testValueDate := time.Now().AddDate(0, 0, -12)
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+
+	testAccountToUpdate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testAccountToUpdate.CurrentValue = float64(900)
+	testAccountToUpdate.CurrentValueDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastValuesByVehicleID(t.testVehicleID, 1).
+		Return([]model.VehicleValue{}, nil)
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), "EntityNotFound")
+	assert.Nil(t.T(), res)
+}
+
+func (t *vehiclesServiceTestSuite) TestCreateValue_RepoFailedCreatingVehicleValue() {
+	errMsg := "failed creating bank account balance"
+	testValueDate := time.Now().AddDate(0, 0, -12)
+	testInput := t.getNewVehicleValueInput(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate)
+	testValue := t.getNewVehicleValue(
+		nuuid.NUUID{},
+		nuuid.From(t.testVehicleID),
+		float64(1234.56),
+		testValueDate,
+	)
+
+	testAccountToUpdate := t.getNewVehicle(nuuid.From(t.testVehicleID), nil)
+	testAccountToUpdate.CurrentValue = float64(900)
+	testAccountToUpdate.CurrentValueDate = time.Now().AddDate(0, 0, -1)
+
+	t.mockRepo.EXPECT().ResolveByIDs([]uuid.UUID{t.testVehicleID}).
+		Return([]model.Vehicle{testAccountToUpdate}, nil)
+
+	t.mockRepo.EXPECT().ResolveLastValuesByVehicleID(t.testVehicleID, 1).
+		Return(
+			[]model.VehicleValue{
+				t.getNewVehicleValue(
+					nuuid.NUUID{},
+					nuuid.From(t.testVehicleID),
+					float64(900),
+					time.Now().AddDate(0, 0, -1))},
+			nil)
+
+	t.mockRepo.EXPECT().CreateValue(vehicleValueMatcher{testValue}, nil).
+		Return(errors.New(errMsg))
+
+	res, err := t.svc.CreateValue(testInput, t.testUserID)
+
+	assert.Error(t.T(), err)
+	assert.Contains(t.T(), err.Error(), errMsg)
+	assert.Nil(t.T(), res)
+}
 
 func (t *vehiclesServiceTestSuite) TestGetValueByID_Normal() {
 	t.mockRepo.EXPECT().ResolveValuesByIDs([]uuid.UUID{t.testVehicleValueID}).
@@ -766,4 +1050,78 @@ func (t *vehiclesServiceTestSuite) TestGetValueBVyFilter_Normal() {
 	assert.NoError(t.T(), err)
 	assert.Len(t.T(), res, 1)
 	assert.Equal(t.T(), pageInfo.TotalCount, 1)
+}
+
+// TODO: test update value
+
+// TODO: test delete value
+
+// matchers
+
+type vehiclePointerMatcher struct {
+	expected model.Vehicle
+}
+
+func (m vehiclePointerMatcher) Matches(x interface{}) bool {
+	actual, ok := x.(*model.Vehicle)
+	if !ok {
+		return false
+	}
+
+	return actual.Name == m.expected.Name &&
+		actual.Make == m.expected.Make &&
+		actual.Model == m.expected.Model &&
+		actual.Year == m.expected.Year &&
+		actual.Type == m.expected.Type &&
+		actual.TitleHolder == m.expected.TitleHolder &&
+		actual.LicensePlateNumber == m.expected.LicensePlateNumber &&
+		actual.PurchaseDate.Equal(m.expected.PurchaseDate) &&
+		actual.InitialValue == m.expected.InitialValue &&
+		actual.InitialValueDate.Equal(m.expected.InitialValueDate) &&
+		actual.CurrentValue == m.expected.CurrentValue &&
+		actual.CurrentValueDate.Equal(m.expected.CurrentValueDate) &&
+		actual.AnnualDepreciationPercent == m.expected.AnnualDepreciationPercent &&
+		actual.Status == m.expected.Status
+}
+
+func (m vehiclePointerMatcher) String() string {
+	return fmt.Sprintf(
+		"is Vehicle with Name=%s, Make=%s, Model=%s, Year=%d, Type=%s, TitleHolder=%s, LicensePlateNumber=%s, PurchaseDate=%s, InitialValue=%f, InitialValueDate=%s, CurrentValue=%f, CurrentValueDate=%s, AnnualDepreciationPercent=%f, Status=%s",
+		m.expected.Name,
+		m.expected.Make,
+		m.expected.Model,
+		m.expected.Year,
+		m.expected.Type,
+		m.expected.TitleHolder,
+		m.expected.LicensePlateNumber,
+		m.expected.PurchaseDate,
+		m.expected.InitialValue,
+		m.expected.InitialValueDate,
+		m.expected.CurrentValue,
+		m.expected.CurrentValueDate,
+		m.expected.AnnualDepreciationPercent,
+		m.expected.Status)
+}
+
+type vehicleValueMatcher struct {
+	expected model.VehicleValue
+}
+
+func (m vehicleValueMatcher) Matches(x interface{}) bool {
+	actual, ok := x.(model.VehicleValue)
+	if !ok {
+		return false
+	}
+
+	return actual.Date.Equal(m.expected.Date) &&
+		actual.Value == m.expected.Value &&
+		actual.VehicleID == m.expected.VehicleID
+}
+
+func (m vehicleValueMatcher) String() string {
+	return fmt.Sprintf(
+		"is VehicleValue with Value=%.2f, Date=%v, VehicleID=%v",
+		m.expected.Value,
+		m.expected.Date,
+		m.expected.VehicleID)
 }
