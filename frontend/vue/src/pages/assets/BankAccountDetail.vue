@@ -341,7 +341,9 @@ const deleteBalance = async () => {
           ✕
         </button>
       </form>
-      <h3 class="text-lg font-bold pb-5">Confirm Balance Delete</h3>
+      <h3 class="text-lg font-bold pb-5">
+        Confirm Bank Account Balance Delete
+      </h3>
       <form class="grid grid-cols-1 gap-4">
         <div class="grid grid-cols-2 grid-rows-2 gap-4">
           <div>Balance</div>
