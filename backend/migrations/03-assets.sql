@@ -112,3 +112,69 @@ CREATE TABLE IF NOT EXISTS `vehicle_values` (
   INDEX `vehicle_values_idx_3` (`created_by`)
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `properties` (
+  `entity_id` CHAR(36) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `address` VARCHAR(255) NOT NULL,
+  `total_area` DECIMAL(18,2) NOT NULL,
+  `building_area` DECIMAL(18,2) NOT NULL,
+  `area_unit` ENUM('sqm', 'sqft') NOT NULL,
+  `type` ENUM('land', 'house', 'apartment') NOT NULL,
+  `title_holder` VARCHAR(255) NOT NULL,
+  `tax_identifier` VARCHAR(255) NOT NULL,
+  `purchase_date` TIMESTAMP NOT NULL,
+  `initial_value` DECIMAL(18,2) NOT NULL,
+  `initial_value_date` TIMESTAMP NOT NULL,
+  `current_value` DECIMAL(18,2) NOT NULL,
+  `current_value_date` TIMESTAMP NOT NULL,
+  `annual_appreciation_percent` DECIMAL(12,4) NOT NULL,
+  `status` ENUM('not_used', 'in_use', 'rented', 'sold') NOT NULL DEFAULT 'in_use',
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` CHAR(36) NOT NULL,
+  `updated` TIMESTAMP NULL DEFAULT NULL,
+  `updated_by` CHAR(36) NULL DEFAULT NULL,
+  `deleted` TIMESTAMP NULL DEFAULT NULL,
+  `deleted_by` CHAR(36) NULL DEFAULT NULL,
+  PRIMARY KEY (`entity_id`),
+  UNIQUE KEY `properties_idx_1` (`address`, `tax_identifier`),
+  INDEX `properties_idx_2` (`name`),
+  INDEX `properties_idx_3` (`address`),
+  INDEX `properties_idx_4` (`total_area`),
+  INDEX `properties_idx_5` (`building_area`),
+  INDEX `properties_idx_6` (`area_unit`),
+  INDEX `properties_idx_7` (`type`),
+  INDEX `properties_idx_8` (`title_holder`),
+  INDEX `properties_idx_9` (`purchase_date`),
+  INDEX `properties_idx_10` (`initial_value`),
+  INDEX `properties_idx_11` (`initial_value_date`),
+  INDEX `properties_idx_12` (`current_value`),
+  INDEX `properties_idx_13` (`current_value_date`),
+  INDEX `properties_idx_14` (`annual_appreciation_percent`),
+  INDEX `properties_idx_15` (`status`),
+  INDEX `properties_idx_16` (`created`),
+  INDEX `properties_idx_17` (`created_by`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `property_values` (
+  `entity_id` CHAR(36) NOT NULL,
+  `property_entity_id` CHAR(36) NOT NULL,
+  `date` TIMESTAMP NOT NULL,
+  `value` DECIMAL(18,2) NOT NULL,
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` CHAR(36) NOT NULL,
+  `updated` TIMESTAMP NULL DEFAULT NULL,
+  `updated_by` CHAR(36) NULL DEFAULT NULL,
+  `deleted` TIMESTAMP NULL DEFAULT NULL,
+  `deleted_by` CHAR(36) NULL DEFAULT NULL,
+  PRIMARY KEY (`entity_id`),
+  CONSTRAINT `fk_pv_property_entity_id` FOREIGN KEY (`property_entity_id`)
+    REFERENCES `properties`(`entity_id`)
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
+  INDEX `property_values_idx_1` (`date`),
+  INDEX `property_values_idx_2` (`created`),
+  INDEX `property_values_idx_3` (`created_by`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
