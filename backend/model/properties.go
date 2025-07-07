@@ -150,6 +150,7 @@ func NewPropertyFromInput(input PropertyInput, userID uuid.UUID) (p Property) {
 		Address:                   input.Address,
 		TotalArea:                 input.TotalArea,
 		BuildingArea:              input.BuildingArea,
+		AreaUnit:                  input.AreaUnit,
 		Type:                      input.Type,
 		TitleHolder:               input.TitleHolder,
 		TaxIdentifier:             input.TaxIdentifier,
@@ -212,6 +213,7 @@ func (p *Property) Update(input PropertyInput, userID uuid.UUID) error {
 	p.Address = input.Address
 	p.TotalArea = input.TotalArea
 	p.BuildingArea = input.BuildingArea
+	p.AreaUnit = input.AreaUnit
 	p.Type = input.Type
 	p.TitleHolder = input.TitleHolder
 	p.TaxIdentifier = input.TaxIdentifier

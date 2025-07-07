@@ -568,3 +568,213 @@ func (mr *MockVehicleMockRecorder) UpdateValue(vehicleValue, vehicle interface{}
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateValue", reflect.TypeOf((*MockVehicle)(nil).UpdateValue), vehicleValue, vehicle)
 }
+
+// MockProperty is a mock of Property interface.
+type MockProperty struct {
+	ctrl     *gomock.Controller
+	recorder *MockPropertyMockRecorder
+}
+
+// MockPropertyMockRecorder is the mock recorder for MockProperty.
+type MockPropertyMockRecorder struct {
+	mock *MockProperty
+}
+
+// NewMockProperty creates a new mock instance.
+func NewMockProperty(ctrl *gomock.Controller) *MockProperty {
+	mock := &MockProperty{ctrl: ctrl}
+	mock.recorder = &MockPropertyMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProperty) EXPECT() *MockPropertyMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockProperty) Create(vehicle model.Property) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockPropertyMockRecorder) Create(vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProperty)(nil).Create), vehicle)
+}
+
+// CreateValue mocks base method.
+func (m *MockProperty) CreateValue(vehicleValue model.PropertyValue, vehicle *model.Property) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateValue", vehicleValue, vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateValue indicates an expected call of CreateValue.
+func (mr *MockPropertyMockRecorder) CreateValue(vehicleValue, vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateValue", reflect.TypeOf((*MockProperty)(nil).CreateValue), vehicleValue, vehicle)
+}
+
+// ExistsByID mocks base method.
+func (m *MockProperty) ExistsByID(id uuid.UUID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsByID", id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsByID indicates an expected call of ExistsByID.
+func (mr *MockPropertyMockRecorder) ExistsByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByID", reflect.TypeOf((*MockProperty)(nil).ExistsByID), id)
+}
+
+// ExistsValueByID mocks base method.
+func (m *MockProperty) ExistsValueByID(id uuid.UUID) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsValueByID", id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsValueByID indicates an expected call of ExistsValueByID.
+func (mr *MockPropertyMockRecorder) ExistsValueByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsValueByID", reflect.TypeOf((*MockProperty)(nil).ExistsValueByID), id)
+}
+
+// ResolveByFilter mocks base method.
+func (m *MockProperty) ResolveByFilter(filter filter.Filter) ([]model.Property, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveByFilter", filter)
+	ret0, _ := ret[0].([]model.Property)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ResolveByFilter indicates an expected call of ResolveByFilter.
+func (mr *MockPropertyMockRecorder) ResolveByFilter(filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveByFilter", reflect.TypeOf((*MockProperty)(nil).ResolveByFilter), filter)
+}
+
+// ResolveByIDs mocks base method.
+func (m *MockProperty) ResolveByIDs(ids []uuid.UUID) ([]model.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveByIDs", ids)
+	ret0, _ := ret[0].([]model.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveByIDs indicates an expected call of ResolveByIDs.
+func (mr *MockPropertyMockRecorder) ResolveByIDs(ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveByIDs", reflect.TypeOf((*MockProperty)(nil).ResolveByIDs), ids)
+}
+
+// ResolveLastValuesByPropertyID mocks base method.
+func (m *MockProperty) ResolveLastValuesByPropertyID(id uuid.UUID, count int) ([]model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveLastValuesByPropertyID", id, count)
+	ret0, _ := ret[0].([]model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveLastValuesByPropertyID indicates an expected call of ResolveLastValuesByPropertyID.
+func (mr *MockPropertyMockRecorder) ResolveLastValuesByPropertyID(id, count interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveLastValuesByPropertyID", reflect.TypeOf((*MockProperty)(nil).ResolveLastValuesByPropertyID), id, count)
+}
+
+// ResolveValuesByFilter mocks base method.
+func (m *MockProperty) ResolveValuesByFilter(filter filter.Filter) ([]model.PropertyValue, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveValuesByFilter", filter)
+	ret0, _ := ret[0].([]model.PropertyValue)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ResolveValuesByFilter indicates an expected call of ResolveValuesByFilter.
+func (mr *MockPropertyMockRecorder) ResolveValuesByFilter(filter interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveValuesByFilter", reflect.TypeOf((*MockProperty)(nil).ResolveValuesByFilter), filter)
+}
+
+// ResolveValuesByIDs mocks base method.
+func (m *MockProperty) ResolveValuesByIDs(ids []uuid.UUID) ([]model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResolveValuesByIDs", ids)
+	ret0, _ := ret[0].([]model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ResolveValuesByIDs indicates an expected call of ResolveValuesByIDs.
+func (mr *MockPropertyMockRecorder) ResolveValuesByIDs(ids interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResolveValuesByIDs", reflect.TypeOf((*MockProperty)(nil).ResolveValuesByIDs), ids)
+}
+
+// Shutdown mocks base method.
+func (m *MockProperty) Shutdown() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Shutdown")
+}
+
+// Shutdown indicates an expected call of Shutdown.
+func (mr *MockPropertyMockRecorder) Shutdown() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Shutdown", reflect.TypeOf((*MockProperty)(nil).Shutdown))
+}
+
+// Startup mocks base method.
+func (m *MockProperty) Startup() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Startup")
+}
+
+// Startup indicates an expected call of Startup.
+func (mr *MockPropertyMockRecorder) Startup() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Startup", reflect.TypeOf((*MockProperty)(nil).Startup))
+}
+
+// Update mocks base method.
+func (m *MockProperty) Update(vehicle model.Property) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockPropertyMockRecorder) Update(vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProperty)(nil).Update), vehicle)
+}
+
+// UpdateValue mocks base method.
+func (m *MockProperty) UpdateValue(vehicleValue model.PropertyValue, vehicle *model.Property) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateValue", vehicleValue, vehicle)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateValue indicates an expected call of UpdateValue.
+func (mr *MockPropertyMockRecorder) UpdateValue(vehicleValue, vehicle interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateValue", reflect.TypeOf((*MockProperty)(nil).UpdateValue), vehicleValue, vehicle)
+}

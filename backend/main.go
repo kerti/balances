@@ -41,6 +41,7 @@ func main() {
 	container.RegisterService("bankAccountService", new(service.BankAccountImpl))
 	container.RegisterService("userService", new(service.UserImpl))
 	container.RegisterService("vehicleService", new(service.VehicleImpl))
+	container.RegisterService("propertyService", new(service.PropertyImpl))
 
 	// Prepare containers - handlers
 	container.RegisterService("authHandler", new(handler.AuthImpl))

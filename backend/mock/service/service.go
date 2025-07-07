@@ -612,3 +612,202 @@ func (mr *MockVehicleMockRecorder) UpdateValue(input, userID interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateValue", reflect.TypeOf((*MockVehicle)(nil).UpdateValue), input, userID)
 }
+
+// MockProperty is a mock of Property interface.
+type MockProperty struct {
+	ctrl     *gomock.Controller
+	recorder *MockPropertyMockRecorder
+}
+
+// MockPropertyMockRecorder is the mock recorder for MockProperty.
+type MockPropertyMockRecorder struct {
+	mock *MockProperty
+}
+
+// NewMockProperty creates a new mock instance.
+func NewMockProperty(ctrl *gomock.Controller) *MockProperty {
+	mock := &MockProperty{ctrl: ctrl}
+	mock.recorder = &MockPropertyMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProperty) EXPECT() *MockPropertyMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockProperty) Create(input model.PropertyInput, userID uuid.UUID) (*model.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", input, userID)
+	ret0, _ := ret[0].(*model.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockPropertyMockRecorder) Create(input, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProperty)(nil).Create), input, userID)
+}
+
+// CreateValue mocks base method.
+func (m *MockProperty) CreateValue(input model.PropertyValueInput, userID uuid.UUID) (*model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateValue", input, userID)
+	ret0, _ := ret[0].(*model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateValue indicates an expected call of CreateValue.
+func (mr *MockPropertyMockRecorder) CreateValue(input, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateValue", reflect.TypeOf((*MockProperty)(nil).CreateValue), input, userID)
+}
+
+// Delete mocks base method.
+func (m *MockProperty) Delete(id, userID uuid.UUID) (*model.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", id, userID)
+	ret0, _ := ret[0].(*model.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockPropertyMockRecorder) Delete(id, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProperty)(nil).Delete), id, userID)
+}
+
+// DeleteValue mocks base method.
+func (m *MockProperty) DeleteValue(id, userID uuid.UUID) (*model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteValue", id, userID)
+	ret0, _ := ret[0].(*model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteValue indicates an expected call of DeleteValue.
+func (mr *MockPropertyMockRecorder) DeleteValue(id, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteValue", reflect.TypeOf((*MockProperty)(nil).DeleteValue), id, userID)
+}
+
+// GetByFilter mocks base method.
+func (m *MockProperty) GetByFilter(input model.PropertyFilterInput) ([]model.Property, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByFilter", input)
+	ret0, _ := ret[0].([]model.Property)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetByFilter indicates an expected call of GetByFilter.
+func (mr *MockPropertyMockRecorder) GetByFilter(input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByFilter", reflect.TypeOf((*MockProperty)(nil).GetByFilter), input)
+}
+
+// GetByID mocks base method.
+func (m *MockProperty) GetByID(id uuid.UUID, withValues bool, valueStartDate, valueEndDate cachetime.NCacheTime, pageSize *int) (*model.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", id, withValues, valueStartDate, valueEndDate, pageSize)
+	ret0, _ := ret[0].(*model.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockPropertyMockRecorder) GetByID(id, withValues, valueStartDate, valueEndDate, pageSize interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProperty)(nil).GetByID), id, withValues, valueStartDate, valueEndDate, pageSize)
+}
+
+// GetValueByID mocks base method.
+func (m *MockProperty) GetValueByID(id uuid.UUID) (*model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetValueByID", id)
+	ret0, _ := ret[0].(*model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetValueByID indicates an expected call of GetValueByID.
+func (mr *MockPropertyMockRecorder) GetValueByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValueByID", reflect.TypeOf((*MockProperty)(nil).GetValueByID), id)
+}
+
+// GetValuesByFilter mocks base method.
+func (m *MockProperty) GetValuesByFilter(input model.PropertyValueFilterInput) ([]model.PropertyValue, model.PageInfoOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetValuesByFilter", input)
+	ret0, _ := ret[0].([]model.PropertyValue)
+	ret1, _ := ret[1].(model.PageInfoOutput)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetValuesByFilter indicates an expected call of GetValuesByFilter.
+func (mr *MockPropertyMockRecorder) GetValuesByFilter(input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValuesByFilter", reflect.TypeOf((*MockProperty)(nil).GetValuesByFilter), input)
+}
+
+// Shutdown mocks base method.
+func (m *MockProperty) Shutdown() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Shutdown")
+}
+
+// Shutdown indicates an expected call of Shutdown.
+func (mr *MockPropertyMockRecorder) Shutdown() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Shutdown", reflect.TypeOf((*MockProperty)(nil).Shutdown))
+}
+
+// Startup mocks base method.
+func (m *MockProperty) Startup() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Startup")
+}
+
+// Startup indicates an expected call of Startup.
+func (mr *MockPropertyMockRecorder) Startup() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Startup", reflect.TypeOf((*MockProperty)(nil).Startup))
+}
+
+// Update mocks base method.
+func (m *MockProperty) Update(input model.PropertyInput, userID uuid.UUID) (*model.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", input, userID)
+	ret0, _ := ret[0].(*model.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockPropertyMockRecorder) Update(input, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProperty)(nil).Update), input, userID)
+}
+
+// UpdateValue mocks base method.
+func (m *MockProperty) UpdateValue(input model.PropertyValueInput, userID uuid.UUID) (*model.PropertyValue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateValue", input, userID)
+	ret0, _ := ret[0].(*model.PropertyValue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateValue indicates an expected call of UpdateValue.
+func (mr *MockPropertyMockRecorder) UpdateValue(input, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateValue", reflect.TypeOf((*MockProperty)(nil).UpdateValue), input, userID)
+}

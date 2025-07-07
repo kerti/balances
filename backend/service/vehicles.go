@@ -162,17 +162,17 @@ func (s *VehicleImpl) CreateValue(input model.VehicleValueInput, userID uuid.UUI
 	}
 
 	if len(vehicles) != 1 {
-		return nil, failure.EntityNotFound("create balance", "Vehicle Value")
+		return nil, failure.EntityNotFound("create value", "Vehicle Value")
 	}
 
 	vehicle := vehicles[0]
 
 	if vehicle.Deleted.Valid || vehicle.DeletedBy.Valid {
-		return nil, failure.OperationNotPermitted("add balance", "Vehicle", "the Vehicle is already deleted")
+		return nil, failure.OperationNotPermitted("add value", "Vehicle", "the Vehicle is already deleted")
 	}
 
 	if vehicle.Status == model.VehicleStatusSold {
-		return nil, failure.OperationNotPermitted("add balance", "Vehicle", "the Vehicle has been sold")
+		return nil, failure.OperationNotPermitted("add value", "Vehicle", "the Vehicle has been sold")
 	}
 
 	lastValues, err := s.Repository.ResolveLastValuesByVehicleID(vehicle.ID, 1)

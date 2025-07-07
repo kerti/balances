@@ -58,3 +58,19 @@ type Vehicle interface {
 	UpdateValue(input model.VehicleValueInput, userID uuid.UUID) (*model.VehicleValue, error)
 	DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.VehicleValue, error)
 }
+
+// Property is the service provider interface
+type Property interface {
+	Startup()
+	Shutdown()
+	Create(input model.PropertyInput, userID uuid.UUID) (*model.Property, error)
+	GetByID(id uuid.UUID, withValues bool, valueStartDate, valueEndDate cachetime.NCacheTime, pageSize *int) (*model.Property, error)
+	GetByFilter(input model.PropertyFilterInput) ([]model.Property, model.PageInfoOutput, error)
+	Update(input model.PropertyInput, userID uuid.UUID) (*model.Property, error)
+	Delete(id uuid.UUID, userID uuid.UUID) (*model.Property, error)
+	CreateValue(input model.PropertyValueInput, userID uuid.UUID) (*model.PropertyValue, error)
+	GetValueByID(id uuid.UUID) (*model.PropertyValue, error)
+	GetValuesByFilter(input model.PropertyValueFilterInput) ([]model.PropertyValue, model.PageInfoOutput, error)
+	UpdateValue(input model.PropertyValueInput, userID uuid.UUID) (*model.PropertyValue, error)
+	DeleteValue(id uuid.UUID, userID uuid.UUID) (*model.PropertyValue, error)
+}
