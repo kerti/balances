@@ -25,6 +25,7 @@ type Server struct {
 	HealthHandler      handler.Health      `inject:"healthHandler"`
 	UserHandler        handler.User        `inject:"userHandler"`
 	VehicleHandler     handler.Vehicle     `inject:"vehicleHandler"`
+	PropertyHandler    handler.Property    `inject:"propertyHandler"`
 	router             *mux.Router
 }
 

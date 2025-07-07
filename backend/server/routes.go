@@ -55,5 +55,17 @@ func (s *Server) InitRoutes() {
 	s.router.HandleFunc("/vehicles/values/{id}", s.VehicleHandler.HandleUpdateVehicleValue).Methods("PATCH")
 	s.router.HandleFunc("/vehicles/values/{id}", s.VehicleHandler.HandleDeleteVehicleValue).Methods("DELETE")
 
+	// Properties
+	s.router.HandleFunc("/properties", s.PropertyHandler.HandleCreateProperty).Methods("POST")
+	s.router.HandleFunc("/properties/{id}", s.PropertyHandler.HandleGetPropertyByID).Methods("GET")
+	s.router.HandleFunc("/properties/search", s.PropertyHandler.HandleGetPropertyByFilter).Methods("POST")
+	s.router.HandleFunc("/properties/{id}", s.PropertyHandler.HandleUpdateProperty).Methods("PATCH")
+	s.router.HandleFunc("/properties/{id}", s.PropertyHandler.HandleDeleteProperty).Methods("DELETE")
+	s.router.HandleFunc("/properties/values", s.PropertyHandler.HandleCreatePropertyValue).Methods("POST")
+	s.router.HandleFunc("/properties/values/{id}", s.PropertyHandler.HandleGetPropertyValueByID).Methods("GET")
+	s.router.HandleFunc("/properties/values/search", s.PropertyHandler.HandleGetPropertyValueByFilter).Methods("POST")
+	s.router.HandleFunc("/properties/values/{id}", s.PropertyHandler.HandleUpdatePropertyValue).Methods("PATCH")
+	s.router.HandleFunc("/properties/values/{id}", s.PropertyHandler.HandleDeletePropertyValue).Methods("DELETE")
+
 	http.Handle("/", s.router)
 }

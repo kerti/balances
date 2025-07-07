@@ -49,6 +49,7 @@ func main() {
 	container.RegisterService("healthHandler", new(handler.HealthImpl))
 	container.RegisterService("userHandler", new(handler.UserImpl))
 	container.RegisterService("vehicleHandler", new(handler.VehicleImpl))
+	container.RegisterService("propertyHandler", new(handler.PropertyImpl))
 
 	// Prepare containers - HTTP server
 	var s server.Server
