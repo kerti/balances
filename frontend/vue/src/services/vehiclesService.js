@@ -134,7 +134,7 @@ export function useVehiclesService() {
         }
     }
 
-    //// vehicles CRUD
+    //// vehicle values CRUD
 
     // create
     async function createVehicleValue(vehicleValue) {

@@ -101,7 +101,7 @@ export async function deleteVehicleWithAPI(id) {
 export async function createVehicleValueWithAPI(vehicleValue) {
     try {
         const { data } = await axiosInstance.post('vehicles/values', {
-            vehicleId: vehicleValue.id,
+            vehicleId: vehicleValue.vehicleId,
             date: vehicleValue.date,
             value: vehicleValue.value,
         })
