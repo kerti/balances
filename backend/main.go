@@ -34,12 +34,14 @@ func main() {
 	container.RegisterService("bankAccountRepository", new(repository.BankAccountMySQLRepo))
 	container.RegisterService("userRepository", new(repository.UserMySQLRepo))
 	container.RegisterService("vehicleRepository", new(repository.VehicleMySQLRepo))
+	container.RegisterService("propertyRepository", new(repository.PropertyMySQLRepo))
 
 	// Prepare containers - services
 	container.RegisterService("authService", new(service.AuthImpl))
 	container.RegisterService("bankAccountService", new(service.BankAccountImpl))
 	container.RegisterService("userService", new(service.UserImpl))
 	container.RegisterService("vehicleService", new(service.VehicleImpl))
+	container.RegisterService("propertyService", new(service.PropertyImpl))
 
 	// Prepare containers - handlers
 	container.RegisterService("authHandler", new(handler.AuthImpl))
@@ -47,6 +49,7 @@ func main() {
 	container.RegisterService("healthHandler", new(handler.HealthImpl))
 	container.RegisterService("userHandler", new(handler.UserImpl))
 	container.RegisterService("vehicleHandler", new(handler.VehicleImpl))
+	container.RegisterService("propertyHandler", new(handler.PropertyImpl))
 
 	// Prepare containers - HTTP server
 	var s server.Server
