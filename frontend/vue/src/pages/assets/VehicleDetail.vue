@@ -105,6 +105,35 @@ const resetVehicleForm = () => {
 const saveVehicle = () => {
   vehiclesStore.updateVehicle()
 }
+
+const showEditor = (valueId) => {
+  if (valueId) {
+    vehiclesStore.dvValueEditorMode = "Edit"
+    vehiclesStore.getVehicleValueById(valueId)
+  } else {
+    vehiclesStore.dvValueEditorMode = "Add"
+    vehiclesStore.prepDVBlankVehicleValue()
+  }
+  valueEditor.showModal()
+}
+
+const resetValueForm = () => {
+  vehiclesStore.revertDVVehicleValueToCache()
+}
+
+const saveValue = async () => {
+  if (vehiclesStore.dvValueEditorMode == "Edit") {
+    const res = await vehiclesStore.updateVehicleValue()
+    if (!res.error) {
+      valueEditor.close()
+    }
+  } else if (vehiclesStore.dvValueEditorMode == "Add") {
+    const res = await vehiclesStore.createVehicleValue()
+    if (!res.error) {
+      valueEditor.close()
+    }
+  }
+}
 </script>
 
 <template>
@@ -272,6 +301,7 @@ const saveVehicle = () => {
                       <button
                         class="btn btn-neutral btn-sm tooltip"
                         data-tip="Edit"
+                        v-on:click="showEditor(value.id)"
                       >
                         <font-awesome-icon :icon="['fas', 'edit']" />
                       </button>
@@ -290,6 +320,55 @@ const saveVehicle = () => {
         </div>
       </div>
     </div>
+
+    <!-- Dialog Box: Value Editor -->
+    <dialog id="valueEditor" class="modal">
+      <div class="modal-box overflow-visible relative z-50">
+        <form method="dialog">
+          <button
+            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+          >
+            ✕
+          </button>
+        </form>
+        <h3 class="text-lg font-bold pb-5">
+          {{ vehiclesStore.dvValueEditorMode }} Vehicle Value
+        </h3>
+        <form class="gri grid-cols-1 gap-4">
+          <div>
+            <label class="label">Value*</label>
+            <input
+              v-model="vehiclesStore.dvEditVehicleValue.value"
+              type="text"
+              class="input input-bordered w-full"
+            />
+          </div>
+          <div>
+            <label class="label">Date*</label>
+            <DatePicker
+              v-model:date="vehiclesStore.dvEditVehicleValue.date"
+              placeholder="pick a date"
+              required
+            />
+          </div>
+          <div class="flex justify-end gap-2 pt-4">
+            <button type="button" @click="saveValue" class="btn btn-primary">
+              Save
+            </button>
+            <button
+              type="button"
+              @click="resetValueForm"
+              class="btn btn-secondary"
+            >
+              Reset
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
 
     <!-- Bottom Half: Line Chart -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">

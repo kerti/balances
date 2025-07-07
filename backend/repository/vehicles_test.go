@@ -923,7 +923,7 @@ func (t *vehiclesRepositoryTestSuite) TestResolveValuesByFilter_ErrorOnCount() {
 func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_Normal() {
 	id1, _ := uuid.NewV7()
 	id2, _ := uuid.NewV7()
-	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_entity_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
 		WithArgs(t.testVehicleID, 2).
 		WillReturnRows(getMultiEntityIDResult([]uuid.UUID{id1, id2}))
 
@@ -943,7 +943,7 @@ func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_CountZero
 func (t *vehiclesRepositoryTestSuite) TestResolveLastValuesByVehicleID_FailOnSelect() {
 	errMsg := "failed resolving last values"
 
-	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
+	t.sqlmock.ExpectQuery(repository.QuerySelectVehicleValues+"WHERE vehicle_values.vehicle_entity_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?").
 		WithArgs(t.testVehicleID, 2).
 		WillReturnError(errors.New(errMsg))
 

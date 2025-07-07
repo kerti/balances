@@ -358,7 +358,7 @@ func (r *VehicleMySQLRepo) ResolveLastValuesByVehicleID(id uuid.UUID, count int)
 		return
 	}
 
-	whereClause := " WHERE vehicle_values.vehicle_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?"
+	whereClause := " WHERE vehicle_values.vehicle_entity_id = ? and vehicle_values.deleted IS NULL AND vehicle_values.deleted_by IS NULL ORDER BY vehicle_values.date DESC LIMIT ?"
 	query, args, err := r.DB.In(QuerySelectVehicleValues+whereClause, id, count)
 	if err != nil {
 		logger.ErrNoStack("%v", err)
