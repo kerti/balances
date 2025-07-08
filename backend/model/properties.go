@@ -321,7 +321,7 @@ type PropertyInput struct {
 	InitialValueDate          cachetime.CacheTime `json:"initialValueDate"`
 	CurrentValue              float64             `json:"currentValue"`
 	CurrentValueDate          cachetime.CacheTime `json:"currentValueDate"`
-	AnnualAppreciationPercent float64             `json:"annualDepreciationPercent"`
+	AnnualAppreciationPercent float64             `json:"annualAppreciationPercent"`
 	Status                    PropertyStatus      `json:"status"`
 }
 
