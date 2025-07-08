@@ -49,6 +49,12 @@ const routes = [
         component: () => import('@/pages/assets/Properties.vue'),
         meta: { requiresAuth: true, pageTitle: 'Properties' }
     },
+    {
+        path: '/assets/properties/:id',
+        name: 'assets.property.detail',
+        component: () => import('@/pages/assets/PropertyDetail.vue'),
+        meta: { requiresAuth: true, pageTitle: 'Property Details' }
+    },
     // liabilities
     {
         path: '/liabilities/personal-debts',
