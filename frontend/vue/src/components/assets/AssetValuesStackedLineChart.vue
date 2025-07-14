@@ -63,16 +63,16 @@ watch(
 onMounted(async () => {
   await nextTick()
   if (assetsStore.assetValueHistory.length > 0) {
-    renderChart()
     destroyChart()
+    renderChart()
   }
 })
 
 onActivated(async () => {
   await nextTick()
   if (assetsStore.assetValueHistory.length > 0) {
-    renderChart()
     destroyChart()
+    renderChart()
   }
 })
 </script>

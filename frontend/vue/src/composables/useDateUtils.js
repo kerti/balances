@@ -28,8 +28,18 @@ export function useDateUtils() {
             now.getFullYear() - 1,
             now.getMonth(),
             now.getDate(),
-            23, 59, 59, 0);
-        return oneYearAgo.getTime();
+            23, 59, 59, 0)
+        return oneYearAgo.getTime()
+    }
+
+    const getEpochXYearsAgo = (years) => {
+        const now = new Date();
+        const xYearsAgo = new Date(
+            now.getFullYear() - years,
+            now.getMonth(),
+            now.getDate(),
+            23, 59, 59, 0)
+        return xYearsAgo.getTime()
     }
 
     return {
@@ -38,5 +48,6 @@ export function useDateUtils() {
         epochToShortLocalDate,
         dateToShortLocalDate,
         getEpochOneYearAgo,
+        getEpochXYearsAgo,
     }
 }
