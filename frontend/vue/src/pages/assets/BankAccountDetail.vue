@@ -280,7 +280,7 @@ const deleteBalance = async () => {
     <!-- Bottom Half: Line Chart -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
-        <h2 class="card-title">Balance History Chart</h2>
+        <h2 class="card-title">Balance History</h2>
         <line-chart />
       </div>
     </div>

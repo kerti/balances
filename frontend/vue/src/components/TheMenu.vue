@@ -15,34 +15,26 @@ function handleLogout() {
   <ul class="menu w-full px-4 py-0">
     <!-- dashboard section -->
     <li>
-      <h2 class="menu-title">
-        <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
-      </h2>
+      <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
     </li>
     <!-- assets section -->
     <li>
-      <details open>
-        <summary>
-          <h2 class="menu-title">Assets</h2>
-        </summary>
-        <ul>
-          <li>
-            <router-link :to="{ name: 'assets.bankaccounts' }"
-              >Bank Accounts</router-link
-            >
-          </li>
-          <li>
-            <router-link :to="{ name: 'assets.vehicles' }"
-              >Vehicles</router-link
-            >
-          </li>
-          <li>
-            <router-link :to="{ name: 'assets.properties' }"
-              >Properties</router-link
-            >
-          </li>
-        </ul>
-      </details>
+      <router-link :to="{ name: 'assets' }">Assets</router-link>
+      <ul>
+        <li>
+          <router-link :to="{ name: 'assets.bankaccounts' }"
+            >Bank Accounts</router-link
+          >
+        </li>
+        <li>
+          <router-link :to="{ name: 'assets.vehicles' }">Vehicles</router-link>
+        </li>
+        <li>
+          <router-link :to="{ name: 'assets.properties' }"
+            >Properties</router-link
+          >
+        </li>
+      </ul>
     </li>
     <!-- liabilities section -->
     <li>
