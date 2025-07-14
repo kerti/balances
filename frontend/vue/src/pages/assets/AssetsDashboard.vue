@@ -1,11 +1,28 @@
 <script setup>
 import { useDateUtils } from "@/composables/useDateUtils"
 import { useNumUtils } from "@/composables/useNumUtils"
-import PieChart from "@/components/assets/AssetProportionsPieChart.vue"
-import LineChart from "@/components/assets/AssetValuesStackedLineChart.vue"
+import AssetProportionsPieChart from "@/components/assets/AssetProportionsPieChart.vue"
+import AssetValuesLineChart from "@/components/assets/AssetValuesStackedLineChart.vue"
+import { computed, onMounted, onUnmounted } from "vue"
+import { useAssetsStore } from "@/stores/assetsStore"
 
 const dateUtils = useDateUtils()
 const numUtils = useNumUtils()
+const assetsStore = useAssetsStore()
+
+const totalAssetValue = computed(() => {
+  return assetsStore.assets.reduce((sum, val) => {
+    return sum + val.value
+  }, 0)
+})
+
+onMounted(() => {
+  assetsStore.hydrate()
+})
+
+onUnmounted(() => {
+  assetsStore.dehydrate()
+})
 </script>
 
 <template>
@@ -27,88 +44,18 @@ const numUtils = useNumUtils()
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Shopping Account</td>
+                <tr v-for="(asset, index) in assetsStore.assets" :key="index">
+                  <td>{{ asset.name }}</td>
                   <td>
-                    <span class="badge badge-sm badge-neutral">cash</span>
+                    <span class="badge badge-sm badge-neutral">{{
+                      asset.class
+                    }}</span>
                   </td>
                   <td class="text-right">
-                    {{ numUtils.numericToMoney(1230) }}
+                    {{ numUtils.numericToMoney(asset.value) }}
                   </td>
                   <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>John's Car</td>
-                  <td>
-                    <span class="badge badge-sm badge-neutral">vehicle</span>
-                  </td>
-                  <td class="text-right">
-                    {{ numUtils.numericToMoney(123000) }}
-                  </td>
-                  <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Jane's House</td>
-                  <td>
-                    <span class="badge badge-sm badge-neutral">property</span>
-                  </td>
-                  <td class="text-right">
-                    {{ numUtils.numericToMoney(1850000) }}
-                  </td>
-                  <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Mike's Bike</td>
-                  <td>
-                    <span class="badge badge-sm badge-neutral">vehicle</span>
-                  </td>
-                  <td class="text-right">
-                    {{ numUtils.numericToMoney(17430) }}
-                  </td>
-                  <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Margaret's Yacht</td>
-                  <td>
-                    <span class="badge badge-sm badge-neutral">vehicle</span>
-                  </td>
-                  <td class="text-right">
-                    {{ numUtils.numericToMoney(2957000) }}
-                  </td>
-                  <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Margaret's Yacht</td>
-                  <td>
-                    <span class="badge badge-sm badge-neutral">vehicle</span>
-                  </td>
-                  <td class="text-right">
-                    {{ numUtils.numericToMoney(2957000) }}
-                  </td>
-                  <td>
-                    {{
-                      dateUtils.epochToLocalDate(dateUtils.getEpochOneYearAgo())
-                    }}
+                    {{ dateUtils.epochToLocalDate(asset.lastUpdated) }}
                   </td>
                 </tr>
               </tbody>
@@ -116,7 +63,7 @@ const numUtils = useNumUtils()
                 <tr>
                   <td colspan="2">Total Value of Assets</td>
                   <td class="text-right">
-                    {{ numUtils.numericToMoney(3492340) }}
+                    {{ numUtils.numericToMoney(totalAssetValue) }}
                   </td>
                   <td></td>
                 </tr>
@@ -131,7 +78,9 @@ const numUtils = useNumUtils()
         <div class="card-body">
           <h2 class="card-title">Asset Proportions</h2>
           <div class="flex justify-center items-center h-92">
-            <pie-chart class="w-full h-full max-w-md max-h-md"></pie-chart>
+            <AssetProportionsPieChart
+              class="w-full h-full max-w-md max-h-md"
+            ></AssetProportionsPieChart>
           </div>
         </div>
       </div>
@@ -141,7 +90,7 @@ const numUtils = useNumUtils()
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
         <h2 class="card-title">Value History</h2>
-        <line-chart />
+        <AssetValuesLineChart />
       </div>
     </div>
   </div>

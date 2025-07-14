@@ -1,9 +1,42 @@
 <script setup>
 import "chartjs-adapter-luxon"
 import { Chart, registerables } from "chart.js"
-import { onActivated, onMounted, ref } from "vue"
+import { computed, nextTick, onActivated, onMounted, ref, watch } from "vue"
+import { useAssetsStore } from "@/stores/assetsStore"
 
 Chart.register(...registerables)
+
+const assetsStore = useAssetsStore()
+
+const sumOfCash = computed(() => {
+  return assetsStore.assets.reduce((sum, val) => {
+    if (val.class === "cash") {
+      return sum + val.value
+    } else {
+      return sum
+    }
+  }, 0)
+})
+
+const sumOfVehicles = computed(() => {
+  return assetsStore.assets.reduce((sum, val) => {
+    if (val.class === "vehicle") {
+      return sum + val.value
+    } else {
+      return sum
+    }
+  }, 0)
+})
+
+const sumOfProperties = computed(() => {
+  return assetsStore.assets.reduce((sum, val) => {
+    if (val.class === "property") {
+      return sum + val.value
+    } else {
+      return sum
+    }
+  }, 0)
+})
 
 const canvas = ref(null)
 let chartInstance = null
@@ -14,7 +47,7 @@ function renderChart() {
       type: "doughnut",
       data: {
         labels: ["Cash", "Vehicles", "Properties"],
-        datasets: [{ data: [123, 456, 789] }],
+        datasets: [{ data: [sumOfCash, sumOfVehicles, sumOfProperties] }],
       },
       options: {
         responsive: true,
@@ -36,14 +69,30 @@ function destroyChart() {
   }
 }
 
-onMounted(() => {
-  destroyChart()
-  renderChart()
+watch(
+  () => assetsStore.assets,
+  (newAssets) => {
+    if (newAssets.length > 0) {
+      destroyChart()
+      renderChart()
+    }
+  }
+)
+
+onMounted(async () => {
+  await nextTick()
+  if (assetsStore.assets.length > 0) {
+    destroyChart()
+    renderChart()
+  }
 })
 
-onActivated(() => {
-  destroyChart()
-  renderChart()
+onActivated(async () => {
+  await nextTick()
+  if (assetsStore.assets.length > 0) {
+    destroyChart()
+    renderChart()
+  }
 })
 </script>
 

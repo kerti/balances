@@ -1,9 +1,12 @@
 <script setup>
 import "chartjs-adapter-luxon"
 import { Chart, registerables } from "chart.js"
-import { onActivated, onMounted, ref } from "vue"
+import { nextTick, onActivated, onMounted, ref, watch } from "vue"
+import { useAssetsStore } from "@/stores/assetsStore"
 
 Chart.register(...registerables)
+
+const assetsStore = useAssetsStore()
 
 const canvas = ref(null)
 let chartInstance = null
@@ -13,35 +16,7 @@ function renderChart() {
     chartInstance = new Chart(canvas.value, {
       type: "line",
       data: {
-        datasets: [
-          {
-            label: "Cash",
-            fill: true,
-            data: [
-              { x: 1722445199000, y: 200000000 },
-              { x: 1725123599000, y: 220000000 },
-              { x: 1727715599000, y: 230000000 },
-            ],
-          },
-          {
-            label: "Vehicles",
-            fill: true,
-            data: [
-              { x: 1722445199000, y: 400000000 },
-              { x: 1725123599000, y: 380000000 },
-              { x: 1727715599000, y: 365000000 },
-            ],
-          },
-          {
-            label: "Properties",
-            fill: true,
-            data: [
-              { x: 1722445199000, y: 1200000000 },
-              { x: 1725123599000, y: 1250000000 },
-              { x: 1727715599000, y: 1320000000 },
-            ],
-          },
-        ],
+        datasets: assetsStore.assetValueHistory,
       },
       options: {
         responsive: true,
@@ -75,14 +50,30 @@ function destroyChart() {
   }
 }
 
-onMounted(() => {
-  destroyChart()
-  renderChart()
+watch(
+  () => assetsStore.assetValueHistory,
+  (newAssetHistory) => {
+    if (newAssetHistory.length > 0) {
+      destroyChart()
+      renderChart()
+    }
+  }
+)
+
+onMounted(async () => {
+  await nextTick()
+  if (assetsStore.assetValueHistory.length > 0) {
+    renderChart()
+    destroyChart()
+  }
 })
 
-onActivated(() => {
-  destroyChart()
-  renderChart()
+onActivated(async () => {
+  await nextTick()
+  if (assetsStore.assetValueHistory.length > 0) {
+    renderChart()
+    destroyChart()
+  }
 })
 </script>
 
