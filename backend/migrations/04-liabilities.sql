@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `personal_debt_balances` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `personal_debt_repayments` (
+CREATE TABLE IF NOT EXISTS `personal_debt_payments` (
   `entity_id` CHAR(36) NOT NULL,
   `personal_debt_entity_id` CHAR(36) NOT NULL,
   `payment_date` TIMESTAMP NOT NULL,
@@ -67,9 +67,9 @@ CREATE TABLE IF NOT EXISTS `personal_debt_repayments` (
     REFERENCES `personal_debts`(`entity_id`)
     ON UPDATE NO ACTION
     ON DELETE NO ACTION,
-  INDEX `personal_debt_repayments_idx_1` (`payment_date`),
-  INDEX `personal_debt_repayments_idx_2` (`payment_amount`),
-  INDEX `personal_debt_repayments_idx_3` (`created`),
-  INDEX `personal_debt_repayments_idx_4` (`created_by`)
+  INDEX `personal_debt_payments_idx_1` (`payment_date`),
+  INDEX `personal_debt_payments_idx_2` (`payment_amount`),
+  INDEX `personal_debt_payments_idx_3` (`created`),
+  INDEX `personal_debt_payments_idx_4` (`created_by`)
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;

@@ -87,26 +87,26 @@ const (
 )
 
 const (
-	// PersonalDebtRepaymentColumnID represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnID filter.Field = "personal_debt_repayments.entity_id"
-	// PersonalDebtRepaymentColumnPersonalDebtID represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnPersonalDebtID filter.Field = "personal_debt_repayments.personal_debt_entity_id"
-	// PersonalDebtRepaymentColumnPaymentDate represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnPaymentDate filter.Field = "personal_debt_repayments.payment_date"
-	// PersonalDebtRepaymentColumnPaymentAmount represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnPaymentAmount filter.Field = "personal_debt_repayments.payment_amount"
-	// PersonalDebtRepaymentColumnCreated represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnCreated filter.Field = "personal_debt_repayments.created"
-	// PersonalDebtRepaymentColumnCreatedBy represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnCreatedBy filter.Field = "personal_debt_repayments.created_by"
-	// PersonalDebtRepaymentColumnUpdated represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnUpdated filter.Field = "personal_debt_repayments.updated"
-	// PersonalDebtRepaymentColumnUpdatedBy represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnUpdatedBy filter.Field = "personal_debt_repayments.updated_by"
-	// PersonalDebtRepaymentColumnDeleted represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnDeleted filter.Field = "personal_debt_repayments.deleted"
-	// PersonalDebtRepaymentColumnDeletedBy represents the corresponding column in the Personal Debt Repayments table
-	PersonalDebtRepaymentColumnDeletedBy filter.Field = "personal_debt_repayments.deleted_by"
+	// PersonalDebtPaymentColumnID represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnID filter.Field = "personal_debt_payments.entity_id"
+	// PersonalDebtPaymentColumnPersonalDebtID represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnPersonalDebtID filter.Field = "personal_debt_payments.personal_debt_entity_id"
+	// PersonalDebtPaymentColumnPaymentDate represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnPaymentDate filter.Field = "personal_debt_payments.payment_date"
+	// PersonalDebtPaymentColumnPaymentAmount represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnPaymentAmount filter.Field = "personal_debt_payments.payment_amount"
+	// PersonalDebtPaymentColumnCreated represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnCreated filter.Field = "personal_debt_payments.created"
+	// PersonalDebtPaymentColumnCreatedBy represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnCreatedBy filter.Field = "personal_debt_payments.created_by"
+	// PersonalDebtPaymentColumnUpdated represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnUpdated filter.Field = "personal_debt_payments.updated"
+	// PersonalDebtPaymentColumnUpdatedBy represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnUpdatedBy filter.Field = "personal_debt_payments.updated_by"
+	// PersonalDebtPaymentColumnDeleted represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnDeleted filter.Field = "personal_debt_payments.deleted"
+	// PersonalDebtPaymentColumnDeletedBy represents the corresponding column in the Personal Debt Payments table
+	PersonalDebtPaymentColumnDeletedBy filter.Field = "personal_debt_payments.deleted_by"
 )
 
 // PersonalDebt represents a Personal Debt object
@@ -127,7 +127,7 @@ type PersonalDebt struct {
 	Deleted            null.Time                `db:"deleted"`
 	DeletedBy          nuuid.NUUID              `db:"deleted_by" validate:"min=36,max=36"`
 	Balances           []PersonalDebtBalance
-	Repayments         []PersonalDebtRepayment
+	Payments           []PersonalDebtPayment
 }
 
 // PersonalDebtBalance represents a Personal Debt Balance object
@@ -144,8 +144,8 @@ type PersonalDebtBalance struct {
 	DeletedBy      nuuid.NUUID `db:"deleted_by" validate:"min=36,max=36"`
 }
 
-// PersonalDebtRepayment represents a Personal Debt Repayment object
-type PersonalDebtRepayment struct {
+// PersonalDebtPayment represents a Personal Debt Payment object
+type PersonalDebtPayment struct {
 	ID             uuid.UUID   `db:"entity_id" validate:"min=36,max=36"`
 	PersonalDebtID uuid.UUID   `db:"personal_debt_entity_id" validate:"min=36,max=36"`
 	PaymentDate    time.Time   `db:"payment_date"`
