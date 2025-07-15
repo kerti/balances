@@ -20,6 +20,12 @@ const routes = [
     },
     // assets
     {
+        path: '/assets',
+        name: 'assets',
+        component: () => import('@/pages/assets/AssetsDashboard.vue'),
+        meta: { requiresAuth: true, pageTitle: 'Assets' }
+    },
+    {
         path: '/assets/bank-accounts',
         name: 'assets.bankaccounts',
         component: () => import('@/pages/assets/BankAccounts.vue'),

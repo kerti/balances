@@ -350,7 +350,7 @@ const deleteValue = async () => {
     <!-- Bottom Half: Line Chart -->
     <div class="card bg-base-100 shadow-md flex flex-1 min-h-0">
       <div class="card-body">
-        <h2 class="card-title">Value History Chart</h2>
+        <h2 class="card-title">Value History</h2>
         <line-chart />
       </div>
     </div>
