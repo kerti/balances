@@ -1,7 +1,7 @@
 {
   "name": "balances-frontend-vue",
   "private": true,
-  "version": "2025.07.08-7edc05b-alpha",
+  "version": "2025.07.15-5aa7d56-alpha",
   "type": "module",
   "scripts": {
     "dev": "vite",
