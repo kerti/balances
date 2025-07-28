@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS `personal_debts` (
   `interest` DECIMAL(18,2) NOT NULL,
   `interest_type` ENUM ('nominal', 'percentage') NOT NULL,
   `date` TIMESTAMP NOT NULL,
+  `current_balance` DECIMAL(18,2) NOT NULL,
+  `current_balance_date` TIMESTAMP NOT NULL,
   `status` ENUM ('active', 'paid', 'defaulted', 'written_off'),
   `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` CHAR(36) NOT NULL,
@@ -23,9 +25,11 @@ CREATE TABLE IF NOT EXISTS `personal_debts` (
   INDEX `personal_debt_idx_6` (`interest`),
   INDEX `personal_debt_idx_7` (`interest_type`),
   INDEX `personal_debt_idx_8` (`date`),
-  INDEX `personal_debt_idx_9` (`status`),
-  INDEX `personal_debt_idx_10` (`created`),
-  INDEX `personal_debt_idx_11` (`created_by`)
+  INDEX `personal_debt_idx_9` (`current_balance`),
+  INDEX `personal_debt_idx_10` (`current_balance_date`),
+  INDEX `personal_debt_idx_11` (`status`),
+  INDEX `personal_debt_idx_12` (`created`),
+  INDEX `personal_debt_idx_13` (`created_by`)
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
