@@ -350,6 +350,7 @@ type VehicleValue struct {
 	DeletedBy nuuid.NUUID `db:"deleted_by" validate:"min=36,max=36"`
 }
 
+// NewVehicleValueFromInput creates a new Vehicle Value from its input object
 func NewVehicleValueFromInput(input VehicleValueInput, vehicleID uuid.UUID, userID uuid.UUID) (vv VehicleValue) {
 	now := time.Now()
 	newUUID, _ := uuid.NewV7()
@@ -363,21 +364,23 @@ func NewVehicleValueFromInput(input VehicleValueInput, vehicleID uuid.UUID, user
 		CreatedBy: userID,
 	}
 
-	// TODO: validate:
+	// TODO: validate?
 
 	return
 }
 
 // Update performs an update on a Vehicle Value
 func (vv *VehicleValue) Update(input VehicleValueInput, userID uuid.UUID) error {
+	if vv.Deleted.Valid || vv.DeletedBy.Valid {
+		return failure.OperationNotPermitted("update", "Vehicle Value", "already deleted")
+	}
+
 	now := time.Now()
 
 	vv.Date = input.Date.Time()
 	vv.Value = input.Value
 	vv.Updated = null.TimeFrom(now)
 	vv.UpdatedBy = nuuid.From(userID)
-
-	// TODO: Validate ?
 
 	return nil
 }
